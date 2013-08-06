@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Repose - Applications</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/css/repose.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Repose Perf Tests</a>
+      <div class="nav-collapse collapse bs-navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/RunningTests">Running Tests</a></li>
+          <li><a href="/applications">Applications</a></li>
+          <li class="active"><a href="/results">Results</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container">
+      <ul class="breadcrumb">
+        <li><a href="/">Home</a></li>
+        <li><a href="/results">Results</a></li>
+        <li><a href="<%= app_detail.href %>"><%= app_detail.name %></a></li>
+        <li><a href="<%= app_detail.href %>/<%= app_detail.test_type %>"><%= app_detail.test_type %></a></li>
+        <li class="active"><%= app_detail.date %></li>
+      </ul>
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Test Results</h3>
+        </div>
+        <table class="table table-hover">
+          <caption>Repose (Origin only)</caption>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>ART</th>
+              <th>Network</th>
+              <th>CPU</th>
+              <th>Memory</th>
+              <th>Disk</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% app_detail.results.each do |result_array| %>
+            <tr>
+              <td><%= result_array[0].date %> s</td>
+              <td><%= result_array[0].art %> ms (<%= result_array[1].art %> ms)</td>
+              <td><%= result_array[0].network %>% (<%= result_array[1].network %>%)</td>
+              <td><%= result_array[0].cpu %>% (<%= result_array[1].cpu %>%)</td>
+              <td><%= result_array[0].memory %>% (<%= result_array[1].memory %>%)</td>
+              <td><%= result_array[0].disk %>% (<%= result_array[1].disk %>%)</td>
+            </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Average Response Time</h3>
+        </div>
+        <div id="art" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Network Utilization</h3>
+        </div>
+        <div id="network" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">CPU Utilization</h3>
+        </div>
+        <div id="cpu" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Memory Utilization</h3>
+        </div>
+        <div id="memory" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Disk Utilization</h3>
+        </div>
+        <div id="disk" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+    </div>
+    <hr>
+    <footer>
+      <p>&copy; Rackspace Hosting 2013</p>
+    </footer>
+  </div> <!-- /container -->
+    <!-- JavaScript plugins (requires jQuery) -->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+    <script src="/js/respond.js"></script>
+    <script src="/js/repose.min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        var art_option = {
+          chart: {
+            renderTo: 'art',
+            type: 'area',
+          },
+          title: {
+            text: 'Repose Average Response Time'
+          },
+          yAxis:{
+            title: {
+              text: 'Milliseconds'
+            },
+            min: 0
+          },
+          series: [{
+            name: 'Repose Average Response Time'
+          }, { name: 'Origin Average Response Time'}]
+        };        
+        var memory_option = {
+          chart: {
+            renderTo: 'memory',
+            type: 'area',
+          },
+          title: {
+            text: 'Memory Utilization Overhead'
+          },
+          yAxis:{
+            title: {
+              text: '%'
+            },
+            min: 0
+          },
+          series: [{
+            name: 'Average memory utilization'
+          }, { name: 'Origin Average memory utilization'}]
+        };        
+        var disk_option = {
+          chart: {
+            renderTo: 'disk',
+            type: 'area',
+          },
+          title: {
+            text: 'Disk Utilization'
+          },
+          yAxis:{
+            title: {
+              text: '%'
+            },
+            min: 0
+          },
+          series: [{
+            name: 'Average disk utilization'
+          }, { name: 'Origin Average disk utilization'}]
+        };        
+        var cpu_option = {
+          chart: {
+            renderTo: 'cpu',
+            type: 'area',
+          },
+          title: {
+            text: 'CPU Utilization'
+          },
+          yAxis:{
+            title: {
+              text: '%'
+            },
+            min: 0
+          },
+          series: [{
+            name: 'Average cpu utilization'
+          }, { name: 'Origin Average cpu utilization'}]
+        };        
+        var network_option = {
+          chart: {
+            renderTo: 'network',
+            type: 'area',
+          },
+          title: {
+            text: 'Network Utilization'
+          },
+          yAxis:{
+            title: {
+              text: '%'
+            },
+            min: 0
+          },
+          series: [{
+            name: 'Average network utilization'
+          }, { name: 'Origin Average network utilization'}]
+        };       
+
+        $.getJSON('/results/<%= app_detail.name %>/<%= app_detail.test_type %>/metric/art/date/<%= app_detail.date %>', function(data) {
+          art_option.series[0].data = data.repose;
+          art_option.series[1].data = data.origin;
+          var art_chart = new Highcharts.Chart(art_option);
+        }); 
+        $.getJSON('/results/<%= app_detail.name %>/<%= app_detail.test_type %>/metric/memory/date/<%= app_detail.date %>', function(data) {
+          memory_option.series[0].data = data.repose;
+          memory_option.series[1].data = data.origin;
+          var memory_chart = new Highcharts.Chart(memory_option);
+        }); 
+        $.getJSON('/results/<%= app_detail.name %>/<%= app_detail.test_type %>/metric/cpu/date/<%= app_detail.date %>', function(data) {
+          cpu_option.series[0].data = data.repose;
+          cpu_option.series[1].data = data.origin;
+          var cpu_chart = new Highcharts.Chart(cpu_option);
+        }); 
+        $.getJSON('/results/<%= app_detail.name %>/<%= app_detail.test_type %>/metric/disk/date/<%= app_detail.date %>', function(data) {
+          disk_option.series[0].data = data.repose;
+          disk_option.series[1].data = data.origin;
+          var disk_chart = new Highcharts.Chart(disk_option);
+        }); 
+        $.getJSON('/results/<%= app_detail.name %>/<%= app_detail.test_type %>/metric/network/date/<%= app_detail.date %>', function(data) {
+          network_option.series[0].data = data.repose;
+          network_option.series[1].data = data.origin;
+          var network_chart = new Highcharts.Chart(network_option);
+        }); 
+      });
+    </script>
+  </body>
+</html>

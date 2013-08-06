@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- To configure Repose see: http://wiki.openrepose.org/display/REPOSE/Configuration -->
+<system-model xmlns="http://docs.rackspacecloud.com/repose/system-model/v2.0">
+  <repose-cluster id="repose">
+    <nodes>
+        <node id="repose_atom-n01" hostname="localhost" http-port="8887"/>
+        <node id="repose_atom-n02" hostname="localhost" http-port="8888"/>
+    </nodes>
+    <filters>
+      <!--
+      <filter name="header-identity" />
+      -->
+      <filter name="dist-datastore" />
+      <filter name="http-logging" configuration="pre-ratelimit-httplog.cfg.xml" />
+      <filter name="ip-identity" />
+      <filter name="rate-limiting" />
+<!--      <filter name="client-auth" uri-regex="/(demo|quantum|melange|lbaas|dns|sites|meta|domain)/.*" />-->
+      <filter name="http-logging" configuration="http-logging.cfg.xml" />
+      <filter name="translation" />
+ 
+     <!-- <filter name="api-validator" />--> 
+      <filter name="default-router"/>
+    </filters>
+    <destinations>
+      <!-- Update this endpoint if you want Repose to send requests to a different service -->
+      <endpoint id="atomhopper_localhost" protocol="http" hostname="localhost" root-path="" port="9090" default="true"/>
+    </destinations>
+  </repose-cluster>
+</system-model>
+
