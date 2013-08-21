@@ -18,7 +18,9 @@ db.load_apps (
   {
     :dbaas => Application.new(0,"Cloud Databases", "cloud databases"),
     :ah => Application.new(0,"Atom Hopper", "description"),
-    :csl => Application.new(0,"Customer Service Layer", "internal application")
+    :csl => Application.new(0,"Customer Service Layer", "internal application"),
+    :passthrough => Application.new(0,"Passthrough (no filters)", "internal application"),
+    :ddrl => Application.new(0,"Dist Datastore + Rate Limiting", "internal application")
   } 
 )  
 

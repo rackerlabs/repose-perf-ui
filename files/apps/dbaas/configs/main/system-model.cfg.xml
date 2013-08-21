@@ -5,7 +5,7 @@
   <repose-cluster id="repose-cluster" rewrite-host-header="false">
     <nodes>
         <% for @node in @nodes %>
-        <node id="repose_atom-<%= @node[:id] %>" hostname="<%= @node[:address] %>" http-port="7070"/>
+        <node id="repose_dbaas-<%= @node[:id] %>" hostname="<%= @node[:address] %>" http-port="7070"/>
         <% end %>
     </nodes>
     <filters>
@@ -15,6 +15,7 @@
       <filter name="client-auth" />
       <filter name="api-validator" />
       <filter name="ip-identity" />
+      <filter name="rate-limiting" />
     </filters>
     <destinations>
       <!-- Update this endpoint if you want Repose to send requests to a different service -->
