@@ -1,0 +1,7 @@
+jmeter.log
+*tmp
+tmp*
+nohup.out
+*swp
+*.dot
+config.yaml

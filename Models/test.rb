@@ -5,8 +5,8 @@ class Test
   attr_reader :test_list
   
   def initialize(name)
-    request_json = JSON.parse(File.read("/root/repose/dist/files/apps/#{name}/tests/main/request.json"))
-    response_json = JSON.parse(File.read("/root/repose/dist/files/apps/#{name}/tests/main/response.json"))
+    request_json = JSON.parse(File.read("/root/repose/dist/files/apps/#{name}/tests/setup/main/request.json"))
+    response_json = JSON.parse(File.read("/root/repose/dist/files/apps/#{name}/tests/setup/main/response.json"))
     request_list = []
     response_list = [] 
     coder = HTMLEntities.new

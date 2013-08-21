@@ -17,7 +17,7 @@
       <a class="navbar-brand" href="/">Repose Perf Tests</a>
       <div class="nav-collapse collapse bs-navbar-collapse">
         <ul class="nav navbar-nav">
-          <li><a href="/RunningTests">Running Tests</a></li>
+          <li><a href="/tests">Running Tests</a></li>
           <li><a href="/applications">Applications</a></li>
           <li class="active"><a href="/results">Results</a></li>
         </ul>
@@ -27,37 +27,52 @@
       <ul class="breadcrumb">
         <li><a href="/">Home</a></li>
         <li><a href="/results">Results</a></li>
-        <li><a href="<%= app_detail.href %>"><%= app_detail.name %></a></li>
+        <li><a href="/results/<%= app_detail.app_id %>"><%= app_detail.name %></a></li>
         <li class="active"><%= app_detail.test_type %></li>
       </ul>
       <div class="panel panel-summary">
         <div class="panel-heading">
           <h3 class="panel-title">Test Results</h3>
         </div>
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>ART overhead</th>
-              <th>Network overhead</th>
-              <th>CPU overhead</th>
-              <th>Memory overhead</th>
-              <th>Disk overhead</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% app_detail.result_set_list.each do |result| %>
-            <tr>
-              <td><a href="<%= app_detail.href %>/<%= app_detail.test_type %>/date/<%= result.date %>"><%= result.date %></td>
-              <td><%= result.art %> ms</td>
-              <td><%= result.network %>%</td>
-              <td><%= result.cpu %>%</td>
-              <td><%= result.memory %>%</td>
-              <td><%= result.disk %>%</td>
-            </tr>
-            <% end %>
-          </tbody>
-        </table>
+        <form method="POST">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Tag</th>
+                <th>Date</th>
+                <th>ART overhead</th>
+                <th>Throughput overhead</th>
+                <th>Error overhead</th>
+                <th>Compare</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% app_detail.result_set_list.each do |result| %>
+              <tr>
+                <td><%= result.tag %></td>
+                <td><a href="/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/id/<%= result.id %>"><%= DateTime.strptime(result.date.chomp("000"), '%s') %></td>
+                <td><%= result.avg %> ms</td>
+                <td><%= result.throughput %> rps</td>
+                <td><%= result.errors %> total errors</td>
+                <td>
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" name="compare[]" value="<%=result.id %>">
+                    </label>
+                  </div>
+                </td>
+              </tr>
+              <% end %>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="6">
+                  <button type="submit" class="btn btn-primary">Compare Tests</button>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </form>
       </div>
       <div class="panel">
         <div class="panel-heading">
@@ -67,27 +82,15 @@
       </div>
       <div class="panel">
         <div class="panel-heading">
-          <h3 class="panel-title">Network Utilization Overhead</h3>
-        </div>
-        <div id="network" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
-      </div>
-      <div class="panel">
-        <div class="panel-heading">
-          <h3 class="panel-title">CPU Utilization Overhead</h3>
+          <h3 class="panel-title">Error Overhead</h3>
         </div>
         <div id="cpu" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
       </div>
       <div class="panel">
         <div class="panel-heading">
-          <h3 class="panel-title">Memory Utilization Overhead</h3>
+          <h3 class="panel-title">Throughput Overhead</h3>
         </div>
         <div id="memory" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
-      </div>
-      <div class="panel">
-        <div class="panel-heading">
-          <h3 class="panel-title">Disk Utilization Overhead</h3>
-        </div>
-        <div id="disk" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
       </div>
     </div>
     <hr>
@@ -117,8 +120,7 @@
           yAxis:{
             title: {
               text: 'Milliseconds'
-            },
-            min: 0
+            }
           },
           xAxis:{
             type: 'datetime',
@@ -136,13 +138,12 @@
             defaultSeriesType: 'spline',
           },
           title: {
-            text: 'Memory Utilization Overhead'
+            text: 'Throughput Overhead'
           },
           yAxis:{
             title: {
               text: '%'
-            },
-            min: 0
+            }
           },
           xAxis:{
             type: 'datetime',
@@ -151,31 +152,7 @@
             }
           },
           series: [{
-            name: 'Average memory utilization overhead'
-          }]
-        };        
-        var disk_option = {
-          chart: {
-            renderTo: 'disk',
-            defaultSeriesType: 'spline',
-          },
-          title: {
-            text: 'Disk Utilization Overhead'
-          },
-          yAxis:{
-            title: {
-              text: '%'
-            },
-            min: 0
-          },
-          xAxis:{
-            type: 'datetime',
-            dateTimeLabelFormats: {
-                day: '%Y-%b-%d'
-            }
-          },
-          series: [{
-            name: 'Average disk utilization overhead'
+            name: 'Average throughput overhead'
           }]
         };        
         var cpu_option = {
@@ -184,13 +161,12 @@
             defaultSeriesType: 'spline',
           },
           title: {
-            text: 'CPU Utilization Overhead'
+            text: 'Error Overhead'
           },
           yAxis:{
             title: {
               text: '%'
-            },
-            min: 0
+            }
           },
           xAxis:{
             type: 'datetime',
@@ -199,64 +175,30 @@
             }
           },
           series: [{
-            name: 'Average cpu utilization overhead'
+            name: 'Error overhead'
           }]
         };        
-        var network_option = {
-          chart: {
-            renderTo: 'network',
-            defaultSeriesType: 'spline',
-          },
-          title: {
-            text: 'Network Utilization Overhead'
-          },
-          yAxis:{
-            title: {
-              text: '%'
-            },
-            min: 0
-          },
-          xAxis:{
-            type: 'datetime',
-            dateTimeLabelFormats: {
-                day: '%Y-%b-%d'
-            }
-          },
-          series: [{
-            name: 'Average network utilization overhead'
-          }]
-        };       
 
-        $.getJSON('<%= app_detail.href %>/<%= app_detail.test_type %>/metric/art', function(data) {
+        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/avg', function(data) {
           var data2 = data.map(convertDate);
           art_option.series[0].data = data2;
           var art_chart = new Highcharts.Chart(art_option);
         }); 
-        $.getJSON('<%= app_detail.href %>/<%= app_detail.test_type %>/metric/memory', function(data) {
+        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/throughput', function(data) {
           var data2 = data.map(convertDate);
           memory_option.series[0].data = data2;
           var memory_chart = new Highcharts.Chart(memory_option);
         }); 
-        $.getJSON('<%= app_detail.href %>/<%= app_detail.test_type %>/metric/cpu', function(data) {
+        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/errors', function(data) {
           var data2 = data.map(convertDate);
           cpu_option.series[0].data = data2;
           var cpu_chart = new Highcharts.Chart(cpu_option);
         }); 
-        $.getJSON('<%= app_detail.href %>/<%= app_detail.test_type %>/metric/disk', function(data) {
-          var data2 = data.map(convertDate);
-          disk_option.series[0].data = data2;
-          var disk_chart = new Highcharts.Chart(disk_option);
-        }); 
-        $.getJSON('<%= app_detail.href %>/<%= app_detail.test_type %>/metric/network', function(data) {
-          var data2 = data.map(convertDate);
-          network_option.series[0].data = data2;
-          var network_chart = new Highcharts.Chart(network_option);
-        }); 
       });
 
       function convertDate(value){
-        var date_data = value[0].split(',');
-        var temp_date = Date.UTC(parseInt(date_data[0]),parseInt(date_data[1]),parseInt(date_data[2]));
+        var temp_date = new Date(parseInt(value[0])).toUTCString();
+ console.log(temp_date);
         return [temp_date, value[1]];
       }
     </script>

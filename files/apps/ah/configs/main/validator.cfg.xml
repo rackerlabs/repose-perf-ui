@@ -15,6 +15,6 @@
       enable-pre-process-extension="true"
       xsl-engine="XalanC"
       use-saxon="true"
-      dot-output="/var/repose/validator.dot"
+      dot-output="validator.dot"
       join-xpath-checks="true"/>
 </validators>

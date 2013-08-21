@@ -1,15 +1,26 @@
 class Result
   include Models
 
-  attr_reader :date, :art, :network, :cpu, :memory, :disk
+  attr_reader :date, :length, :avg, :throughput, :errors, :id, :tag
 
-  def initialize(date, art, network, cpu, memory,disk)
+  def initialize(date, length, avg, throughput, errors, id, tag)
     @date = date
-    @art = art
-    @network = network
-    @cpu = cpu
-    @memory = memory
-    @disk = disk
+    @avg = avg
+    @tag = tag
+    @length = length
+    @throughput = throughput
+    @errors = errors
+    @id = id
   end
 end
-    
+
+class SummaryResult
+  attr_reader :date, :throughput, :avg, :errors
+
+  def initialize(date, throughput, avg, errors)
+    @date = date
+    @throughput = throughput
+    @avg = avg
+    @errors = errors
+  end
+end

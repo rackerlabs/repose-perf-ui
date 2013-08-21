@@ -1,11 +1,10 @@
 class PerfTest
   include Models
 
-  attr_reader :id, :href, :name, :description
+  attr_reader :id, :name, :description
 
-  def initialize(id, href, name, description)
+  def initialize(id, name, description)
     @id = id
-    @href = href
     @name = name
     @description = description
   end

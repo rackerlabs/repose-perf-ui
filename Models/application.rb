@@ -1,10 +1,9 @@
 class Application
   include Models
-  attr_reader :id, :href, :description, :name
+  attr_reader :id, :description, :name
 
-  def initialize(id, href, name, description)
+  def initialize(id, name, description)
     @id = id
-    @href = href
     @name = name
     @description = description
   end

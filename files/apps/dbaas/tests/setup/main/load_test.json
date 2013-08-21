@@ -1,0 +1,6 @@
+{
+  "node_count": 2,
+  "runner":"jmeter",
+  "start":"<%= @start_time %>",
+  "stop":"<%= @stop_time %>"
+}
