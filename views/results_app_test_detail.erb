@@ -50,7 +50,7 @@
               <% app_detail.result_set_list.each do |result| %>
               <tr>
                 <td><%= result.tag %></td>
-                <td><a href="/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/id/<%= result.id %>"><%= DateTime.strptime(result.date.chomp("000"), '%s') %></td>
+                <td><a href="/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/id/<%= result.id %>/date/<%= result.date %>"><%= DateTime.strptime(result.date.chomp("000"), '%s') %></td>
                 <td><%= result.avg %> ms</td>
                 <td><%= result.throughput %> rps</td>
                 <td><%= result.errors %> total errors</td>
@@ -92,6 +92,48 @@
         </div>
         <div id="memory" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
       </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">GC Metrics</h3>
+          <h5>GarbageCollectorImpl.PSMarkSweep.CollectionTime, GarbageCollectorImpl.PSMarkSweep.CollectionCount, GarbageCollectorImpl.PSScavenge.CollectionTime, GarbageCollectorImpl.PSScavenge.CollectionCount</h5>
+        </div>
+        <div id="gc" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Memory Pool Metrics</h3>
+          <h5>MemoryPoolImpl.CodeCache.Usage_committed, MemoryPoolImpl.CodeCache.Usage_init, MemoryPoolImpl.CodeCache.Usage_max, MemoryPoolImpl.CodeCache.Usage_used</h5>
+        </div>
+        <div id="code_cache" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Heap Memory Metrics</h3>
+          <h5>MemoryImpl.HeapMemoryUsage_committed, MemoryImpl.HeapMemoryUsage_init, MemoryImpl.HeapMemoryUsage_max, MemoryImpl.HeapMemoryUsage_used</h5>
+        </div>
+        <div id="heap_memory_usage" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">NonHeap Memory Metrics</h3>
+          <h5>MemoryImpl.NonHeapMemoryUsage_committed, MemoryImpl.NonHeapMemoryUsage_init, MemoryImpl.NonHeapMemoryUsage_max, MemoryImpl.NonHeapMemoryUsage_used</h5>
+        </div>
+        <div id="non_heap_memory_usage" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">OS Metrics</h3>
+          <h5>UnixOperatingSystem.OpenFileDescriptorCount, UnixOperatingSystem.MaxFileDescriptorCount, UnixOperatingSystem.CommittedVirtualMemorySize, UnixOperatingSystem.TotalSwapSpaceSize, UnixOperatingSystem.FreeSwapSpaceSize, UnixOperatingSystem.ProcessCpuTime, UnixOperatingSystem.FreePhysicalMemorySize, UnixOperatingSystem.TotalPhysicalMemorySize, UnixOperatingSystem.SystemLoadAverage</h5>
+        </div>
+        <div id="os" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Threading Metrics</h3>
+          <h5>ThreadImpl.PeakThreadCount, ThreadImpl.DaemonThreadCount, ThreadImpl.ThreadCount, ThreadImpl.TotalStartedThreadCount</h5>
+        </div>
+        <div id="threading" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
     </div>
     <hr>
     <footer>
@@ -102,6 +144,7 @@
     <script src="http://code.jquery.com/jquery.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="/js/bootstrap.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.1.0/moment.min.js"></script>
 
     <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
     <script src="/js/respond.js"></script>
@@ -125,7 +168,7 @@
           xAxis:{
             type: 'datetime',
             dateTimeLabelFormats: {
-                day: '%Y-%b-%d'
+                day: '%H:%M:%S'
             }
           },
           series: [{
@@ -148,7 +191,7 @@
           xAxis:{
             type: 'datetime',
             dateTimeLabelFormats: {
-                day: '%Y-%b-%d'
+                day: '%a %d %b %H:%M:%S'
             }
           },
           series: [{
@@ -197,9 +240,9 @@
       });
 
       function convertDate(value){
-        var temp_date = new Date(parseInt(value[0])).toUTCString();
+        var temp_date = new Date(parseInt(value[0]));
  console.log(temp_date);
-        return [temp_date, value[1]];
+        return [parseInt(value[0]), Math.abs(value[1])];
       }
     </script>
   </body>

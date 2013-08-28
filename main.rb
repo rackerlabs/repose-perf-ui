@@ -20,7 +20,9 @@ db.load_apps (
     :ah => Application.new(0,"Atom Hopper", "description"),
     :csl => Application.new(0,"Customer Service Layer", "internal application"),
     :passthrough => Application.new(0,"Passthrough (no filters)", "internal application"),
-    :ddrl => Application.new(0,"Dist Datastore + Rate Limiting", "internal application")
+    :ddrl => Application.new(0,"Dist Datastore + Rate Limiting", "internal application"),
+    :metrics_on_off => Application.new(0,"Metrics off setup", "internal application"),
+    :custom => Application.new(0,"Custom", "anything goes in here")
   } 
 )  
 
@@ -58,14 +60,14 @@ end
 get '/applications/:name' do |name|
   app = app_list[name.to_sym]
   app.app_id = name.to_sym
-  app.request_response_list = Test.new(name).test_list
-  app.config_list = Configuration.new(name).config_list
-  app.test_location = TestLocation.new(name)
+  app.request_response_list = Test.new.get_requests_by_name(name)
+  app.config_list = Configuration.new.get_by_name(name)
+  app.test_location = TestLocationFactory.get_by_name(name)
   erb :app_detail, :locals => {:app_detail => app}
 end
 
 get '/applications/:name/test_download/:file_name' do |name, file_name|
-  send_file TestLocation.new(name).download, :filename => file_name, :type => 'Application/octet-stream'
+  send_file TestLocationFactory.get_by_name(name).download, :filename => file_name, :type => 'Application/octet-stream'
 end
 
 get '/tests' do
@@ -125,7 +127,6 @@ get '/results/:name/:test' do |name, test|
   app = app_list[name.to_sym]
   app.results = PastResults.new(name, test)
   app.result_set_list = app.results.overhead_test_results
-  p app.inspect
   app.test_type = test
   erb :results_app_test_detail, :locals => {:app_detail => app }
 end
@@ -133,7 +134,6 @@ end
 post '/results/:name/:test' do |name, test|
   app = app_list[name.to_sym]
   app.compared_result_set_list = app.results.compared_test_results(params[:compare])
-  p app.compared_result_set_list.inspect
   erb :results_app_test_compare, :locals => {:app_detail => app }
 end
 
@@ -146,26 +146,35 @@ get '/results/:name/:test/metric/:metric' do |name, test, metric|
   body results.to_json
 end
 
-get '/results/:name/:test/date/:date' do |name, test, date|
+get '/results/:name/:test/id/:id/date/:date' do |name, test, id, date|
   #get result files from file under files/apps/:name/results/:test/:date
   app = app_list[name.to_sym]
   #group by then order by start time.  The first will always be repose
-  app.repose_detail = repose_detail_results_list
+  app.detailed_results = app.results.detailed_results id
   app.date = date
+  app.id = id
   app.test_type = test
-  app.os_detail = os_detail_results_list
-  app.results = app.repose_detail.zip(app.os_detail)
+  file_location = app.results.detailed_results_file_location(id)
+  app.request_response_list = Test.new.get_requests_by_file_location(file_location)
+  app.config_list = Configuration.new.get_by_file_location(file_location)
+  app.test_location = TestLocationFactory.get_by_file_location(file_location)
   erb :results_detail, :locals => {:app_detail => app}
 end
 
-get '/results/:name/:test/metric/:metric/date/:date' do |name, test, metric, date|
+get '/results/:name/:test/metric/:metric/id/:id/date/:date' do |name, test, metric, id, date|
   #get result files from file under files/apps/:name/results/:test/:date/:metric
+  app = app_list[name.to_sym]
   repose_results = []
   origin_results = []
-  repose_detail_results_list.each { |result| repose_results << [result.date, result.send(metric.to_sym).to_f] }
-  os_detail_results_list.each { |result| origin_results << [result.date, result.send(metric.to_sym).to_f] }
+  app.detailed_results[0].each { |result| repose_results << [result.date, result.send(metric.to_sym).to_f] }
+  app.detailed_results[1].each { |result| origin_results << [result.date, result.send(metric.to_sym).to_f] }
   results = { :repose => repose_results, :origin => origin_results }
   content_type :json
   body results.to_json
 end
 
+get '/results/:name/test_download/:file_name' do |name, file_name|
+  app = app_list[name.to_sym]
+  file_location = app.results.detailed_results_file_location(id)
+  send_file TestLocationFactory.get_by_file_location(name).download, :filename => file_name, :type => 'Application/octet-stream'
+end

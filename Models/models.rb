@@ -1,4 +1,5 @@
 module Models
+  attr_accessor :id
   attr_accessor :results_link
   attr_accessor :request_response_list
   attr_accessor :config_list
@@ -13,4 +14,5 @@ module Models
   attr_accessor :test_location
   attr_accessor :app_id
   attr_accessor :results
+  attr_accessor :detailed_results
 end

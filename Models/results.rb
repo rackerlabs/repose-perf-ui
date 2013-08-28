@@ -1,5 +1,88 @@
 require 'json'
 
+class PastJmxResults
+  attr_reader :test_list
+
+  def initialize(name, test_type)
+    #load all tmp_directories
+    @test_list = []
+    test_type.chomp!("_test")
+    folder_location = "/root/repose/dist/files/apps/#{name}/results/#{test_type}"
+    Dir.glob("#{folder_location}/tmp_*").each do |entry| 
+      test_hash = {}
+      if File.directory?(entry)
+        #get directory
+        #get begin time, end time, tag name in entry meta file
+        test_type = "load" if test_type == "adhoc"
+        test_hash.merge!(JSON.parse(File.read("#{entry}/meta/#{test_type}_test.json")))
+        #get jxm data like so
+=begin
+ {
+  :os => {
+    'UnixOperatingSystem.OpenFileDescriptorCount' => [
+       {
+         :timestamp => 1234,
+         :value => 5
+       },
+       {
+         :timestamp => 1236,
+         :value => 6
+       },
+     ],
+    'UnixOperatingSystem.MaxFileDescriptorCount' => [ ... ]
+    },
+  :memory => { ... },
+  ...
+ }
+   
+=end
+        Dir.glob("#{entry}/jxmdata*").each do |jxm_file|
+          File.open(jmx_file) do |line|
+            
+          end
+        end
+        summary_location = "#{entry}/summary.log" 
+        summary = `tail -n 3 #{summary_location}`
+        summary.scan(/summary =\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/).map do |time_offset,throughput,average,errors| 
+          test_hash.merge!( {:length => time_offset, :throughput => throughput, :average => average, :errors =>  errors, :folder_name => entry})
+        end
+        @test_list << test_hash
+=begin
+  match overhead on id!
+  test_list = {
+    'ah' => [
+       { 
+         'id' => 'ah/2.8.3',
+         'tag' => 'ah/2.8.3 with repose',
+         'start' => start time,
+         'end' => end time,
+         'runner' => 'jmeter',
+         'node_count' => 2,
+         'length' => time_offset,
+         'throughput' => throughput,
+         'average' => average,
+         'errors' => errors
+       },
+       { 
+         'id' => 'ah/2.8.3',
+         'tag' => 'ah/2.8.3 without repose',
+         'start' => start time,
+         'end' => end time,
+         'runner' => 'jmeter',
+         'node_count' => 2,
+         'length' => time_offset,
+         'throughput' => throughput,
+         'average' => average,
+         'errors' => errors
+       }
+     ] 
+  }
+=end        
+      end
+    end
+  end
+end
+
 class PastResults
   attr_reader :test_list
 
@@ -19,7 +102,7 @@ class PastResults
         summary_location = "#{entry}/summary.log" 
         summary = `tail -n 3 #{summary_location}`
         summary.scan(/summary =\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/).map do |time_offset,throughput,average,errors| 
-          test_hash.merge!( {:length => time_offset, :throughput => throughput, :average => average, :errors =>  errors})
+          test_hash.merge!( {:length => time_offset, :throughput => throughput, :average => average, :errors =>  errors, :folder_name => entry})
         end
         @test_list << test_hash
 =begin
@@ -57,6 +140,47 @@ class PastResults
     end
   end
 
+  def detailed_results_file_location(id)
+    test_locations = @test_list.find_all do |test|
+      id == test['id']
+    end.sort_by do |hash|
+      hash['start']
+    end.map do |test|
+      test[:folder_name]
+    end
+
+    railse 'Id not found' if test_locations.empty?
+    test_locations[0]
+  end
+
+  def detailed_results(id)
+    test_locations = @test_list.find_all do |test|
+      id == test['id']
+    end.sort_by do |hash|
+      hash['start']
+    end.map do |test|
+      test[:folder_name]
+    end
+    repose_results = test_locations[0]
+    os_results = test_locations[1]
+    temp_time = 0
+    repose_summary_results = []
+    File.readlines("#{repose_results}/summary.log").each do |line|     
+      t = line.scan(/summary \+\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/)
+      temp_time = temp_time + t[0][0].to_i unless t.empty?
+      repose_summary_results << SummaryResult.new(temp_time, t[0][1], t[0][2], t[0][3]) unless t.empty?
+    end 
+    
+    temp_time = 0
+    os_summary_results = []
+    File.readlines("#{os_results}/summary.log").each do |line|     
+      t = line.scan(/summary \+\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/)
+      temp_time = temp_time + t[0][0].to_i unless t.empty?
+      os_summary_results << SummaryResult.new(temp_time, t[0][1], t[0][2], t[0][3]) unless t.empty?
+    end 
+    [repose_summary_results,os_summary_results]
+  end
+
 =begin
   [ Result.new('start date','test length','average overhead', 'throughput overhead', 'errors overhead', 'id that matches both tests')]
 =end
@@ -69,7 +193,7 @@ class PastResults
     end.map do |id, hashes| 
       hashes.reduce do | test_a, test_b|  
         test_a.merge(test_b) do |key, v1, v2| 
-          ["length","throughput","average","errors"].include?(key.to_s) ? v1.to_f - v2.to_f : v1 
+          ["length","throughput","average","errors"].include?(key.to_s) ? (v1.to_f - v2.to_f) : v1 
         end
       end
     end.each do |test|

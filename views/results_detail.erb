@@ -6,6 +6,7 @@
     <!-- Bootstrap -->
     <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="/css/repose.css" rel="stylesheet" media="screen">
+    <link href="/css/prettify.css" rel="stylesheet" media="screen">
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -27,40 +28,10 @@
       <ul class="breadcrumb">
         <li><a href="/">Home</a></li>
         <li><a href="/results">Results</a></li>
-        <li><a href="<%= app_detail.href %>"><%= app_detail.name %></a></li>
-        <li><a href="<%= app_detail.href %>/<%= app_detail.test_type %>"><%= app_detail.test_type %></a></li>
+        <li><a href="/results/<%= app_detail.app_id %>"><%= app_detail.name %></a></li>
+        <li><a href="/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>"><%= app_detail.test_type %></a></li>
         <li class="active"><%= app_detail.date %></li>
       </ul>
-      <div class="panel panel-summary">
-        <div class="panel-heading">
-          <h3 class="panel-title">Test Results</h3>
-        </div>
-        <table class="table table-hover">
-          <caption>Repose (Origin only)</caption>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>ART</th>
-              <th>Network</th>
-              <th>CPU</th>
-              <th>Memory</th>
-              <th>Disk</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% app_detail.results.each do |result_array| %>
-            <tr>
-              <td><%= result_array[0].date %> s</td>
-              <td><%= result_array[0].art %> ms (<%= result_array[1].art %> ms)</td>
-              <td><%= result_array[0].network %>% (<%= result_array[1].network %>%)</td>
-              <td><%= result_array[0].cpu %>% (<%= result_array[1].cpu %>%)</td>
-              <td><%= result_array[0].memory %>% (<%= result_array[1].memory %>%)</td>
-              <td><%= result_array[0].disk %>% (<%= result_array[1].disk %>%)</td>
-            </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
       <div class="panel">
         <div class="panel-heading">
           <h3 class="panel-title">Average Response Time</h3>
@@ -69,27 +40,94 @@
       </div>
       <div class="panel">
         <div class="panel-heading">
-          <h3 class="panel-title">Network Utilization</h3>
+          <h3 class="panel-title">Throughput</h3>
         </div>
         <div id="network" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
       </div>
       <div class="panel">
         <div class="panel-heading">
-          <h3 class="panel-title">CPU Utilization</h3>
+          <h3 class="panel-title">Total Errors</h3>
         </div>
         <div id="cpu" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
       </div>
-      <div class="panel">
+      <div class="panel panel-info">
         <div class="panel-heading">
-          <h3 class="panel-title">Memory Utilization</h3>
+          <h3 class="panel-title">Requests and responses</h3>
         </div>
-        <div id="memory" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Request</th>
+              <th>Response</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% app_detail.request_response_list.each do |test| %>
+            <tr>
+              <td><%= test[0].method %> <%= test[0].uri %> <%= test[0].headers.inspect %>
+                <pre class="prettyprint linenums languague-css"><!-- --><%= test[0].body %><!-- --></pre>
+              </td>
+              <td><%= test[1].response_code %></td>
+            </tr>
+            <% end %>
+          </tbody>
+        </table>
       </div>
-      <div class="panel">
+      <div class="panel panel-info">
         <div class="panel-heading">
-          <h3 class="panel-title">Disk Utilization</h3>
+          <h3 class="panel-title">Configurations</h3>
         </div>
-        <div id="disk" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+        <div class="accordion" id="config-accordion">
+          <% app_detail.config_list.each do |key, config| %>
+          <div class="accordion-group">
+            <div class="accordion-heading">
+              <a class="accordion-toggle" data-toggle="collapse" data-parent="#config-accordion" href="#<%= key %>"><%= key %></a>
+            </div>
+            <div id="<%= key %>" class="accordion-body collapse in">
+              <div class="accordion-inner">
+                <pre class="prettyprint linenums languague-css"><!-- --><%= config %><!-- --></pre>
+              </div>
+            </div>
+          </div>
+          <% end %>
+        </div>
+      </div>
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <h3 class="panel-title">Test Setup</h3>
+        </div>
+        <div class="row">
+          <label for="testLocation" class="col-lg-2 control-label">Test Location</label>
+          <div class="col-lg-10">
+            <a href="/results/<%= app_detail.app_id %>/test_download/<%= app_detail.test_location.href %>"><%= app_detail.test_location.type %></a>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Detailed Test Results</h3>
+        </div>
+        <table class="table table-hover">
+          <caption>Repose (Origin only)</caption>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>ART</th>
+              <th>Throughput</th>
+              <th>Errors</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% app_detail.detailed_results[0].zip(app_detail.detailed_results[1]).each do |result_array| %>
+            <tr>
+              <td><%= result_array[0].date %> s</td>
+              <td><%= result_array[0].avg %> ms (<%= result_array[1].avg %> ms)</td>
+              <td><%= result_array[0].throughput %> rps (<%= result_array[1].throughput %> rps)</td>
+              <td><%= result_array[0].errors %> (<%= result_array[1].errors %>)</td>
+            </tr>
+            <% end %>
+          </tbody>
+        </table>
       </div>
     </div>
     <hr>
@@ -106,8 +144,11 @@
     <script src="/js/respond.js"></script>
     <script src="/js/repose.min.js"></script>
     <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="/js/prettify.js"></script>
     <script type="text/javascript">
       $(document).ready(function() {
+        window.prettyPrint && prettyPrint()
+        $(".accordion-toggle").collapse();
         var art_option = {
           chart: {
             renderTo: 'art',
@@ -126,59 +167,23 @@
             name: 'Repose Average Response Time'
           }, { name: 'Origin Average Response Time'}]
         };        
-        var memory_option = {
-          chart: {
-            renderTo: 'memory',
-            type: 'area',
-          },
-          title: {
-            text: 'Memory Utilization Overhead'
-          },
-          yAxis:{
-            title: {
-              text: '%'
-            },
-            min: 0
-          },
-          series: [{
-            name: 'Average memory utilization'
-          }, { name: 'Origin Average memory utilization'}]
-        };        
-        var disk_option = {
-          chart: {
-            renderTo: 'disk',
-            type: 'area',
-          },
-          title: {
-            text: 'Disk Utilization'
-          },
-          yAxis:{
-            title: {
-              text: '%'
-            },
-            min: 0
-          },
-          series: [{
-            name: 'Average disk utilization'
-          }, { name: 'Origin Average disk utilization'}]
-        };        
         var cpu_option = {
           chart: {
             renderTo: 'cpu',
             type: 'area',
           },
           title: {
-            text: 'CPU Utilization'
+            text: 'Total Errors'
           },
           yAxis:{
             title: {
-              text: '%'
+              text: 'count'
             },
             min: 0
           },
           series: [{
-            name: 'Average cpu utilization'
-          }, { name: 'Origin Average cpu utilization'}]
+            name: 'Repose Total errors'
+          }, { name: 'Origin total errors'}]
         };        
         var network_option = {
           chart: {
@@ -186,40 +191,30 @@
             type: 'area',
           },
           title: {
-            text: 'Network Utilization'
+            text: 'Throughput Utilization'
           },
           yAxis:{
             title: {
-              text: '%'
+              text: 'Requests per second'
             },
             min: 0
           },
           series: [{
-            name: 'Average network utilization'
-          }, { name: 'Origin Average network utilization'}]
+            name: 'Repose Average throughput'
+          }, { name: 'Origin Average Throughput'}]
         };       
 
-        $.getJSON('/results/<%= app_detail.name %>/<%= app_detail.test_type %>/metric/art/date/<%= app_detail.date %>', function(data) {
+        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/avg/id/<%= app_detail.id %>/date/<%= app_detail.date %>', function(data) {
           art_option.series[0].data = data.repose;
           art_option.series[1].data = data.origin;
           var art_chart = new Highcharts.Chart(art_option);
         }); 
-        $.getJSON('/results/<%= app_detail.name %>/<%= app_detail.test_type %>/metric/memory/date/<%= app_detail.date %>', function(data) {
-          memory_option.series[0].data = data.repose;
-          memory_option.series[1].data = data.origin;
-          var memory_chart = new Highcharts.Chart(memory_option);
-        }); 
-        $.getJSON('/results/<%= app_detail.name %>/<%= app_detail.test_type %>/metric/cpu/date/<%= app_detail.date %>', function(data) {
+        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/errors/id/<%= app_detail.id %>/date/<%= app_detail.date %>', function(data) {
           cpu_option.series[0].data = data.repose;
           cpu_option.series[1].data = data.origin;
           var cpu_chart = new Highcharts.Chart(cpu_option);
         }); 
-        $.getJSON('/results/<%= app_detail.name %>/<%= app_detail.test_type %>/metric/disk/date/<%= app_detail.date %>', function(data) {
-          disk_option.series[0].data = data.repose;
-          disk_option.series[1].data = data.origin;
-          var disk_chart = new Highcharts.Chart(disk_option);
-        }); 
-        $.getJSON('/results/<%= app_detail.name %>/<%= app_detail.test_type %>/metric/network/date/<%= app_detail.date %>', function(data) {
+        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/throughput/id/<%= app_detail.id %>/date/<%= app_detail.date %>', function(data) {
           network_option.series[0].data = data.repose;
           network_option.series[1].data = data.origin;
           var network_chart = new Highcharts.Chart(network_option);

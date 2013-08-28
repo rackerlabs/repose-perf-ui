@@ -34,8 +34,8 @@
         <div class="panel-heading">
           <h3 class="panel-title">Test Results</h3>
         </div>
-        <form method="POST">
           <table class="table table-hover">
+            <caption>Execution via Repose is listed first.   Execution against origin service directly is in parentheses</caption>
             <thead>
               <tr>
                 <th>Tag</th>
@@ -52,12 +52,11 @@
                 <td><a href="/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/id/<%= key %>"><%= result_list[0][:length].to_f %>(<%= result_list[1][:length].to_f %>) - difference of <%= result_list[0][:length].to_f - result_list[1][:length].to_f %> s</a></td>
                 <td><%= result_list[0][:average].to_f %> ms (<%= result_list[1][:average].to_f %> ms) - difference of <%= result_list[0][:average].to_f - result_list[1][:average].to_f %> ms</td>
                 <td><%= result_list[0][:throughput].to_f %> rps (<%= result_list[1][:throughput].to_f %> rps) - difference of <%= result_list[0][:throughput].to_f - result_list[1][:throughput].to_f %> rps</td>
-                <td><%= result_list[0][:errors].to_f %> ms (<%= result_list[1][:errors].to_f %> ms) - difference of <%= result_list[0][:errors].to_f - result_list[1][:errors].to_f %> ms</td>
+                <td><%= result_list[0][:errors].to_f %> total errors (<%= result_list[1][:errors].to_f %> total errors) - difference of <%= result_list[0][:errors].to_f - result_list[1][:errors].to_f %> total errors</td>
               </tr>
               <% end %>
             </tbody>
           </table>
-        </form>
       </div>
       <div class="panel">
         <div class="panel-heading">

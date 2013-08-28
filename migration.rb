@@ -79,24 +79,28 @@ p "shell started"
 tmp_dir = "tmp_#{DateTime.now.strftime('%Y%m%dT%H%M%S')}"
 
 if opts[:action] == 'stop'
-  env = Environment.new
-  env.connect(:dfw)
-  env.servers.select {|server| server.state == 'ACTIVE' }.each do |server|
-    p server
-    if opts[:with_repose]
-      system "ssh root@#{server.ipv4_address} 'curl http://localhost:6666 -v'"
-      system "ssh root@#{server.ipv4_address} 'rm -rf /home/repose/configs/* '" 
-      system "ssh root@#{server.ipv4_address} 'rm -rf /home/repose/usr/share/repose/repose-valve.jar '" 
-      system "ssh root@#{server.ipv4_address} 'rm -rf /home/repose/usr/share/repose/filters/* '" 
-      system "ssh root@#{server.ipv4_address} 'rm -rf /home/repose/logs/* '" 
-      system "ssh root@#{server.ipv4_address} -f 'killall node '"
-    end
-  end
   p "copy directories over"
   #copy directory over.  remove current
   FileUtils.cp_r("/root/repose/dist/files/apps/#{opts[:app]}/results/adhoc/current/." , "/root/repose/dist/files/apps/#{opts[:app]}/results/adhoc/#{tmp_dir}")
   FileUtils.rm_r("/root/repose/dist/files/apps/#{opts[:app]}/results/adhoc/current")
-  p "remove directories"
+  env = Environment.new
+  env.connect(:dfw)
+  env.servers.select {|server| server.state == 'ACTIVE' }.each do |server|
+    p server
+    p opts[:with_repose]
+    if opts[:with_repose]
+      system "ssh root@#{server.ipv4_address} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
+      system "ssh root@#{server.ipv4_address} 'curl http://localhost:6666 -v'"      
+      p "copying over to /root/repose/dist/files/apps/#{opts[:app]}/results/adhoc/#{tmp_dir}/jmxdata.out"
+      system "scp root@#{server.ipv4_address}:/home/repose/logs/jmxdata.out /root/repose/dist/files/apps/#{opts[:app]}/results/adhoc/#{tmp_dir}/jmxdata.out_#{server.name}"
+      
+      system "ssh root@#{server.ipv4_address} 'rm -rf /home/repose/configs/* '" 
+      system "ssh root@#{server.ipv4_address} 'rm -rf /home/repose/usr/share/repose/repose-valve.jar '" 
+      system "ssh root@#{server.ipv4_address} 'rm -rf /home/repose/usr/share/repose/filters/* '" 
+      system "ssh root@#{server.ipv4_address} 'rm -rf /home/repose/logs/* '" 
+    end
+    system "ssh root@#{server.ipv4_address} -f 'killall node '"
+  end
 elsif opts[:action] == 'start'
   unless Dir.exists?("/root/repose/dist/files/apps/#{opts[:app]}/results/adhoc/current")
 
@@ -122,7 +126,7 @@ elsif opts[:action] == 'start'
     env.connect(:dfw)
   
 
-    nodes = env.servers.map {|server| {:id => server.id, :address => server.ipv4_address}}
+    nodes = env.servers.map {|server| {:id => server.id, :address => server.ipv4_address} if server.name =~ /test/ }
 
     #modify system-model and dd xmls and stage all configs. 
     system_model_contents = SystemModelTemplate.new(nodes,File.read("#{config_target_dir}/system-model.cfg.xml")).render
@@ -132,10 +136,11 @@ elsif opts[:action] == 'start'
     #download repose and spin up
     #load and spin up auth and mock responders
 
-    env.servers.select {|server| server.state == 'ACTIVE' }.each do |server|
+    env.servers.select {|server| server.state == 'ACTIVE' && server.name =~ /test/ }.each do |server|
       Dir.glob("#{config_target_dir}/**"){ |file| p "#{config_target_dir}/#{file}"; p File.directory?(file); server.scp file, "/home/repose/configs/", {:recursive => true}}
       server.scp "#{target_dir}/auth_responder.js", "/home/mocks/auth_responder/server.js"
       server.scp "#{target_dir}/mock_responder.js", "/home/mocks/mock_responder/server.js"
+      server.scp "#{source_dir}/jmxparams.json","/usr/share/jmxtrans/example.json"
       p "everything is uploaded"
       system "ssh root@#{server.ipv4_address} -f 'nohup node /home/mocks/auth_responder/server.js & '" 
       p "started auth on #{server.ipv4_address}"
@@ -147,11 +152,16 @@ elsif opts[:action] == 'start'
           system "ssh root@#{server.ipv4_address} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --version #{opts[:release]}'" 
         else
           server.scp "project-set/core/valve/target/repose-valve.jar", "/home/repose/usr/share/repose/"
-          Dir.glob("/home/jenkins/.m2/repository/com/rackspace/papi/components/extensions/extensions-filter-bundle/2.8.3-SNAPSHOT/*.ear") { |file| server.scp file, "/home/repose/usr/share/repose/filters/extensions-filter-bundle.ear"}
-          Dir.glob("/home/jenkins/.m2/repository/com/rackspace/papi/components/filter-bundle/2.8.3-SNAPSHOT/*.ear") { |file| server.scp file, "/home/repose/usr/share/repose/filters/filter-bundle.ear"}
+          Dir.glob("/home/jenkins/.m2/repository/com/rackspace/papi/components/extensions/extensions-filter-bundle/*-SNAPSHOT/*.ear") { |file| server.scp file, "/home/repose/usr/share/repose/filters/extensions-filter-bundle.ear"}
+          Dir.glob("/home/jenkins/.m2/repository/com/rackspace/papi/components/filter-bundle/*-SNAPSHOT/*.ear") { |file| server.scp file, "/home/repose/usr/share/repose/filters/filter-bundle.ear"}
         end
+        p "stop jmxtrans"
+        system "ssh root@#{server.ipv4_address} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
+        p "start jmxtrans"
+        system "ssh root@#{server.ipv4_address} -f 'cd /usr/share/jmxtrans ; ./jmxtrans.sh start example.json '" 
         #start repose
-        system "ssh root@#{server.ipv4_address} -f 'nohup java -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ -s 6666 start & '" 
+        p "start repose"
+        system "ssh root@#{server.ipv4_address} -f 'nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ -s 6666 start & '" 
       end
     end
     length = opts[:length] ? opts[:length].to_i : 60
