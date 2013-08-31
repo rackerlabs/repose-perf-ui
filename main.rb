@@ -1,180 +1,209 @@
 require 'sinatra'
 require 'json'
-require './Models/models.rb'
-require './Models/application.rb'
-require './Models/test.rb'
-require './Models/request.rb'
-require './Models/response.rb'
-require './Models/perftest.rb'
-require './Models/result.rb'
-require './Models/results.rb'
-require './Models/configuration.rb'
-require './Models/testlocation.rb'
-require './Models/database.rb'
+require_relative './Models/models.rb'
+require_relative  './Models/application.rb'
+require_relative  './Models/test.rb'
+require_relative  './Models/request.rb'
+require_relative  './Models/response.rb'
+require_relative  './Models/perftest.rb'
+require_relative  './Models/result.rb'
+require_relative  './Models/results.rb'
+require_relative  './Models/configuration.rb'
+require_relative  './Models/testlocation.rb'
+require_relative  './Models/database.rb'
 
-db = Database.new
-db.upgrade 1
-db.load_apps (
-  {
-    :dbaas => Application.new(0,"Cloud Databases", "cloud databases"),
-    :ah => Application.new(0,"Atom Hopper", "description"),
-    :csl => Application.new(0,"Customer Service Layer", "internal application"),
-    :passthrough => Application.new(0,"Passthrough (no filters)", "internal application"),
-    :ddrl => Application.new(0,"Dist Datastore + Rate Limiting", "internal application"),
-    :metrics_on_off => Application.new(0,"Metrics off setup", "internal application"),
-    :custom => Application.new(0,"Custom", "anything goes in here")
-  } 
-)  
+class PerfApp < Sinatra::Base
 
-app_list = db.retrieve_apps
- 
-load_test_list = {
-  :load_test => PerfTest.new(1, 'Load Test', 'Test description'),
-  :duration_test => PerfTest.new(2, 'Duration Test','Test description'),
-  :benchmark_test => PerfTest.new(3, 'Benchmark Test','Test description'),
-  :adhoc_test => PerfTest.new(4, 'Adhoc Test','Test description')
-}
+  db = Models::Database.new
+  db.upgrade 1
+  db.load_apps (
+    {
+      :dbaas => Models::Application.new(0,"Cloud Databases", "cloud databases"),
+      :ah => Models::Application.new(0,"Atom Hopper", "description"),
+      :csl => Models::Application.new(0,"Customer Service Layer", "internal application"),
+      :passthrough => Models::Application.new(0,"Passthrough (no filters)", "internal application"),
+      :ddrl => Models::Application.new(0,"Dist Datastore + Rate Limiting", "internal application"),
+      :metrics_on_off => Models::Application.new(0,"Metrics off setup", "internal application"),
+      :custom => Models::Application.new(0,"Custom", "anything goes in here")
+    } 
+  )  
 
-=begin
-result_set_list = [
-  Result.new(Date.new(2013,1,1), '13.4','17','24','10','32'),
-  Result.new(Date.new(2013,1,2), '13.5','23','34','5','15'),
-  Result.new(Date.new(2013,1,3), '13.9','34','44','42','20'),
-  Result.new(Date.new(2013,1,4), '15.4','12','34','30','23'),
-  Result.new(Date.new(2013,1,5), '12.1','34','24','20','23'),
-  Result.new(Date.new(2013,1,6), '15.2','23','34','50','17'),
-  Result.new(Date.new(2013,1,7), '10.4','53','71','20','9')
-]
-=end
+  app_list = db.retrieve_apps
+   
+  load_test_list = {
+    :load_test => Models::PerfTest.new(1, 'Load Test', 'Test description'),
+    :duration_test => Models::PerfTest.new(2, 'Duration Test','Test description'),
+    :benchmark_test => Models::PerfTest.new(3, 'Benchmark Test','Test description'),
+    :adhoc_test => Models::PerfTest.new(4, 'Adhoc Test','Test description')
+  }
 
-results = nil
+  results = nil
 
-get '/' do
-  erb :index
-end
+  # In your main application file
+  configure do
+    set :views, "#{File.dirname(__FILE__)}/views"
+    set :public, "#{File.dirname(__FILE__)}/public"
+  end
 
-get '/applications' do
-  erb :applications, :locals => {:application_list => app_list}
-end
+  get '/' do
+    erb :index
+  end
 
-get '/applications/:name' do |name|
-  app = app_list[name.to_sym]
-  app.app_id = name.to_sym
-  app.request_response_list = Test.new.get_requests_by_name(name)
-  app.config_list = Configuration.new.get_by_name(name)
-  app.test_location = TestLocationFactory.get_by_name(name)
-  erb :app_detail, :locals => {:app_detail => app}
-end
+  get '/applications' do
+    erb :applications, :locals => {:application_list => app_list}
+  end
 
-get '/applications/:name/test_download/:file_name' do |name, file_name|
-  send_file TestLocationFactory.get_by_name(name).download, :filename => file_name, :type => 'Application/octet-stream'
-end
+  get '/applications/:name' do |name|
+    app = app_list[name.to_sym]
+    if app 
+      app.app_id = name.to_sym
+      app.request_response_list = Models::Test.new.get_setup_requests_by_name(name)
+      app.config_list = Models::Configuration.new.get_by_name(name)
+      app.test_location = Models::TestLocationFactory.get_by_name(name)
+      erb :app_detail, :locals => {:app_detail => app}
+    else
+      status 404
+      body "Not found"
+    end
+  end
 
-get '/tests' do
-  erb :tests, :locals => {:application_list => app_list}
-end
+  get '/applications/:name/test_download/:file_name' do |name, file_name|
+    begin
+      downloaded_file = Models::TestLocationFactory.get_by_name(name).download
+      send_file downloaded_file, :filename => file_name, :type => 'Application/octet-stream'
+    rescue ArgumentError => e
+      status 404
+      body e.message
+    end
+  end
 
-get '/tests/:name' do |name|
-  #get scheduled tests, running tests, and ability to start test (either with default values or upload own config and/or test)
-  app = app_list[name.to_sym]
-  app.load_test_list = load_test_list
-  app.app_id = name.to_sym
-  erb :tests_app_detail, :locals => {:app_detail => app}
-end
+  get '/tests' do
+    erb :tests, :locals => {:application_list => app_list}
+  end
 
-get '/tests/:name/:test' do |name, test|
-  app = app_list[name.to_sym]
-  app.results = Results.new(name, 'adhoc', :current)
-  app.results.convert_summary
-  app.result_set_list = app.results.summary_results 
-  app.test_type = test
-  erb :tests_app_test_detail, :locals => {:app_detail => app }
-end
+  get '/tests/:name' do |name|
+    app = app_list[name.to_sym]
+    if app
+      app.load_test_list = load_test_list
+      app.app_id = name.to_sym
+      erb :tests_app_detail, :locals => {:app_detail => app}
+    else
+      status 404
+      body "Not found"
+    end
+  end
 
-get '/tests/:name/:test/metric/:metric' do |name, test, metric|
-  #parse from summary file and jmx filei
-  app = app_list[name.to_sym]
-  temp_results = []
-  app.result_set_list.each { |result| p result.inspect; temp_results << [result.date, result.send(metric.to_sym).to_f] }
-  content_type :json
-  response = { :results => temp_results, :ended => app.results.test_ended}
-  body response.to_json
-end
+  get '/tests/:name/:test' do |name, test|
+    app = app_list[name.to_sym]
+    if app and load_test_list.keys.include?(test.to_sym)
+      app.results = Results::LiveSummaryResults.start_running_results(name, test.chomp('_test'))
+      app.result_set_list = app.results.summary_results 
+      app.test_type = test
+      erb :tests_app_test_detail, :locals => {:app_detail => app }
+    else
+      status 404
+      body "Not found"
+    end
+  end
 
-get '/tests/:name/:test/metric/:metric/live' do |name, test, metric|
-  #get last values from summary file and jmx file
-  app = app_list[name.to_sym]
-  temp_results = []
-  app.results.new_summary_values.each { |result| temp_results << [result.date, result.send(metric.to_sym).to_f] } unless app.results.test_ended
-  content_type :json
-  response = { :results => temp_results, :ended => app.results.test_ended}
-  body response.to_json
-end
+  get '/tests/:name/:test/metric/:metric' do |name, test, metric|
+    #parse from summary file and jmx filei
+    app = app_list[name.to_sym]
+    if app and load_test_list.keys.include?(test.to_sym)
+      temp_results = []
+      live_results = Results::LiveSummaryResults.running_tests[name][test.chomp('_test')]
+      if live_results && live_results.summary_results[0].respond_to?(metric.to_sym)
+        live_results.summary_results.each { |result| temp_results << [result.date, result.send(metric.to_sym).to_f] }
+      end
+      content_type :json
+      response = { :results => temp_results, :ended => live_results.test_ended}
+    else
+      status 404
+      response = { :results => [], :ended => true}
+    end
+    body response.to_json
+  end
 
-get '/results' do
-  erb :results, :locals => {:application_list => app_list}
-end
+  get '/tests/:name/:test/metric/:metric/live' do |name, test, metric|
+    #get last values from summary file and jmx file
+    app = app_list[name.to_sym]
+    if app and load_test_list.keys.include?(test.to_sym) and !app.results.test_ended
+      temp_results = []
+      app.results.new_summary_values.each { |result| temp_results << [result.date, result.send(metric.to_sym).to_f] }
+      content_type :json
+      response = { :results => temp_results, :ended => app.results.test_ended}
+    else
+      status 404
+      response = { :results => [], :ended => true}
+    end
+    body response.to_json
+  end
 
-get '/results/:name' do |name|
-  app = app_list[name.to_sym]
-  app.app_id = name.to_sym
-  app.load_test_list = load_test_list
-  erb :results_app_detail, :locals => {:app_detail => app}
-end
+  get '/results' do
+    erb :results, :locals => {:application_list => app_list}
+  end
 
-get '/results/:name/:test' do |name, test|
-  #get result files from file under  files/apps/:name/results/:test/summary
-  app = app_list[name.to_sym]
-  app.results = PastResults.new(name, test)
-  app.result_set_list = app.results.overhead_test_results
-  app.test_type = test
-  erb :results_app_test_detail, :locals => {:app_detail => app }
-end
+  get '/results/:name' do |name|
+    app = app_list[name.to_sym]
+    app.app_id = name.to_sym
+    app.load_test_list = load_test_list
+    erb :results_app_detail, :locals => {:app_detail => app}
+  end
 
-post '/results/:name/:test' do |name, test|
-  app = app_list[name.to_sym]
-  app.compared_result_set_list = app.results.compared_test_results(params[:compare])
-  erb :results_app_test_compare, :locals => {:app_detail => app }
-end
+  get '/results/:name/:test' do |name, test|
+    #get result files from file under  files/apps/:name/results/:test/summary
+    app = app_list[name.to_sym]
+    app.results = PastResults.new(name, test)
+    app.result_set_list = app.results.overhead_test_results
+    app.test_type = test
+    erb :results_app_test_detail, :locals => {:app_detail => app }
+  end
 
-get '/results/:name/:test/metric/:metric' do |name, test, metric|
-  #parse from previous result_set
-  app = app_list[name.to_sym]
-  results = []
-  app.result_set_list.each { |result| results << [result.date, result.send(metric.to_sym).to_f] }
-  content_type :json
-  body results.to_json
-end
+  post '/results/:name/:test' do |name, test|
+    app = app_list[name.to_sym]
+    app.compared_result_set_list = app.results.compared_test_results(params[:compare])
+    erb :results_app_test_compare, :locals => {:app_detail => app }
+  end
 
-get '/results/:name/:test/id/:id/date/:date' do |name, test, id, date|
-  #get result files from file under files/apps/:name/results/:test/:date
-  app = app_list[name.to_sym]
-  #group by then order by start time.  The first will always be repose
-  app.detailed_results = app.results.detailed_results id
-  app.date = date
-  app.id = id
-  app.test_type = test
-  file_location = app.results.detailed_results_file_location(id)
-  app.request_response_list = Test.new.get_requests_by_file_location(file_location)
-  app.config_list = Configuration.new.get_by_file_location(file_location)
-  app.test_location = TestLocationFactory.get_by_file_location(file_location)
-  erb :results_detail, :locals => {:app_detail => app}
-end
+  get '/results/:name/:test/metric/:metric' do |name, test, metric|
+    #parse from previous result_set
+    app = app_list[name.to_sym]
+    results = []
+    app.result_set_list.each { |result| results << [result.date, result.send(metric.to_sym).to_f] }
+    content_type :json
+    body results.to_json
+  end
 
-get '/results/:name/:test/metric/:metric/id/:id/date/:date' do |name, test, metric, id, date|
-  #get result files from file under files/apps/:name/results/:test/:date/:metric
-  app = app_list[name.to_sym]
-  repose_results = []
-  origin_results = []
-  app.detailed_results[0].each { |result| repose_results << [result.date, result.send(metric.to_sym).to_f] }
-  app.detailed_results[1].each { |result| origin_results << [result.date, result.send(metric.to_sym).to_f] }
-  results = { :repose => repose_results, :origin => origin_results }
-  content_type :json
-  body results.to_json
-end
+  get '/results/:name/:test/id/:id/date/:date' do |name, test, id, date|
+    #get result files from file under files/apps/:name/results/:test/:date
+    app = app_list[name.to_sym]
+    #group by then order by start time.  The first will always be repose
+    app.detailed_results = app.results.detailed_results id
+    app.date = date
+    app.id = id
+    app.test_type = test
+    file_location = app.results.detailed_results_file_location(id)
+    app.request_response_list = Test.new.get_requests_by_file_location(file_location)
+    app.config_list = Configuration.new.get_by_file_location(file_location)
+    app.test_location = TestLocationFactory.get_by_file_location(file_location)
+    erb :results_detail, :locals => {:app_detail => app}
+  end
 
-get '/results/:name/test_download/:file_name' do |name, file_name|
-  app = app_list[name.to_sym]
-  file_location = app.results.detailed_results_file_location(id)
-  send_file TestLocationFactory.get_by_file_location(name).download, :filename => file_name, :type => 'Application/octet-stream'
+  get '/results/:name/:test/metric/:metric/id/:id/date/:date' do |name, test, metric, id, date|
+    #get result files from file under files/apps/:name/results/:test/:date/:metric
+    app = app_list[name.to_sym]
+    repose_results = []
+    origin_results = []
+    app.detailed_results[0].each { |result| repose_results << [result.date, result.send(metric.to_sym).to_f] }
+    app.detailed_results[1].each { |result| origin_results << [result.date, result.send(metric.to_sym).to_f] }
+    results = { :repose => repose_results, :origin => origin_results }
+    content_type :json
+    body results.to_json
+  end
+
+  get '/results/:name/test_download/:file_name' do |name, file_name|
+    app = app_list[name.to_sym]
+    file_location = app.results.detailed_results_file_location(id)
+    send_file TestLocationFactory.get_by_file_location(name).download, :filename => file_name, :type => 'Application/octet-stream'
+  end
 end

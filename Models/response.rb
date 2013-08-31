@@ -1,9 +1,11 @@
-class Response
-  include Models
+module Models
+	class Response
+	  include Models
 
-  attr_reader :response_code
+	  attr_reader :response_code
 
-  def initialize(response_code)
-    @response_code = response_code
-  end
+	  def initialize(response_code)
+	    @response_code = response_code
+	  end
+	end
 end

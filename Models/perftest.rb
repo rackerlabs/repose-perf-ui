@@ -1,11 +1,11 @@
-class PerfTest
-  include Models
+module Models
+	class PerfTest
+	  attr_reader :id, :name, :description
 
-  attr_reader :id, :name, :description
-
-  def initialize(id, name, description)
-    @id = id
-    @name = name
-    @description = description
-  end
+	  def initialize(id, name, description)
+	    @id = id
+	    @name = name
+	    @description = description
+	  end
+	end
 end
