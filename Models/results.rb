@@ -214,7 +214,7 @@ module Results
         t = line.scan(/summary \+\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/)
         temp_time = temp_time + t[0][0].to_i unless t.empty?
         repose_summary_results << SummaryResult.new(temp_time, t[0][1], t[0][2], t[0][3]) unless t.empty?
-      end 
+      end if File.exists?("#{repose_results}/summary.log")
       
       temp_time = 0
       os_summary_results = []
@@ -222,7 +222,7 @@ module Results
         t = line.scan(/summary \+\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/)
         temp_time = temp_time + t[0][0].to_i unless t.empty?
         os_summary_results << SummaryResult.new(temp_time, t[0][1], t[0][2], t[0][3]) unless t.empty?
-      end 
+      end  if File.exists?("#{os_results}/summary.log")
       [repose_summary_results,os_summary_results]
     end
 

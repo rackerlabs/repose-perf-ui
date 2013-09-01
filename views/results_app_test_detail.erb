@@ -47,7 +47,7 @@
               </tr>
             </thead>
             <tbody>
-              <% app_detail.result_set_list.each do |result| %>
+<% app_detail.result_set_list.each do |result| %>
               <tr>
                 <td><%= result.tag %></td>
                 <td><a href="/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/id/<%= result.id %>/date/<%= result.date %>"><%= DateTime.strptime(result.date.chomp("000"), '%s') %></td>
@@ -62,7 +62,7 @@
                   </div>
                 </td>
               </tr>
-              <% end %>
+<% end %>
             </tbody>
             <tfoot>
               <tr>

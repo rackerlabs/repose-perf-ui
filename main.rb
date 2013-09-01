@@ -129,7 +129,9 @@ class PerfApp < Sinatra::Base
     app = app_list[name.to_sym]
     if app and load_test_list.keys.include?(test.to_sym) and !app.results.test_ended
       temp_results = []
-      app.results.new_summary_values.each { |result| temp_results << [result.date, result.send(metric.to_sym).to_f] }
+      if app.results && app.results.summary_results[0].respond_to?(metric.to_sym)
+        app.results.new_summary_values.each { |result| temp_results << [result.date, result.send(metric.to_sym).to_f] }
+      end
       content_type :json
       response = { :results => temp_results, :ended => app.results.test_ended}
     else
@@ -145,32 +147,53 @@ class PerfApp < Sinatra::Base
 
   get '/results/:name' do |name|
     app = app_list[name.to_sym]
-    app.app_id = name.to_sym
-    app.load_test_list = load_test_list
-    erb :results_app_detail, :locals => {:app_detail => app}
+    if app
+      app.load_test_list = load_test_list
+      app.app_id = name.to_sym
+      erb :results_app_detail, :locals => {:app_detail => app}
+    else
+      status 404
+      body "Not found"
+    end
   end
 
   get '/results/:name/:test' do |name, test|
     #get result files from file under  files/apps/:name/results/:test/summary
     app = app_list[name.to_sym]
-    app.results = PastResults.new(name, test)
-    app.result_set_list = app.results.overhead_test_results
-    app.test_type = test
-    erb :results_app_test_detail, :locals => {:app_detail => app }
+    if app and load_test_list.keys.include?(test.to_sym)
+      app.result_set_list = Results::PastSummaryResults.new(name, test.chomp('_test')).overhead_test_results 
+      app.test_type = test
+      erb :results_app_test_detail, :locals => {:app_detail => app }
+    else
+      status 404
+      body "Not found"
+    end
   end
 
   post '/results/:name/:test' do |name, test|
     app = app_list[name.to_sym]
-    app.compared_result_set_list = app.results.compared_test_results(params[:compare])
-    erb :results_app_test_compare, :locals => {:app_detail => app }
+    if app and load_test_list.keys.include?(test.to_sym)
+      app.compared_result_set_list = app.results.compared_test_results(params[:compare])
+      erb :results_app_test_compare, :locals => {:app_detail => app }
+    else
+      status 404
+    end
   end
 
   get '/results/:name/:test/metric/:metric' do |name, test, metric|
     #parse from previous result_set
     app = app_list[name.to_sym]
     results = []
-    app.result_set_list.each { |result| results << [result.date, result.send(metric.to_sym).to_f] }
-    content_type :json
+    if app and load_test_list.keys.include?(test.to_sym)
+      app.results = Results::PastSummaryResults.new(name, test.chomp('_test'))
+      app.result_set_list = app.results.overhead_test_results 
+      if app.result_set_list[0].respond_to?(metric.to_sym)
+        app.result_set_list.each { |result| results << [result.date, result.send(metric.to_sym).to_f] }
+      end
+      content_type :json
+    else
+      status 404
+    end
     body results.to_json
   end
 
@@ -178,32 +201,74 @@ class PerfApp < Sinatra::Base
     #get result files from file under files/apps/:name/results/:test/:date
     app = app_list[name.to_sym]
     #group by then order by start time.  The first will always be repose
-    app.detailed_results = app.results.detailed_results id
-    app.date = date
-    app.id = id
-    app.test_type = test
-    file_location = app.results.detailed_results_file_location(id)
-    app.request_response_list = Test.new.get_requests_by_file_location(file_location)
-    app.config_list = Configuration.new.get_by_file_location(file_location)
-    app.test_location = TestLocationFactory.get_by_file_location(file_location)
-    erb :results_detail, :locals => {:app_detail => app}
+    begin
+      if app and load_test_list.keys.include?(test.to_sym)
+        app.results = Results::PastSummaryResults.new(name, test.chomp('_test'))
+        app.detailed_results = app.results.detailed_results id
+        app.date = date
+        app.test_id = id
+        app.test_type = test
+        file_location = app.results.detailed_results_file_location(id)
+        app.request_response_list = Models::Test.new.get_results_requests_by_file_location(file_location)
+        app.config_list = Models::Configuration.new.get_by_result_file_location(file_location)
+        app.test_location = Models::TestLocationFactory.get_by_file_location(file_location)
+        erb :results_detail, :locals => {:app_detail => app}
+      else
+        status 404
+      end
+    rescue RuntimeError => e
+      status 404
+      body e.message
+    end
   end
 
   get '/results/:name/:test/metric/:metric/id/:id/date/:date' do |name, test, metric, id, date|
     #get result files from file under files/apps/:name/results/:test/:date/:metric
     app = app_list[name.to_sym]
-    repose_results = []
-    origin_results = []
-    app.detailed_results[0].each { |result| repose_results << [result.date, result.send(metric.to_sym).to_f] }
-    app.detailed_results[1].each { |result| origin_results << [result.date, result.send(metric.to_sym).to_f] }
-    results = { :repose => repose_results, :origin => origin_results }
-    content_type :json
-    body results.to_json
+    begin
+      if app and load_test_list.keys.include?(test.to_sym)
+        app.results = Results::PastSummaryResults.new(name, test.chomp('_test'))
+        app.detailed_results = app.results.detailed_results(id)
+        repose_results = []
+        origin_results = []
+        if app.detailed_results[0][0].respond_to?(metric.to_sym)
+          app.detailed_results[0].each { |result| repose_results << [result.date, result.send(metric.to_sym).to_f] }
+        end
+        if app.detailed_results[1][0].respond_to?(metric.to_sym)
+          app.detailed_results[1].each { |result| origin_results << [result.date, result.send(metric.to_sym).to_f] }
+        end
+        results = { :repose => repose_results, :origin => origin_results }
+        content_type :json
+        body results.to_json
+      else
+        status 404
+      end
+    rescue RuntimeError => e
+      status 404
+      body e.message
+    end
   end
 
-  get '/results/:name/test_download/:file_name' do |name, file_name|
+  get '/results/:name/:test/:id/test_download/:file_name' do |name, test, id,file_name|
     app = app_list[name.to_sym]
-    file_location = app.results.detailed_results_file_location(id)
-    send_file TestLocationFactory.get_by_file_location(name).download, :filename => file_name, :type => 'Application/octet-stream'
+    begin
+      if app
+        #get folder id
+        app.results = Results::PastSummaryResults.new(name, test.chomp('_test'))
+        app.detailed_results = app.results.detailed_results(id)
+        file_location = app.results.detailed_results_file_location(id)
+        downloaded_file = Models::TestLocationFactory.get_by_file_location(file_location).download
+        p downloaded_file
+        send_file downloaded_file, :filename => file_name, :type => 'Application/octet-stream'
+      else
+        status 404
+      end
+    rescue ArgumentError => e
+      body e.message
+      status 404
+    rescue RuntimeError => r
+      status 404
+      body r.message
+    end
   end
 end

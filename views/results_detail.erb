@@ -99,7 +99,7 @@
         <div class="row">
           <label for="testLocation" class="col-lg-2 control-label">Test Location</label>
           <div class="col-lg-10">
-            <a href="/results/<%= app_detail.app_id %>/test_download/<%= app_detail.test_location.href %>"><%= app_detail.test_location.type %></a>
+            <a href="/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/<%= app_detail.test_id %>/test_download/<%= app_detail.test_location.href %>"><%= app_detail.test_location.type %></a>
           </div>
         </div>
       </div>
@@ -204,17 +204,17 @@
           }, { name: 'Origin Average Throughput'}]
         };       
 
-        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/avg/id/<%= app_detail.id %>/date/<%= app_detail.date %>', function(data) {
+        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/avg/id/<%= app_detail.test_id %>/date/<%= app_detail.date %>', function(data) {
           art_option.series[0].data = data.repose;
           art_option.series[1].data = data.origin;
           var art_chart = new Highcharts.Chart(art_option);
         }); 
-        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/errors/id/<%= app_detail.id %>/date/<%= app_detail.date %>', function(data) {
+        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/errors/id/<%= app_detail.test_id %>/date/<%= app_detail.date %>', function(data) {
           cpu_option.series[0].data = data.repose;
           cpu_option.series[1].data = data.origin;
           var cpu_chart = new Highcharts.Chart(cpu_option);
         }); 
-        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/throughput/id/<%= app_detail.id %>/date/<%= app_detail.date %>', function(data) {
+        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/throughput/id/<%= app_detail.test_id %>/date/<%= app_detail.date %>', function(data) {
           network_option.series[0].data = data.repose;
           network_option.series[1].data = data.origin;
           var network_chart = new Highcharts.Chart(network_option);

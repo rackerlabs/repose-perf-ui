@@ -92,35 +92,44 @@ Feature: Test Page
 
 	Scenario: Load live dbaas adhoc test average response time metric
 		When I navigate to '/tests/dbaas/adhoc_test'
+		And I load 1 more record in "dbaas" app and "adhoc" test type
+		And I wait "9" seconds
 		And I navigate to '/tests/dbaas/adhoc_test/metric/avg/live'
+		Then the response should be "200"
+		And the record in "dbaas" app and "adhoc" test type should be cleaned up
+		And response should be a json
+		And there should be "1" records in response
+		And the test should not have ended
+
+	Scenario: Load live dbaas adhoc test throughput metric
+		When I navigate to '/tests/dbaas/adhoc_test'
+		And I load 1 more record in "dbaas" app and "adhoc" test type
+		And I wait "9" seconds
+		And I navigate to '/tests/dbaas/adhoc_test/metric/throughput/live'
+		Then the response should be "200"
+		And the record in "dbaas" app and "adhoc" test type should be cleaned up
+		And response should be a json
+		And there should be "1" records in response
+		And the test should not have ended
+
+	Scenario: Load live dbaas adhoc test errors metric
+		When I navigate to '/tests/dbaas/adhoc_test'
+		And I load 1 more record in "dbaas" app and "adhoc" test type
+		And I wait "9" seconds
+		And I navigate to '/tests/dbaas/adhoc_test/metric/errors/live'
+		Then the response should be "200"
+		And the record in "dbaas" app and "adhoc" test type should be cleaned up
+		And response should be a json
+		And there should be "1" records in response
+		And the test should not have ended
+
+	Scenario: Load live dbaas adhoc test invalid metric
+		When I navigate to '/tests/dbaas/adhoc_test'
+		And I navigate to '/tests/dbaas/adhoc_test/metric/invalid/live'
 		Then the response should be "200"
 		And response should be a json
 		And there should be "0" records in response
 		And the test should not have ended
-
-	Scenario: Load live dbaas load test throughput metric
-		When I navigate to '/tests/dbaas/load_test'
-		And I navigate to '/tests/dbaas/load_test/metric/throughput/live'
-		Then the response should be "404"
-		And response should be a json
-		And there should be "0" records in response
-		And the test should have ended
-
-	Scenario: Load live dbaas load test errors metric
-		When I navigate to '/tests/dbaas/load_test'
-		And I navigate to '/tests/dbaas/load_test/metric/errors/live'
-		Then the response should be "404"
-		And response should be a json
-		And there should be "0" records in response
-		And the test should have ended
-
-	Scenario: Load live dbaas load test invalid metric
-		When I navigate to '/tests/dbaas/load_test'
-		And I navigate to '/tests/dbaas/load_test/metric/invalid/live'
-		Then the response should be "404"
-		And response should be a json
-		And there should be "0" records in response
-		And the test should have ended
 
 	Scenario: Load live dbaas invalid test errors metric
 		When I navigate to '/tests/dbaas/invalid_test/metric/errors/live'
@@ -129,8 +138,8 @@ Feature: Test Page
 		And there should be "0" records in response
 		And the test should have ended
 
-	Scenario: Load live invalid app load test errors metric
-		When I navigate to '/tests/invalid/load_test/metric/errors/live'
+	Scenario: Load live invalid app ahdoc test errors metric
+		When I navigate to '/tests/invalid/adhoc_test/metric/errors/live'
 		Then the response should be "404"
 		And response should be a json
 		And there should be "0" records in response

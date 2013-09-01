@@ -27,8 +27,8 @@
       <ul class="breadcrumb">
         <li><a href="/">Home</a></li>
         <li><a href="/results">Results</a></li>
-        <li><a href="/results/<%= app_detail.app_id %>"><%= app_detail.name %></a></li>
-        <li class="active"><%= app_detail.test_type %></li>
+        <li><a href="/results/dbaas">Cloud Databases</a></li>
+        <li class="active">load_test</li>
       </ul>
       <div class="panel panel-summary">
         <div class="panel-heading">
@@ -46,15 +46,13 @@
               </tr>
             </thead>
             <tbody>
-<% app_detail.compared_result_set_list.each do |key, result_list| %>
               <tr>
-                <td><%= result_list[0]['tag']  %></td>
-                <td><a href="/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/id/<%= key %>"><%= result_list[0][:length].to_f %>(<%= result_list[1][:length].to_f %>) - difference of <%= result_list[0][:length].to_f - result_list[1][:length].to_f %> s</a></td>
-                <td><%= result_list[0][:average].to_f %> ms (<%= result_list[1][:average].to_f %> ms) - difference of <%= result_list[0][:average].to_f - result_list[1][:average].to_f %> ms</td>
-                <td><%= result_list[0][:throughput].to_f %> rps (<%= result_list[1][:throughput].to_f %> rps) - difference of <%= result_list[0][:throughput].to_f - result_list[1][:throughput].to_f %> rps</td>
-                <td><%= result_list[0][:errors].to_f %> total errors (<%= result_list[1][:errors].to_f %> total errors) - difference of <%= result_list[0][:errors].to_f - result_list[1][:errors].to_f %> total errors</td>
+                <td>load test against 2.8.2 via repose</td>
+                <td><a href="/results/dbaas/load_test/id/jenkins-repose-pt-static-load-146">3600.0(3600.0) - difference of 0.0 s</a></td>
+                <td>484.0 ms (34.0 ms) - difference of 450.0 ms</td>
+                <td>40.9 rps (572.4 rps) - difference of -531.5 rps</td>
+                <td>0.0 total errors (0.0 total errors) - difference of 0.0 total errors</td>
               </tr>
-<% end %>
             </tbody>
           </table>
       </div>
@@ -163,17 +161,17 @@
           }]
         };        
 
-        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/avg', function(data) {
+        $.getJSON('/results/dbaas/load_test/metric/avg', function(data) {
           var data2 = data.map(convertDate);
           art_option.series[0].data = data2;
           var art_chart = new Highcharts.Chart(art_option);
         }); 
-        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/throughput', function(data) {
+        $.getJSON('/results/dbaas/load_test/metric/throughput', function(data) {
           var data2 = data.map(convertDate);
           memory_option.series[0].data = data2;
           var memory_chart = new Highcharts.Chart(memory_option);
         }); 
-        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/errors', function(data) {
+        $.getJSON('/results/dbaas/load_test/metric/errors', function(data) {
           var data2 = data.map(convertDate);
           cpu_option.series[0].data = data2;
           var cpu_chart = new Highcharts.Chart(cpu_option);

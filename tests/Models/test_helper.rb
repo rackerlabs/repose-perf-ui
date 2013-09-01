@@ -18,4 +18,4 @@ require './tests/Models/response_tests.rb'
 require './tests/Models/test_tests.rb'
 require './tests/Models/testlocation_tests.rb'
 
-system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature"
+system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/tests.feature tests/sinatra/features/results.feature"

@@ -27,36 +27,50 @@
       <ul class="breadcrumb">
         <li><a href="/">Home</a></li>
         <li><a href="/results">Results</a></li>
-        <li><a href="/results/<%= app_detail.app_id %>"><%= app_detail.name %></a></li>
-        <li class="active"><%= app_detail.test_type %></li>
+        <li><a href="/results/dbaas">Cloud Databases</a></li>
+        <li class="active">load_test</li>
       </ul>
       <div class="panel panel-summary">
         <div class="panel-heading">
           <h3 class="panel-title">Test Results</h3>
         </div>
+        <form method="POST">
           <table class="table table-hover">
-            <caption>Execution via Repose is listed first.   Execution against origin service directly is in parentheses</caption>
             <thead>
               <tr>
                 <th>Tag</th>
                 <th>Date</th>
-                <th>ART</th>
-                <th>Throughput</th>
-                <th>Error</th>
+                <th>ART overhead</th>
+                <th>Throughput overhead</th>
+                <th>Error overhead</th>
+                <th>Compare</th>
               </tr>
             </thead>
             <tbody>
-<% app_detail.compared_result_set_list.each do |key, result_list| %>
               <tr>
-                <td><%= result_list[0]['tag']  %></td>
-                <td><a href="/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/id/<%= key %>"><%= result_list[0][:length].to_f %>(<%= result_list[1][:length].to_f %>) - difference of <%= result_list[0][:length].to_f - result_list[1][:length].to_f %> s</a></td>
-                <td><%= result_list[0][:average].to_f %> ms (<%= result_list[1][:average].to_f %> ms) - difference of <%= result_list[0][:average].to_f - result_list[1][:average].to_f %> ms</td>
-                <td><%= result_list[0][:throughput].to_f %> rps (<%= result_list[1][:throughput].to_f %> rps) - difference of <%= result_list[0][:throughput].to_f - result_list[1][:throughput].to_f %> rps</td>
-                <td><%= result_list[0][:errors].to_f %> total errors (<%= result_list[1][:errors].to_f %> total errors) - difference of <%= result_list[0][:errors].to_f - result_list[1][:errors].to_f %> total errors</td>
+                <td>load test against 2.8.2 via repose</td>
+                <td><a href="/results/dbaas/load_test/id/jenkins-repose-pt-static-load-146/date/1377583327000">2013-08-27T06:02:07+00:00</td>
+                <td>450.0 ms</td>
+                <td>-531.5 rps</td>
+                <td>0.0 total errors</td>
+                <td>
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" name="compare[]" value="jenkins-repose-pt-static-load-146">
+                    </label>
+                  </div>
+                </td>
               </tr>
-<% end %>
             </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="6">
+                  <button type="submit" class="btn btn-primary">Compare Tests</button>
+                </td>
+              </tr>
+            </tfoot>
           </table>
+        </form>
       </div>
       <div class="panel">
         <div class="panel-heading">
@@ -76,6 +90,48 @@
         </div>
         <div id="memory" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
       </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">GC Metrics</h3>
+          <h5>GarbageCollectorImpl.PSMarkSweep.CollectionTime, GarbageCollectorImpl.PSMarkSweep.CollectionCount, GarbageCollectorImpl.PSScavenge.CollectionTime, GarbageCollectorImpl.PSScavenge.CollectionCount</h5>
+        </div>
+        <div id="gc" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Memory Pool Metrics</h3>
+          <h5>MemoryPoolImpl.CodeCache.Usage_committed, MemoryPoolImpl.CodeCache.Usage_init, MemoryPoolImpl.CodeCache.Usage_max, MemoryPoolImpl.CodeCache.Usage_used</h5>
+        </div>
+        <div id="code_cache" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Heap Memory Metrics</h3>
+          <h5>MemoryImpl.HeapMemoryUsage_committed, MemoryImpl.HeapMemoryUsage_init, MemoryImpl.HeapMemoryUsage_max, MemoryImpl.HeapMemoryUsage_used</h5>
+        </div>
+        <div id="heap_memory_usage" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">NonHeap Memory Metrics</h3>
+          <h5>MemoryImpl.NonHeapMemoryUsage_committed, MemoryImpl.NonHeapMemoryUsage_init, MemoryImpl.NonHeapMemoryUsage_max, MemoryImpl.NonHeapMemoryUsage_used</h5>
+        </div>
+        <div id="non_heap_memory_usage" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">OS Metrics</h3>
+          <h5>UnixOperatingSystem.OpenFileDescriptorCount, UnixOperatingSystem.MaxFileDescriptorCount, UnixOperatingSystem.CommittedVirtualMemorySize, UnixOperatingSystem.TotalSwapSpaceSize, UnixOperatingSystem.FreeSwapSpaceSize, UnixOperatingSystem.ProcessCpuTime, UnixOperatingSystem.FreePhysicalMemorySize, UnixOperatingSystem.TotalPhysicalMemorySize, UnixOperatingSystem.SystemLoadAverage</h5>
+        </div>
+        <div id="os" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Threading Metrics</h3>
+          <h5>ThreadImpl.PeakThreadCount, ThreadImpl.DaemonThreadCount, ThreadImpl.ThreadCount, ThreadImpl.TotalStartedThreadCount</h5>
+        </div>
+        <div id="threading" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
     </div>
     <hr>
     <footer>
@@ -86,6 +142,7 @@
     <script src="http://code.jquery.com/jquery.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="/js/bootstrap.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.1.0/moment.min.js"></script>
 
     <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
     <script src="/js/respond.js"></script>
@@ -109,7 +166,7 @@
           xAxis:{
             type: 'datetime',
             dateTimeLabelFormats: {
-                day: '%Y-%b-%d'
+                day: '%H:%M:%S'
             }
           },
           series: [{
@@ -132,7 +189,7 @@
           xAxis:{
             type: 'datetime',
             dateTimeLabelFormats: {
-                day: '%Y-%b-%d'
+                day: '%a %d %b %H:%M:%S'
             }
           },
           series: [{
@@ -163,17 +220,17 @@
           }]
         };        
 
-        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/avg', function(data) {
+        $.getJSON('/results/dbaas/load_test/metric/avg', function(data) {
           var data2 = data.map(convertDate);
           art_option.series[0].data = data2;
           var art_chart = new Highcharts.Chart(art_option);
         }); 
-        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/throughput', function(data) {
+        $.getJSON('/results/dbaas/load_test/metric/throughput', function(data) {
           var data2 = data.map(convertDate);
           memory_option.series[0].data = data2;
           var memory_chart = new Highcharts.Chart(memory_option);
         }); 
-        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/errors', function(data) {
+        $.getJSON('/results/dbaas/load_test/metric/errors', function(data) {
           var data2 = data.map(convertDate);
           cpu_option.series[0].data = data2;
           var cpu_chart = new Highcharts.Chart(cpu_option);
@@ -181,9 +238,9 @@
       });
 
       function convertDate(value){
-        var temp_date = new Date(parseInt(value[0])).toUTCString();
+        var temp_date = new Date(parseInt(value[0]));
  console.log(temp_date);
-        return [temp_date, value[1]];
+        return [parseInt(value[0]), Math.abs(value[1])];
       }
     </script>
   </body>

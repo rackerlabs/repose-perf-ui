@@ -2,7 +2,7 @@
 
 ENV['RACK_ENV'] = 'test'
 require 'simplecov'
-SimpleCov.start 'rails'
+SimpleCov.start
 
 require 'rack/test'
 require File.join(File.dirname(__FILE__), '..', '..','..','..', 'main.rb')
