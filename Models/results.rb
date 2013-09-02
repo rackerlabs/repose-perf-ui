@@ -11,7 +11,7 @@ module Results
     include ResultModule
     attr_reader :test_list
 
-    def jmx_categories
+    def self.jmx_categories
      {
         :gc =>  [
           'GarbageCollectorImpl.PSScavenge.CollectionTime',
@@ -98,7 +98,7 @@ module Results
           #localhost_9999.sun_management_MemoryImpl.HeapMemoryUsage_committed      79364096        1377570793582
           line.scan(/(\S+)\s+(\d+)\s+(\d+)/).map do |jmx_name, value, timestamp|
             #find value in jmx categories
-            jmx_category = jmx_categories.map do |key, jmx_entry_list| 
+            jmx_category = PastJmxResults.jmx_categories.map do |key, jmx_entry_list| 
               result = jmx_entry_list.find {|j| 
                 jmx_name.include?(j)
               } 
