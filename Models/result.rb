@@ -48,7 +48,7 @@ class AbstractStrategy
   include ResultModule
 
   attr_reader :folder_location
-  def initialize(name, test_type,id, config_path = nil)
+  def initialize(name, test_type,id, config_path)
     config = config(config_path)
     test_type.chomp!("_test")
     @folder_location = "#{config['home_dir']}/files/apps/#{name}/results/#{test_type}"
@@ -65,64 +65,14 @@ class AbstractStrategy
       end
     end
   end
-end
 
-class DeviceDiskResultStrategy < AbstractStrategy
-  def detailed_metric_list
-    {
-      "device" => [],
-      "tps" => [],
-      "rd_sec/s" => [],
-      "wr_sec/s" => [],
-      "avgrq-sz" => [],
-      "avgqu-sz" => [],
-      "await" => [],
-      "svctm" => [],
-      "%util" => []
-    }
-  end
-
-  def average_metric_list
-    {
-      "device" => [],
-      "tps" => [],
-      "rd_sec/s" => [],
-      "wr_sec/s" => [],
-      "avgrq-sz" => [],
-      "avgqu-sz" => [],
-      "await" => [],
-      "svctm" => [],
-      "%util" => []
-    }
-  end
-
-  def populate_metric(entry, id, start, stop)
-    Dir.glob("#{entry}/sysstats.log*").each do |sysstats_file|
-      #execute file and get back io results
-      p "sar -b -f #{sysstats_file}"
-      io_results = `sar -b -f #{sysstats_file}`
-
-      (3..(io_results.length-2)).each do |index|
-        io_results[index].scan(/(\d+:\d+:\d+ \w+)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)/).map do |time, tps, rtps,wtps,breads,bwrtns|
-          #only use time that's between start and end (in the 24 hour period the time has to be between those 2)
-          DeviceDiskResultStrategy.detailed_metric_list["tps"] << [time,tps]
-          DeviceDiskResultStrategy.detailed_metric_list["rtps"] << [time,rtps]
-          DeviceDiskResultStrategy.detailed_metric_list["wtps"] << [time,wtps]
-          DeviceDiskResultStrategy.detailed_metric_list["bread/s"] << [time,breads]
-          DeviceDiskResultStrategy.detailed_metric_list["bwrtn/s"] << [time,bwrtns]
-        end
-      end
-
-      io_results[io_results.length-1].scan(/(\d+:\d+:\d+ \w+)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)/).map do |time, tps, rtps,wtps,breads,bwrtns|
-        DeviceDiskResultStrategy.average_metric_list["tps"] = tps
-        DeviceDiskResultStrategy.average_metric_list["rtps"] = rtps
-        DeviceDiskResultStrategy.average_metric_list["wtps"] = wtps
-        DeviceDiskResultStrategy.average_metric_list["bread/s"] = breads
-        DeviceDiskResultStrategy.average_metric_list["bwrtn/s"] = bwrtns
-      end
+  def initialize_metric(list,key, dev)
+    unless list[key].find{|key_data| key_data.has_key?("dev_name")}
+      list[key] << {:dev_name  => dev, :results => []}
     end
-  end
+  end 
 end
+
 
 class DeviceNetworkResultStrategy < AbstractStrategy
   def detailed_metric_list
@@ -195,111 +145,54 @@ class SocketNetworkResultStrategy < AbstractStrategy
 end
 
 class IOTransferResultStrategy < AbstractStrategy
-  attr_reader :test_list
+  attr_accessor :average_metric_list,:detailed_metric_list 
 
-  def detailed_metric_list
-    {
-      "time" => [],
+  def initialize(name, test_type, id, config_path = nil)
+  
+    @average_metric_list = {
       "tps" => [],
       "rtps" => [],
       "wtps" => [],
       "bread/s" => [],
       "bwrtn/s" => []
     }
-  end
 
-  def average_metric_list
-    {
-      "tps" => "",
-      "rtps" => "",
-      "wtps" => "",
-      "bread/s" => "",
-      "bwrtn/s" => ""
+    @detailed_metric_list = {
+      "tps" => [],
+      "rtps" => [],
+      "wtps" => [],
+      "bread/s" => [],
+      "bwrtn/s" => []
     }
-  end
+
+    super(name,test_type,id,config_path)
+  end 
+
 
   def populate_metric(entry, id, start, stop)
     Dir.glob("#{entry}/sysstats.log*").each do |sysstats_file|
       #execute file and get back io results
-      io_results = `sar -b -f #{sysstats.log}`
-
-      (3..(io_results.length-2)).each do |index|
-        io_results[index].scan(/(\d+:\d+:\d+ \w+)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)/).map do |time, tps, rtps,wtps,breads,bwrtns|
+      p "sar -d -f #{sysstats_file}"
+      io_results = `sar -b -f #{sysstats_file}`.split(/\r?\n/)
+      io_results.each do |result|
+        result.scan(/Average:\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)/).map do |tps,rtps,wtps,breads,bwrtns|
+          #get device name and then time
+          dev = File.basename(sysstats_file)
           #only use time that's between start and end (in the 24 hour period the time has to be between those 2)
-          IOResultStrategy.detailed_metric_list["tps"] << [time,tps]
-          IOResultStrategy.detailed_metric_list["rtps"] << [time,rtps]
-          IOResultStrategy.detailed_metric_list["wtps"] << [time,wtps]
-          IOResultStrategy.detailed_metric_list["bread/s"] << [time,breads]
-          IOResultStrategy.detailed_metric_list["bwrtn/s"] << [time,bwrtns]
+          initialize_metric(@average_metric_list,"tps",dev)
+          @average_metric_list["tps"].find {|key_data| key_data[:dev_name] == dev}[:results] = tps
+          initialize_metric(@average_metric_list,"rtps",dev)
+          @average_metric_list["rtps"].find {|key_data| key_data[:dev_name] == dev}[:results] = rtps
+          initialize_metric(@average_metric_list,"wtps",dev)
+          @average_metric_list["wtps"].find {|key_data| key_data[:dev_name] == dev}[:results] = wtps
+          initialize_metric(@average_metric_list,"bread/s",dev)
+          @average_metric_list["bread/s"].find {|key_data| key_data[:dev_name] == dev}[:results] = breads
+          initialize_metric(@average_metric_list,"bwrtn/s",dev)
+          @average_metric_list["bwrtn/s"].find {|key_data| key_data[:dev_name] == dev}[:results] = bwrtns
         end
-      end
-
-      io_results[io_results.length-1].scan(/(\d+:\d+:\d+ \w+)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)/).map do |time, tps, rtps,wtps,breads,bwrtns|
-        IOResultStrategy.average_metric_list["tps"] = tps
-        IOResultStrategy.average_metric_list["rtps"] = rtps
-        IOResultStrategy.average_metric_list["wtps"] = wtps
-        IOResultStrategy.average_metric_list["bread/s"] = breads
-        IOResultStrategy.average_metric_list["bwrtn/s"] = bwrtns
       end
     end
   end
 end
 
 
-class DiskPagingResultStrategy
-  attr_reader :test_list
-
-  def self.detailed_metric_list
-    {
-      "time" => [],
-      "pgpgin/s" => [],
-      "pgpgout/s" => [],
-      "fault/s" => [],
-      "majflt/s" => [],
-      "pgfree/s" => [],
-      "pgscank/s" => [],
-      "pgscand/s" => [],
-      "pgsteal/s" => [],
-      "%vmeff" => []
-    }
-  end
-
-  def self.average_metric_list
-    {
-      "pgpgin/s" => "",
-      "pgpgout/s" => "",
-      "fault/s" => "",
-      "majflt/s" => "",
-      "pgfree/s" => "",
-      "pgscank/s" => "",
-      "pgscand/s" => "",
-      "pgsteal/s" => "",
-      "%vmeff" => ""
-    }
-  end
-
-  def populate_metric(entry, id, start, stop)
-    Dir.glob("#{entry}/sysstats.log*").each do |sysstats_file|
-      #execute file and get back io results
-      io_results = `sar -Bd -f #{sysstats.log}`
-
-      (3..(io_results.length-2)).each do |index|
-        io_results[index].scan(/(\d+:\d+:\d+ \w+)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)/).map do |time, tps, rtps,wtps,breads,bwrtns|
-          DiskPagingResultStrategy.detailed_metric_list["tps"] << [time,tps]
-          DiskPagingResultStrategy.detailed_metric_list["rtps"] << [time,rtps]
-          DiskPagingResultStrategy.detailed_metric_list["wtps"] << [time,wtps]
-          DiskPagingResultStrategy.detailed_metric_list["bread/s"] << [time,breads]
-          DiskPagingResultStrategy.detailed_metric_list["bwrtn/s"] << [time,bwrtns]
-        end
-      end
-
-      io_results[io_results.length-1].scan(/(\d+:\d+:\d+ \w+)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)/).map do |time, tps, rtps,wtps,breads,bwrtns|
-        DiskPagingResultStrategy.average_metric_list["tps"] = tps
-        DiskPagingResultStrategy.average_metric_list["rtps"] = rtps
-        DiskPagingResultStrategy.average_metric_list["wtps"] = wtps
-        DiskPagingResultStrategy.average_metric_list["bread/s"] = breads
-        DiskPagingResultStrategy.average_metric_list["bwrtn/s"] = bwrtns
-      end
-    end
-  end
-end

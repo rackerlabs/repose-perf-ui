@@ -7,7 +7,7 @@ class Environment
   attr_accessor :servers, :service, :lb, :lb_service 
   
   def initialize
-    config = YAML.load_file("/root/repose/dist/config.yaml")
+    config = YAML.load_file("/root/repose/dist/config/config.yaml")
     @username = config['user'] 
     @apikey = config['key']
     @images_list = ["repose_test_image_with_auth","repose_test_image_without_auth", "repose_test_auth_image"]
