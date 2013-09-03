@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- http://wiki.openrepose.org/display/REPOSE/Response+Messaging+Service -->
+<!-- The Response Messaging Service (RMS) allows you to configure the HTTP response returned to the client
+     for specific HTTP status codes. -->
+<response-messaging xmlns="http://docs.rackspacecloud.com/repose/response-messaging/v1.0">
+    <status-code id="413" code-regex="413">
+        <message media-type="*/*">
+{
+    "overLimit" : {
+        "code" : 413,
+        "message" : "OverLimit Retry...",
+        "details" : "Error Details...",
+            "retryAfter" : "%{Retry-After DATE ISO_8601}o"
+    }
+}
+        </message>
+
+        <message media-type="application/xml">
+<![CDATA[
+<overLimit
+    xmlns="http://docs.openstack.org/compute/api/v1.1"
+    code="413"
+    retryAfter="%{Retry-After DATE ISO_8601}o">
+  <message>OverLimit Retry...</message>
+  <details>Error Details...</details>
+</overLimit>
+]]>
+        </message>
+    </status-code>
+
+    <status-code id="401" code-regex="401" overwrite="IF_EMPTY">
+        <message media-type="*/*">
+<![CDATA[
+<?xml version='1.0' encoding='UTF-8'?>
+<error xmlns="http://abdera.apache.org"
+       xmlns:atom="http://www.w3.org/2005/Atom">
+  <code>%s</code>
+  <message>This feed requires authentication. Refer to https://one.rackspace.com/display/CIT/Atom+Hopper+Authentication for details.</message>
+</error>
+]]>
+        </message>
+    </status-code>
+
+    <status-code id="400" code-regex="4.." overwrite="IF_EMPTY">
+        <message media-type="*/*">
+<![CDATA[
+<?xml version='1.0' encoding='UTF-8'?>
+  <error xmlns="http://abdera.apache.org"
+         xmlns:db="http://docbook.org/ns/docbook"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema"
+         xmlns:event="http://docs.rackspace.com/core/event"
+         xmlns:dbaas="http://docs.rackspace.com/usage/dbaas"
+         xmlns:maas="http://docs.rackspace.com/usage/maas"
+         xmlns:lbaas="http://docs.rackspace.com/usage/lbaas"
+         xmlns:lbaas-account="http://docs.rackspace.com/usage/lbaas/account"
+         xmlns:cbs="http://docs.rackspace.com/usage/cbs"
+         xmlns:cbs-snap="http://docs.rackspace.com/usage/cbs/snapshot"
+         xmlns:cf-b="http://docs.rackspace.com/usage/cloudfiles/bandwidth"
+         xmlns:cf-cdn="http://docs.rackspace.com/usage/cloudfiles/cdnbandwidth"
+         xmlns:cf-str="http://docs.rackspace.com/usage/cloudfiles/storage"
+         xmlns:rax="http://docs.rackspace.com/api"
+         xmlns:atom="http://www.w3.org/2005/Atom">
+  <code>%s</code>
+  <message>%M</message>
+</error>
+]]>
+        </message>
+    </status-code>
+
+
+</response-messaging>
