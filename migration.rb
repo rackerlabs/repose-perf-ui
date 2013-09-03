@@ -93,6 +93,7 @@ if opts[:action] == 'stop'
       system "ssh root@#{server.ipv4_address} 'curl http://localhost:6666 -v'"      
       p "copying over to /root/repose/dist/files/apps/#{opts[:app]}/results/adhoc/#{tmp_dir}/jmxdata.out"
       system "scp root@#{server.ipv4_address}:/home/repose/logs/jmxdata.out /root/repose/dist/files/apps/#{opts[:app]}/results/adhoc/#{tmp_dir}/jmxdata.out_#{server.name}"
+      system "scp root@#{server.ipv4_address}:/home/repose/logs/sysstats.log /root/repose/dist/files/apps/#{opts[:app]}/results/adhoc/#{tmp_dir}/sysstats.log_#{server.name}"
       
       system "ssh root@#{server.ipv4_address} 'rm -rf /home/repose/configs/* '" 
       system "ssh root@#{server.ipv4_address} 'rm -rf /home/repose/usr/share/repose/repose-valve.jar '" 
@@ -100,6 +101,8 @@ if opts[:action] == 'stop'
       system "ssh root@#{server.ipv4_address} 'rm -rf /home/repose/logs/* '" 
     end
     system "ssh root@#{server.ipv4_address} -f 'killall node '"
+    system "ssh root@#{server.ipv4_address} -f 'killall sar '"
+    system "ssh root@#{server.ipv4_address} -f 'service sysstat stop '"
   end
 elsif opts[:action] == 'start'
   unless Dir.exists?("/root/repose/dist/files/apps/#{opts[:app]}/results/adhoc/current")
@@ -162,6 +165,8 @@ elsif opts[:action] == 'start'
         #start repose
         p "start repose"
         system "ssh root@#{server.ipv4_address} -f 'nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ -s 6666 start & '" 
+        p "start logging"
+        system "ssh root@#{server.ipv4_address} -f 'sar -o /home/repose/logs/sysstats.log 30 >/dev/null 2>&1 & '"
       end
     end
     length = opts[:length] ? opts[:length].to_i : 60
