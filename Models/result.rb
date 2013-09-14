@@ -4,9 +4,10 @@ require_relative 'models.rb'
 
 class Result
 
-  attr_reader :date, :length, :avg, :throughput, :errors, :id, :tag
+  attr_reader :date, :length, :avg, :throughput, :errors, :id, :tag 
+  attr_accessor :jmx_results, :network_results
 
-  def initialize(date, length, avg, throughput, errors, id, tag)
+  def initialize(date, length, avg, throughput, errors, id, tag, jmx_results = {}, network_results = {})
     @date = date
     @avg = avg
     @tag = tag
@@ -14,6 +15,8 @@ class Result
     @throughput = throughput
     @errors = errors
     @id = id
+    @jmx_results = jmx_results
+    @network_results = network_results
   end
 end
 
@@ -71,77 +74,6 @@ class AbstractStrategy
       list[key] << {:dev_name  => dev, :results => []}
     end
   end 
-end
-
-
-class DeviceNetworkResultStrategy < AbstractStrategy
-  def detailed_metric_list
-    {
-      "IFACE" => [],
-      "rxpck/s" => [],
-      "txpck/s" => [],
-      "rxkB/s" => [],
-      "txkB/s" => [],
-      "rxcmp/s" => [],
-      "txcmp/s" => [],
-      "rxmcst/s" => [],
-      "rxerr/s" => [],
-      "txerr/s" => [],
-      "coll/s" => [],
-      "rxdrop/s" => [],
-      "txdrop/s" => [],
-      "txcarr/s" => [],
-      "rxfram/s" => [],
-      "rxfifo/s" => [],
-      "txfifo/s" => []
-    }
-  end
-
-  def average_metric_list
-    {
-      "IFACE" => [],
-      "rxpck/s" => [],
-      "txpck/s" => [],
-      "rxkB/s" => [],
-      "txkB/s" => [],
-      "rxcmp/s" => [],
-      "txcmp/s" => [],
-      "rxmcst/s" => [],
-      "rxerr/s" => [],
-      "txerr/s" => [],
-      "coll/s" => [],
-      "rxdrop/s" => [],
-      "txdrop/s" => [],
-      "txcarr/s" => [],
-      "rxfram/s" => [],
-      "rxfifo/s" => [],
-      "txfifo/s" => []
-    }
-  end
-end
-
-class SocketNetworkResultStrategy < AbstractStrategy
-  def detailed_metric_list
-    {
-      "totsck" => [],
-      "tcpsck" => [],
-      "udpsck" => [],
-      "rawsck" => [],
-      "ip-frag" => [],
-      "tcp-tw" => []
-    }
-  end
-
-  def average_metric_list
-    {
-      "totsck" => [],
-      "tcpsck" => [],
-      "udpsck" => [],
-      "rawsck" => [],
-      "ip-frag" => [],
-      "tcp-tw" => []
-    }
-  end
 end
 
 class IOTransferResultStrategy < AbstractStrategy

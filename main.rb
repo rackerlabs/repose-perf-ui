@@ -11,8 +11,22 @@ require_relative  './Models/results.rb'
 require_relative  './Models/configuration.rb'
 require_relative  './Models/testlocation.rb'
 require_relative  './Models/database.rb'
+require_relative './Models/cpuresultstrategy.rb'
+require_relative './Models/kernelresultstrategy.rb'
+require_relative './Models/memoryswapresultstrategy.rb'
+require_relative './Models/memorypageresultstrategy.rb'
+require_relative './Models/memoryutilsresultstrategy.rb'
+require_relative './Models/tcpfailurenetworkresultstrategy.rb'
+require_relative './Models/tcpnetworkresultstrategy.rb'
+require_relative './Models/ipfailurenetworkresultstrategy.rb'
+require_relative './Models/ipnetworkresultstrategy.rb'
+require_relative './Models/socketnetworkresultstrategy.rb'
+require_relative './Models/devicefailurenetworkresultstrategy.rb'
+require_relative './Models/devicenetworkresultstrategy.rb'
+require_relative './Models/devicediskresultstrategy.rb'
+require_relative './Models/pagingresultsstrategy.rb'
 
-class PerfApp < Sinatra::Base
+#class PerfApp < Sinatra::Base
 
   db = Models::Database.new
   db.upgrade 1
@@ -42,7 +56,7 @@ class PerfApp < Sinatra::Base
   # In your main application file
   configure do
     set :views, "#{File.dirname(__FILE__)}/views"
-    set :public, "#{File.dirname(__FILE__)}/public"
+    set :public_dir, "#{File.dirname(__FILE__)}/public"
   end
 
   get '/' do
@@ -162,6 +176,18 @@ class PerfApp < Sinatra::Base
     app = app_list[name.to_sym]
     if app and load_test_list.keys.include?(test.to_sym)
       app.result_set_list = Results::PastSummaryResults.new(name, test.chomp('_test')).overhead_test_results 
+      app.result_set_list.each do |result|
+        result.network_results = {}
+        Results::PastNetworkResults.format_network(NetworkResult.new(CpuResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:cpu,result.network_results)
+        Results::PastNetworkResults.format_network(NetworkResult.new(KernelResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:kernel,result.network_results)
+        Results::PastNetworkResults.format_network(NetworkResult.new(MemorySwapResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:memory_swap,result.network_results)
+        Results::PastNetworkResults.format_network(NetworkResult.new(MemoryPageResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:memory_page,result.network_results)
+        Results::PastNetworkResults.format_network(NetworkResult.new(MemoryUtilizationResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:memory_utilization,result.network_results)
+        Results::PastNetworkResults.format_network(NetworkResult.new(TcpFailureNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:tcp_failure,result.network_results)
+        Results::PastNetworkResults.format_network(NetworkResult.new(TcpNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:tcp,result.network_results)
+        Results::PastNetworkResults.format_network(NetworkResult.new(IpFailureNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:ip_failure,result.network_results)
+        Results::PastNetworkResults.format_network(NetworkResult.new(IpNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:ip,result.network_results)
+      end
       app.test_type = test
       erb :results_app_test_detail, :locals => {:app_detail => app }
     else
@@ -271,4 +297,6 @@ class PerfApp < Sinatra::Base
       body r.message
     end
   end
-end
+#end
+
+#PerfApp.new
