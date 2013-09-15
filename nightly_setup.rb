@@ -23,7 +23,7 @@ Logging.color_scheme( 'bright',
   :message => :magenta
 )
 logger = Logging.logger(STDOUT)
-logger.level = :debug
+logger.level = :info
 
 config = YAML.load_file("#{Dir.pwd}/config/config.yaml")
 logger.debug "configuration file: #{config}"
