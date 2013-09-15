@@ -97,7 +97,7 @@ if opts[:action] == 'stop'
     system "ssh root@#{server.ipv4_address} -f 'service sysstat stop '"
   end
   unless opts[:with_repose]
-    env.tear_down opts[:app]
+    env.tear_down "#{opts[:app]}_#{opts[:with_repose]}"
   end
 elsif opts[:action] == 'start'
   raise ArgumentError, "Test already running" if Dir.exists?("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current")
@@ -172,9 +172,7 @@ elsif opts[:action] == 'start'
       unless opts[:release].empty?
         system "ssh root@#{server.ipv4_address} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --version #{opts[:release]}'" 
       else
-        server.scp "project-set/core/valve/target/repose-valve.jar", "/home/repose/usr/share/repose/"
-        Dir.glob("/home/jenkins/.m2/repository/com/rackspace/papi/components/extensions/extensions-filter-bundle/*-SNAPSHOT/*.ear") { |file| server.scp file, "/home/repose/usr/share/repose/filters/extensions-filter-bundle.ear"}
-        Dir.glob("/home/jenkins/.m2/repository/com/rackspace/papi/components/filter-bundle/*-SNAPSHOT/*.ear") { |file| server.scp file, "/home/repose/usr/share/repose/filters/filter-bundle.ear"}
+        system "ssh root@#{server.ipv4_address} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --snapshot'"       
       end
       logger.debug "stop jmxtrans"
       system "ssh root@#{server.ipv4_address} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"

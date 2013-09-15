@@ -113,7 +113,11 @@ class Environment
     @service.servers.each do |server| 
        server.destroy if server.name =~ /#{Regexp.escape(name)}/
     end
-    @lb_service.load_balancers.each {|lb| lb.destroy}
+    @lb_service.load_balancers.each do |lb|  
+      if lb.name =~ /#{Regexp.escape(name)}/
+        lb.destroy
+      end
+    end
     @logger.info "everything is killed."
   end
 end
