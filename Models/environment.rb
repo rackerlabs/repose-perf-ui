@@ -88,19 +88,34 @@ class Environment
   
   def load_balance(region, servers, port = 80, name) 
     load_balance_connect region
-    nodes = []  
+    repose_nodes = []  
+    origin_nodes = []  
 
     servers.each do |server|
-      nodes << {:address => server.ipv4_address, :port => port, :condition => 'ENABLED'}
+      repose_nodes << {:address => server.ipv4_address, :port => 7070, :condition => 'ENABLED'}
+      origin_nodes << {:address => server.ipv4_address, :port => 8080, :condition => 'ENABLED'}
     end
 
-    @logger.info "Create load balancer"
+    @logger.info "Create load balancer with repose"
 
-    load_balancer = @lb_service.load_balancers.create :name => "repose_lb_#{name}",
+    load_balancer = @lb_service.load_balancers.create :name => "repose_lb_withrepose",
       :protocol => 'HTTP',
       :port => 80,
       :virtual_ips => [{:type => 'PUBLIC'}],
-      :nodes => nodes
+      :nodes => repose_nodes
+
+    @lb = load_balancer.virtual_ips.find { |ip| ip.ip_version == 'IPV4' && ip.type == 'PUBLIC' }
+
+    @logger.info "Load balancer created - #{load_balancer.inspect}"
+    @logger.info "Load balance vips - #{@lb.inspect}" 
+
+    @logger.info "Create load balancer without repose"
+
+    load_balancer = @lb_service.load_balancers.create :name => "repose_lb_withoutrepose",
+      :protocol => 'HTTP',
+      :port => 80,
+      :virtual_ips => [{:type => 'PUBLIC'}],
+      :nodes => origin_nodes
 
     @lb = load_balancer.virtual_ips.find { |ip| ip.ip_version == 'IPV4' && ip.type == 'PUBLIC' }
 

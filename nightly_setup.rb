@@ -97,7 +97,7 @@ if opts[:action] == 'stop'
     system "ssh root@#{server.ipv4_address} -f 'service sysstat stop '"
   end
   unless opts[:with_repose]
-    env.tear_down "#{opts[:app]}_#{opts[:with_repose]}"
+    env.tear_down "#{opts[:app]}"
   end
 elsif opts[:action] == 'start'
   raise ArgumentError, "Test already running" if Dir.exists?("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current")
@@ -137,7 +137,7 @@ elsif opts[:action] == 'start'
   env.load_balance_connect(:dfw)
 
   if env.servers.find_all {|server| server.name =~ /#{Regexp.escape(opts[:app])}/}.empty?
-    env.spin_up_servers(node_count, "#{opts[:app]}_#{opts[:with_repose]}")
+    env.spin_up_servers(node_count, "#{opts[:app]}", "4GB")
   end
 
   nodes = env.servers.find_all {|server| server.name =~ /#{Regexp.escape(opts[:app])}/}.map {|server| {:id => server.id, :address => server.ipv4_address}}
@@ -200,8 +200,12 @@ elsif opts[:action] == 'start'
   lb = env.load_balance_connect :dfw
   logger.debug "load balancer #{lb}"
 
-  lb_ip = env.lb_service.load_balancers.find { |lb| lb.name =~ /#{Regexp.escape(opts[:app])}_#{Regexp.escape(opts[:with_repose].to_s)}/ }.virtual_ips.find {|ip| ip.ip_version == 'IPV4' && ip.type == 'PUBLIC' }.address
-  logger.debug "ip address with repose: #{lb_ip}"
+  if opts[:with_repose]
+    lb_ip = env.lb_service.load_balancers.find { |lb| lb.name =~ /#{Regexp.escape(opts[:app])}_withrepose/ }.virtual_ips.find {|ip| ip.ip_version == 'IPV4' && ip.type == 'PUBLIC' }.address
+  else
+    lb_ip = env.lb_service.load_balancers.find { |lb| lb.name =~ /#{Regexp.escape(opts[:app])}_withoutrepose/ }.virtual_ips.find {|ip| ip.ip_version == 'IPV4' && ip.type == 'PUBLIC' }.address
+  end
+  logger.debug "load balance ip address: #{lb_ip}"
 
   jmeter_contents = JmeterTemplate.new(start_time, end_time, 20, 60, lb_ip, File.read("#{target_dir}/test_#{opts[:app]}.jmx")).render
   logger.debug jmeter_contents 
