@@ -23,7 +23,7 @@ Logging.color_scheme( 'bright',
   :message => :magenta
 )
 logger = Logging.logger(STDOUT)
-logger.level = :info
+logger.level = :debug
 
 config = YAML.load_file("#{Dir.pwd}/config/config.yaml")
 logger.debug "configuration file: #{config}"
@@ -41,7 +41,7 @@ EOS
   opt :action, "Action", :type => :string
   opt :length, "Length in minutes", :type => :int
   opt :tag, "Test tag", :type => :string
-  opt :release, "Specify Release", :type => :string
+  opt :release, "Specify Release", :default => ""
   opt :id, "Tag id", :type => :string
   opt :with_repose, "Optional repose-specific parameter, used to specify whether to deploy repose or not", :type => :boolean
 end
@@ -53,7 +53,8 @@ logger.debug opts
 
 logger.debug "start shell"
 system "ssh-agent -c"
-logger.debug "shell started"
+ssh_agent_id = $?.pid
+logger.debug "shell started in pid #{ssh_agent_id}"
 
 tmp_dir = "tmp_#{DateTime.now.strftime('%Y%m%dT%H%M%S')}"
 logger.debug "temp directory: #{tmp_dir}"
@@ -153,6 +154,7 @@ elsif opts[:action] == 'start'
   #load and spin up auth and mock responders
 
   env.servers.select {|server| server.state == 'ACTIVE' && server.name =~ /#{Regexp.escape(opts[:app])}/ }.each do |server|
+    system "ssh -o 'StrictHostKeyChecking no' #{server.ipv4_address} uptime"
     Dir.glob("#{config_target_dir}/**") do |file| 
       logger.debug "is #{file} a directory: #{File.directory?(file)}"
       server.scp file, "/home/repose/configs/", {:recursive => true}
@@ -226,5 +228,5 @@ elsif opts[:action] == 'start'
 end
 
 logger.debug "stop shell"
-system "killall ssh-agent"
+system "kill -9 #{ssh_agent_id}"
 logger.debug "shell stopped"
