@@ -98,7 +98,8 @@ if opts[:action] == 'stop'
     system "ssh root@#{server.ipv4_address} -f 'service sysstat stop '"
   end
   unless opts[:with_repose]
-    env.tear_down "#{opts[:app]}"
+    logger.debug "remove all servers for #{opts[:app]}"
+    env.tear_down(opts[:app])
   end
 elsif opts[:action] == 'start'
   raise ArgumentError, "Test already running" if Dir.exists?("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current")

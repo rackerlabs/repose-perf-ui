@@ -98,7 +98,7 @@ class Environment
 
     @logger.info "Create load balancer with repose"
 
-    load_balancer = @lb_service.load_balancers.create :name => "repose_lb_withrepose",
+    load_balancer = @lb_service.load_balancers.create :name => "repose_lb_#{name}_withrepose",
       :protocol => 'HTTP',
       :port => 80,
       :virtual_ips => [{:type => 'PUBLIC'}],
@@ -126,6 +126,8 @@ class Environment
   
   def tear_down(name)
     @service.servers.each do |server| 
+       test = server.name =~ /#{Regexp.escape(name)}/
+       @logger.info "remove server: #{server.name} if #{test}"
        server.destroy if server.name =~ /#{Regexp.escape(name)}/
     end
     @lb_service.load_balancers.each do |lb|  
