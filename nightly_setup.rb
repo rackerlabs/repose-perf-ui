@@ -81,7 +81,7 @@ if opts[:action] == 'stop'
   env.servers.select {|server| server.state == 'ACTIVE' && server.name =~ /#{Regexp.escape(opts[:app])}/}.each do |server|
     logger.debug server
     system "scp root@#{server.ipv4_address}:/home/repose/logs/sysstats.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/sysstats.log_#{server.name}"
-    logger.debug opts[:with_repose]
+    logger.debug "with repose: #{opts[:with_repose]}"
     if opts[:with_repose]
       system "ssh root@#{server.ipv4_address} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
       system "ssh root@#{server.ipv4_address} 'curl http://localhost:6666 -v'"      
@@ -97,6 +97,7 @@ if opts[:action] == 'stop'
     system "ssh root@#{server.ipv4_address} -f 'killall sar '"
     system "ssh root@#{server.ipv4_address} -f 'service sysstat stop '"
   end
+  logger.debug "done with clearing up the servers"
   unless opts[:with_repose]
     logger.debug "remove all servers for #{opts[:app]}"
     env.tear_down(opts[:app])

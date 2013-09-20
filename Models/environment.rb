@@ -1,5 +1,6 @@
 require 'fog'
 require 'yaml'
+require 'logging'
 require_relative 'models.rb'
 
 class Environment
@@ -14,11 +15,13 @@ class Environment
       @logger = logger
     else 
       @logger = Logging.logger('logger.log')
-      @logger.level = :info
+      @logger.level = :debug
     end
 
-    @config = config_file ? config_file : config
+    @config = config_file ? config_file : config(nil,@logger)
     @logger.debug "Config file: #{@config}"
+    @logger.debug "Config file: #{config}"
+    @logger.debug "Config file: #{config_file}"
     @username = config['user'] 
     @apikey = config['key']
     @images_list = ["repose_test_image_with_auth","repose_test_image_without_auth", "repose_test_auth_image"]
@@ -111,7 +114,7 @@ class Environment
 
     @logger.info "Create load balancer without repose"
 
-    load_balancer = @lb_service.load_balancers.create :name => "repose_lb_withoutrepose",
+    load_balancer = @lb_service.load_balancers.create :name => "repose_lb_#{name}_withoutrepose",
       :protocol => 'HTTP',
       :port => 80,
       :virtual_ips => [{:type => 'PUBLIC'}],
@@ -131,6 +134,9 @@ class Environment
        server.destroy if server.name =~ /#{Regexp.escape(name)}/
     end
     @lb_service.load_balancers.each do |lb|  
+      puts lb.inspect
+      puts lb.name
+      puts name
       if lb.name =~ /#{Regexp.escape(name)}/
         lb.destroy
       end
