@@ -4,5 +4,6 @@
   "start":"<%= @start_time %>",
   "stop":"<%= @stop_time %>",
   "tag" : "<%= @tag %>",
-  "id" : "<%= @id %>"
+  "id" : "<%= @id %>",
+  "test_type": "<%= @test_type %>"
 }

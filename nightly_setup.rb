@@ -43,7 +43,7 @@ EOS
   opt :tag, "Test tag", :type => :string
   opt :release, "Specify Release", :default => ""
   opt :id, "Tag id", :type => :string
-  opt :with_repose, "Optional repose-specific parameter, used to specify whether to deploy repose or not", :type => :boolean
+  opt :with_repose, "Optional repose-specific parameter, used to specify whether to deploy repose or not", :default => false
 end
 
 Trollop::die :action, "must be specified" unless opts[:action]
@@ -196,7 +196,8 @@ elsif opts[:action] == 'start'
   end_time = start_time + (length * 60 * 1000)
   logger.debug "end time: #{end_time}"
   logger.debug "tag: #{opts[:tag]}"
-  test_json_contents = TestTemplate.new(start_time, end_time, opts[:tag], opts[:id], File.read("#{target_dir}/#{opts[:test_type]}_test.json")).render
+  test_type_template = opts[:with_repose] ? "repose_test" : "origin_test"
+  test_json_contents = TestTemplate.new(start_time, end_time, opts[:tag], opts[:id], opts[:with_repose], File.read("#{target_dir}/#{opts[:test_type]}_test.json")).render
   File.open("#{target_dir}/load_test.json", 'w') { |f| f.write(test_json_contents) }
   logger.debug test_json_contents
   logger.debug "took care of test json content"

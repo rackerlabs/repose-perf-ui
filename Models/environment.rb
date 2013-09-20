@@ -8,7 +8,7 @@ class Environment
   
   attr_reader :username, :apikey, :images_list
   attr_accessor :servers, :service, :lb, :lb_service 
-  attr_reader :logger, :config
+  attr_reader :logger, :configuration
   
   def initialize(config_file = nil, logger = nil)
     if logger
@@ -18,12 +18,10 @@ class Environment
       @logger.level = :debug
     end
 
-    @config = config_file ? config_file : config(nil,@logger)
+    @configuration = config_file ? config_file : config
     @logger.debug "Config file: #{@config}"
-    @logger.debug "Config file: #{config}"
-    @logger.debug "Config file: #{config_file}"
-    @username = config['user'] 
-    @apikey = config['key']
+    @username = @configuration['user'] 
+    @apikey = @configuration['key']
     @images_list = ["repose_test_image_with_auth","repose_test_image_without_auth", "repose_test_auth_image"]
     @servers = []
 

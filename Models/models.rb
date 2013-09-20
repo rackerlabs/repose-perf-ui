@@ -1,3 +1,5 @@
+require 'logging'
+
 module ResultModule
   def config(file_path = nil, logger = nil)
     logger.debug "file path: #{file_path}" if logger
