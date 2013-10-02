@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Repose - <%= app_detail.name %></title>
+    <title><%= app_detail[:title] %> - <%= app_detail[:app_id] %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
     <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
@@ -28,7 +28,7 @@
       <ul class="breadcrumb">
         <li><a href="/">Home</a></li>
         <li><a href="/applications">Applications</a></li>
-        <li class="active"><%= app_detail.name %></li>
+        <li class="active"><%= app_detail[:app_id] %></li>
       </ul>
       <div class="panel panel-info">
         <div class="panel-heading">
@@ -42,7 +42,7 @@
             </tr>
           </thead>
           <tbody>
-            <% app_detail.request_response_list.each do |test| %>
+            <% app_detail[:request_response_list].each do |test| %>
             <tr>
               <td><%= test[0].method %> <%= test[0].uri %> <%= test[0].headers.inspect %>
                 <pre class="prettyprint linenums languague-css"><!-- --><%= test[0].body %><!-- --></pre>
@@ -58,7 +58,7 @@
           <h3 class="panel-title">Configurations</h3>
         </div>
         <div class="accordion" id="config-accordion">
-          <% app_detail.config_list.each do |key, config| %>
+          <% app_detail[:config_list].each do |key, config| %>
           <div class="accordion-group">
             <div class="accordion-heading">
               <a class="accordion-toggle" data-toggle="collapse" data-parent="#config-accordion" href="#<%= key %>"><%= key %></a>
@@ -79,7 +79,7 @@
         <div class="row">
           <label for="testLocation" class="col-lg-2 control-label">Test Location</label>
           <div class="col-lg-10">
-            <a href="/applications/<%= app_detail.app_id %>/test_download/<%= app_detail.test_location.href %>"><%= app_detail.test_location.type %></a>
+            <a href="/applications/<%= app_detail[:app_id] %>/test_download/<%= app_detail[:test_location].href %>"><%= app_detail[:test_location].type %></a>
           </div>
         </div>
       </div>

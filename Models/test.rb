@@ -1,3 +1,5 @@
+require_relative  'request.rb'
+require_relative  'response.rb'
 require 'htmlentities'
 
 class String
