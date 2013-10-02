@@ -1,5 +1,6 @@
 require 'sinatra'
 require 'json'
+require 'logging'
 require_relative './Models/models.rb'
 require_relative  './Models/application.rb'
 require_relative  './Models/test.rb'
@@ -27,6 +28,21 @@ require_relative './Models/devicediskresultstrategy.rb'
 require_relative './Models/pagingresultsstrategy.rb'
 
 #class PerfApp < Sinatra::Base
+
+  Logging.color_scheme( 'bright',
+    :levels => {
+      :info  => :green,
+      :warn  => :yellow,
+      :error => :red,
+      :fatal => [:white, :on_red]
+    },
+    :date => :blue,
+    :logger => :cyan,
+    :message => :magenta
+  )
+  logger = Logging.logger(STDOUT)
+  logger.level = :debug
+
 
   db = Models::Database.new
   db.upgrade 1
@@ -187,6 +203,7 @@ require_relative './Models/pagingresultsstrategy.rb'
         Results::PastNetworkResults.format_network(NetworkResult.new(TcpNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:tcp,result.network_results)
         Results::PastNetworkResults.format_network(NetworkResult.new(IpFailureNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:ip_failure,result.network_results)
         Results::PastNetworkResults.format_network(NetworkResult.new(IpNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:ip,result.network_results)
+        Results::PastNetworkResults.format_network(NetworkResult.new(DeviceNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:ip,result.network_results)
       end
       app.test_type = test
       erb :results_app_test_detail, :locals => {:app_detail => app }
