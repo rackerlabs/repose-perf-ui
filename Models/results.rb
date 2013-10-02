@@ -2,6 +2,7 @@ require 'json'
 require 'yaml'
 require_relative 'result.rb'
 require_relative 'models.rb'
+require_relative 'bootstrap.rb'
 
 
 module Results
@@ -151,7 +152,6 @@ module Results
       @test_list = []
       test_type.chomp!("_test")
       folder_location = "#{config['home_dir']}/files/apps/#{name}/results/#{test_type}"
-      
 
       Dir.glob("#{folder_location}/tmp_*").each do |entry| 
         test_hash = {}
@@ -159,14 +159,14 @@ module Results
           #get directory
           #get begin time, end time, tag name in entry meta file
           test_type = "load" if test_type == "adhoc"
-          test_hash.merge!(JSON.parse(File.read("#{entry}/meta/#{test_type}_test.json")))
+          test_json = JSON.parse(File.read("#{entry}/meta/#{test_type}_test.json"))
+          test_hash.merge!(test_json)
+
+          #get runner and parse data from runner
+          runner_class = Models::Bootstrap.new.runner_list[test_json['runner'].to_sym]
+
           #get summary 
-          summary_location = "#{entry}/summary.log" 
-          summary = `tail -n 3 #{summary_location}`
-          summary.scan(/summary =\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/).map do |time_offset,throughput,average,errors| 
-            test_hash.merge!( {:length => time_offset, :throughput => throughput, :average => average, :errors =>  errors, :folder_name => entry})
-          end
-          @test_list << test_hash
+          @test_list << runner_class.compile_summary_results(test_hash, entry)
         end
       end
 

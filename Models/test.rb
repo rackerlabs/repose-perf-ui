@@ -1,3 +1,5 @@
+require_relative  'request.rb'
+require_relative  'response.rb'
 require 'htmlentities'
 
 class String
@@ -49,6 +51,12 @@ module Models
       end if response_json
 
       request_list.zip(response_list)
+    end
+
+    def get_runner_by_name_test(name,test)
+      test_contents = File.read("#{config['home_dir']}/files/apps/#{name}/tests/setup/main/#{test}_test.json") if File.exists?("#{config['home_dir']}/files/apps/#{name}/tests/setup/main/#{test}_test.json") 
+      test_json = JSON.parse(test_contents) if test_contents && test_contents.is_json?
+      test_json['runner']
     end
     
   end

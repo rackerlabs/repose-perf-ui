@@ -1,32 +1,24 @@
 require 'sinatra'
 require 'json'
 require 'logging'
+require 'rbconfig'
+
+require_relative './Models/bootstrap.rb'
 require_relative './Models/models.rb'
+require_relative './Models/perftest.rb'
+require_relative './Models/test.rb'
+require_relative './Models/configuration.rb'
+require_relative './Models/testlocation.rb'
+require_relative './Models/results.rb'
+
+=begin
 require_relative  './Models/application.rb'
-require_relative  './Models/test.rb'
 require_relative  './Models/request.rb'
 require_relative  './Models/response.rb'
-require_relative  './Models/perftest.rb'
 require_relative  './Models/result.rb'
-require_relative  './Models/results.rb'
-require_relative  './Models/configuration.rb'
-require_relative  './Models/testlocation.rb'
 require_relative  './Models/database.rb'
-require_relative './Models/cpuresultstrategy.rb'
-require_relative './Models/kernelresultstrategy.rb'
-require_relative './Models/memoryswapresultstrategy.rb'
-require_relative './Models/memorypageresultstrategy.rb'
-require_relative './Models/memoryutilsresultstrategy.rb'
-require_relative './Models/tcpfailurenetworkresultstrategy.rb'
-require_relative './Models/tcpnetworkresultstrategy.rb'
-require_relative './Models/ipfailurenetworkresultstrategy.rb'
-require_relative './Models/ipnetworkresultstrategy.rb'
-require_relative './Models/socketnetworkresultstrategy.rb'
-require_relative './Models/devicefailurenetworkresultstrategy.rb'
-require_relative './Models/devicenetworkresultstrategy.rb'
-require_relative './Models/devicediskresultstrategy.rb'
-require_relative './Models/pagingresultsstrategy.rb'
 
+=end
 #class PerfApp < Sinatra::Base
 
   Logging.color_scheme( 'bright',
@@ -44,22 +36,13 @@ require_relative './Models/pagingresultsstrategy.rb'
   logger.level = :debug
 
 
-  db = Models::Database.new
-  db.upgrade 1
-  db.load_apps (
-    {
-      :dbaas => Models::Application.new(0,"Cloud Databases", "cloud databases"),
-      :ah => Models::Application.new(0,"Atom Hopper", "description"),
-      :csl => Models::Application.new(0,"Customer Service Layer", "internal application"),
-      :passthrough => Models::Application.new(0,"Passthrough (no filters)", "internal application"),
-      :ddrl => Models::Application.new(0,"Dist Datastore + Rate Limiting", "internal application"),
-      :metrics_on_off => Models::Application.new(0,"Metrics off setup", "internal application"),
-      :custom => Models::Application.new(0,"Custom", "anything goes in here")
-    } 
-  )  
+=begin
+  load all plugins based on OS
+=end
+  
 
-  app_list = db.retrieve_apps
-   
+  bootstrap_config = Models::Bootstrap.new.config
+
   load_test_list = {
     :load_test => Models::PerfTest.new(1, 'Load Test', 'Test description'),
     :duration_test => Models::PerfTest.new(2, 'Duration Test','Test description'),
@@ -76,20 +59,30 @@ require_relative './Models/pagingresultsstrategy.rb'
   end
 
   get '/' do
-    erb :index
+    erb :index, :locals => {
+      :data => {
+        :name => bootstrap_config['name'], 
+        :description => bootstrap_config['description'],
+        :title => bootstrap_config['name']
+      }
+    }
   end
 
   get '/applications' do
-    erb :applications, :locals => {:application_list => app_list}
+    erb :applications, :locals => {
+      :application_list => bootstrap_config['applications'],
+      :title => bootstrap_config['name']
+    }
   end
 
   get '/applications/:name' do |name|
-    app = app_list[name.to_sym]
+    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
     if app 
-      app.app_id = name.to_sym
-      app.request_response_list = Models::Test.new.get_setup_requests_by_name(name)
-      app.config_list = Models::Configuration.new.get_by_name(name)
-      app.test_location = Models::TestLocationFactory.get_by_name(name)
+      app[:app_id] = name.to_sym
+      app[:request_response_list] = Models::Test.new.get_setup_requests_by_name(name)
+      app[:config_list] = Models::Configuration.new.get_by_name(name)
+      app[:test_location] = Models::TestLocationFactory.get_by_name(name)
+      app[:title] = bootstrap_config['name']
       erb :app_detail, :locals => {:app_detail => app}
     else
       status 404
@@ -108,21 +101,28 @@ require_relative './Models/pagingresultsstrategy.rb'
   end
 
   get '/tests' do
-    erb :tests, :locals => {:application_list => app_list}
+    erb :tests, :locals => {
+      :application_list => bootstrap_config['applications'],
+      :title => bootstrap_config['name']
+    }
   end
 
   get '/tests/:name' do |name|
-    app = app_list[name.to_sym]
+    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
     if app
-      app.load_test_list = load_test_list
-      app.app_id = name.to_sym
-      erb :tests_app_detail, :locals => {:app_detail => app}
+      app[:load_test_list] = load_test_list
+      app[:app_id] = name.to_sym
+      app[:title] = bootstrap_config['name']
+      erb :tests_list, :locals => {:app_detail => app}
     else
       status 404
       body "Not found"
     end
   end
 
+=begin
+  loop through plugins here
+=end
   get '/tests/:name/:test' do |name, test|
     app = app_list[name.to_sym]
     if app and load_test_list.keys.include?(test.to_sym)
@@ -172,15 +172,19 @@ require_relative './Models/pagingresultsstrategy.rb'
   end
 
   get '/results' do
-    erb :results, :locals => {:application_list => app_list}
+    erb :results, :locals => {
+      :application_list => bootstrap_config['applications'],
+      :title => bootstrap_config['name']
+    }
   end
 
   get '/results/:name' do |name|
-    app = app_list[name.to_sym]
+    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
     if app
-      app.load_test_list = load_test_list
-      app.app_id = name.to_sym
-      erb :results_app_detail, :locals => {:app_detail => app}
+      app[:load_test_list] = load_test_list
+      app[:app_id] = name.to_sym
+      app[:title] = bootstrap_config['name']
+      erb :results_list, :locals => {:app_detail => app}
     else
       status 404
       body "Not found"
@@ -189,10 +193,16 @@ require_relative './Models/pagingresultsstrategy.rb'
 
   get '/results/:name/:test' do |name, test|
     #get result files from file under  files/apps/:name/results/:test/summary
-    app = app_list[name.to_sym]
+    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
     if app and load_test_list.keys.include?(test.to_sym)
-      app.result_set_list = Results::PastSummaryResults.new(name, test.chomp('_test')).overhead_test_results 
-      app.result_set_list.each do |result|
+      if bootstrap_config['app_type'] == 'OVERHEAD'
+        app[:result_set_list] = Results::PastSummaryResults.new(name, test.chomp('_test')).overhead_test_results 
+      else
+        app[:result_set_list] = Results::PastSummaryResults.new(name, test.chomp('_test')) 
+      end
+      app[:result_set_list].each do |result|
+=begin
+  
         result.network_results = {}
         Results::PastNetworkResults.format_network(NetworkResult.new(CpuResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:cpu,result.network_results)
         Results::PastNetworkResults.format_network(NetworkResult.new(KernelResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:kernel,result.network_results)
@@ -204,8 +214,11 @@ require_relative './Models/pagingresultsstrategy.rb'
         Results::PastNetworkResults.format_network(NetworkResult.new(IpFailureNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:ip_failure,result.network_results)
         Results::PastNetworkResults.format_network(NetworkResult.new(IpNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:ip,result.network_results)
         Results::PastNetworkResults.format_network(NetworkResult.new(DeviceNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:ip,result.network_results)
+=end
       end
-      app.test_type = test
+      app[:test_type] = test
+      app[:app_id] = name
+      app[:title] = bootstrap_config['name']
       erb :results_app_test_detail, :locals => {:app_detail => app }
     else
       status 404
