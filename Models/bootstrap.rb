@@ -1,4 +1,5 @@
 require_relative 'models.rb'
+require_relative 'runner.rb'
 
 module Models
 	class Bootstrap
@@ -20,6 +21,15 @@ module Models
 		      raise Error::WebDriverError, "unknown os: #{host_os.inspect}"
 		    end
 		  )
+		end
+
+		def runner_list
+		  {
+		  	:jmeter => Models::JMeterRunner.new,
+		  	:pravega => Models::PravegaRunner.new,
+		  	:flood => Models::FloodRunner.new,
+		  	:autobench => Models::AutoBenchRunner.new
+		  }
 		end
 	end
 end
