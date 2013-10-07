@@ -1,5 +1,4 @@
 class Plugin
-
   @@plugins ||= []
 
   def self.os
@@ -21,33 +20,10 @@ class Plugin
   end 
 
   def self.plugin_list
-    @@plugins = @@plugins.find_all {|p| puts p; puts p.supported_os_list; p.supported_os_list.include?(os)}
+    @@plugins = @@plugins.find_all {|p| p.supported_os_list.include?(os)}
   end
 
   def self.inherited(klass)
-    puts klass
     @@plugins << klass
   end
-
 end
-
-class LinuxPerfMon < Plugin
-  def self.supported_os_list
-    [:linux]
-  end 
-  def test
-    puts "fplug"
-  end
-end
-
-class MacosxPerfMon < Plugin
-  def self.supported_os_list
-    [:macosx]
-  end 
-end
-
-class Test
-  def initialize
-    puts "this is the load plugin list: #{Plugin.plugin_list}"
-  end
-end 

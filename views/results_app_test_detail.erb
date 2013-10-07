@@ -50,12 +50,23 @@
             <tbody>
 <% app_detail[:result_set_list].each do |result| %>
               <tr>
-                <td><%= result[:tag] %></td>
+                <td><%= result.tag %></td>
                 <td><a href="/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/id/<%= result.id %>/date/<%= result.date %>"><%= DateTime.strptime(result.date.chomp("000"), '%s') %></td>
                 <td><%= result.avg %> ms</td>
                 <td><%= result.throughput %> rps</td>
                 <td><%= result.errors %> total errors</td>
-                <td>&nbsp;</td>
+                <td>
+<% app_detail[:plugin_list].each do |plugin| %>
+                  <div class="btn-group">
+                    <a class="btn dropdown-toggle" role="button" data-toggle="dropdown" href="#"><%= plugin[:id] %><span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+<% plugin[:data].each do |option| %>
+                      <li><a href="/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/id/<%= result.id %>/plugin/<%= plugin[:id] %>/<%= option[:id] %>"><%= option[:name] %></a></li>
+<% end %>
+                    </ul>
+                  </div>
+<% end %>
+                </td>
                 <td>
                   <div class="checkbox">
                     <label>
@@ -103,7 +114,8 @@
     <!-- JavaScript plugins (requires jQuery) -->
     <script src="http://code.jquery.com/jquery.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="/js/bootstrap.min.js"></script>
+<!--    <script src="/js/bootstrap.min.js"></script>-->
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.1.0/moment.min.js"></script>
 
     <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
@@ -128,7 +140,7 @@
           xAxis:{
             type: 'datetime',
             dateTimeLabelFormats: {
-                day: '%H:%M:%S'
+                day: '%Y-%b-%d'
             }
           },
           series: [{
@@ -145,13 +157,13 @@
           },
           yAxis:{
             title: {
-              text: '%'
+              text: 'requests/sec'
             }
           },
           xAxis:{
             type: 'datetime',
             dateTimeLabelFormats: {
-                day: '%a %d %b %H:%M:%S'
+                day: '%Y-%b-%d'
             }
           },
           series: [{
@@ -168,7 +180,7 @@
           },
           yAxis:{
             title: {
-              text: '%'
+              text: 'Total'
             }
           },
           xAxis:{
@@ -183,17 +195,20 @@
         };        
 
         $.getJSON('/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/metric/avg', function(data) {
-          var data2 = data.map(convertDate);
+console.log(data);
+          var data2 = data.avg.map(convertDate);
           art_option.series[0].data = data2;
           var art_chart = new Highcharts.Chart(art_option);
         }); 
         $.getJSON('/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/metric/throughput', function(data) {
-          var data2 = data.map(convertDate);
+console.log(data);
+          var data2 = data.throughput.map(convertDate);
           memory_option.series[0].data = data2;
           var memory_chart = new Highcharts.Chart(memory_option);
         }); 
         $.getJSON('/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/metric/errors', function(data) {
-          var data2 = data.map(convertDate);
+console.log(data);
+          var data2 = data.errors.map(convertDate);
           cpu_option.series[0].data = data2;
           var cpu_chart = new Highcharts.Chart(cpu_option);
         }); 

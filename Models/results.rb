@@ -211,9 +211,8 @@ module Results
       end.map do |test|
         test[:folder_name]
       end
-
       raise 'Id not found' if test_locations.empty?
-      test_locations[0]
+      result = (test_locations[0] != nil) ? test_locations[0] : test_locations[1]
     end
 
     def detailed_results(id)

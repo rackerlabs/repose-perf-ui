@@ -2,7 +2,7 @@ module Models
 	class JMeterRunner
 	  def compile_summary_results(test_hash, entry)
         summary_location = "#{entry}/summary.log" 
-        summary = `tail -n 3 #{summary_location}`
+        summary = `grep -B 1 Tidying #{summary_location}`
         summary.scan(/summary =\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/).map do |time_offset,throughput,average,errors| 
           test_hash.merge!( 
           	{
