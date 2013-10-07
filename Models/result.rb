@@ -51,6 +51,10 @@ class AbstractStrategy
   include ResultModule
 
   attr_reader :folder_location
+  def initialize
+  end
+
+
   def initialize(name, test_type,id, config_path)
     config = config(config_path)
     test_type.chomp!("_test")
