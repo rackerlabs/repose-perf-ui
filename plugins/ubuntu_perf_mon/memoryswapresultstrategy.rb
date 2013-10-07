@@ -1,4 +1,4 @@
-require_relative 'result.rb'
+require_relative 'abstractstrategy.rb'
 
 class MemorySwapResultStrategy < AbstractStrategy
   attr_accessor :average_metric_list,:detailed_metric_list 
@@ -29,8 +29,6 @@ class MemorySwapResultStrategy < AbstractStrategy
       io_results = `sar -S -f #{sysstats_file}`.split(/\r?\n/)
       io_results.each do |result|
         result.scan(/Average:\s+(\d+\.?\d*?)\s+(\d+\.?\d*?)\s+(\d+\.?\d*?)\s+(\d+\.?\d*?)\s+(\d+\.?\d*?)$/).map do |kbswpfree, kbswpused, swpused, kbswpcad,swpcad|
-          #get device name and then time
-          #only use time that's between start and end (in the 24 hour period the time has to be between those 2)
           dev = File.basename(sysstats_file)
           initialize_metric(@average_metric_list,"kbswpfree",dev)
           @average_metric_list["kbswpfree"].find {|key_data| key_data[:dev_name] == dev}[:results] = kbswpfree
@@ -42,6 +40,19 @@ class MemorySwapResultStrategy < AbstractStrategy
           @average_metric_list["kbswpcad"].find {|key_data| key_data[:dev_name] == dev}[:results] = kbswpcad
           initialize_metric(@average_metric_list,"%swpcad",dev)
           @average_metric_list["%swpcad"].find {|key_data| key_data[:dev_name] == dev}[:results] = swpcad
+        end
+        result.scan(/(\d+:\d+:\d+ \S+)\s+(\d+\.?\d*?)\s+(\d+\.?\d*?)\s+(\d+\.?\d*?)\s+(\d+\.?\d*?)\s+(\d+\.?\d*?)$/).map do |time, kbswpfree, kbswpused, swpused, kbswpcad,swpcad|
+          dev = File.basename(sysstats_file)
+          initialize_metric(@detailed_metric_list,"kbswpfree",dev)
+          @detailed_metric_list["kbswpfree"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => kbswpfree}
+          initialize_metric(@detailed_metric_list,"kbswpused",dev)
+          @detailed_metric_list["kbswpused"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value =>  kbswpused}
+          initialize_metric(@detailed_metric_list,"%swpused",dev)
+          @detailed_metric_list["%swpused"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => swpused}
+          initialize_metric(@detailed_metric_list,"kbswpcad",dev)
+          @detailed_metric_list["kbswpcad"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => kbswpcad}
+          initialize_metric(@detailed_metric_list,"%swpcad",dev)
+          @detailed_metric_list["%swpcad"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value =>  swpcad}
         end
       end
     end

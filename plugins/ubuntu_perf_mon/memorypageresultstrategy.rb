@@ -1,4 +1,4 @@
-require_relative 'result.rb'
+require_relative 'abstractstrategy.rb'
 
 class MemoryPageResultStrategy < AbstractStrategy
   attr_accessor :average_metric_list,:detailed_metric_list 
@@ -24,8 +24,6 @@ class MemoryPageResultStrategy < AbstractStrategy
       io_results = `sar -R -f #{sysstats_file}`.split(/\r?\n/)
       io_results.each do |result|
         result.scan(/Average:\s+(-?\d+\.?\d*?)\s+(\d+\.?\d*?)\s+(\d+\.?\d*?)$/).map do |frmpgs, bufpgs, campgs|
-          #get device name and then time
-          #only use time that's between start and end (in the 24 hour period the time has to be between those 2)
           dev = File.basename(sysstats_file)
           initialize_metric(@average_metric_list,"frmpg/s",dev)
           @average_metric_list["frmpg/s"].find {|key_data| key_data[:dev_name] == dev}[:results] = frmpgs
@@ -33,6 +31,15 @@ class MemoryPageResultStrategy < AbstractStrategy
           @average_metric_list["bufpg/s"].find {|key_data| key_data[:dev_name] == dev}[:results] = bufpgs
           initialize_metric(@average_metric_list,"campg/s",dev)
           @average_metric_list["campg/s"].find {|key_data| key_data[:dev_name] == dev}[:results] = campgs
+        end
+        result.scan(/(\d+:\d+:\d+ \S+)\s+(\S+)\s+(-?\d+\.?\d*?)\s+(\d+\.?\d*?)\s+(\d+\.?\d*?)$/).map do |time, frmpgs, bufpgs, campgs|
+          dev = File.basename(sysstats_file)
+          initialize_metric(@detailed_metric_list,"frmpg/s",dev)
+          @detailed_metric_list["frmpg/s"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => frmpgs}
+          initialize_metric(@detailed_metric_list,"bufpg/s",dev)
+          @detailed_metric_list["bufpg/s"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => bufpgs}
+          initialize_metric(@detailed_metric_list,"campg/s",dev)
+          @detailed_metric_list["campg/s"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => campgs}
         end
       end
     end

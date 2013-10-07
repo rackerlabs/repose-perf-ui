@@ -1,4 +1,4 @@
-require_relative 'result.rb'
+require_relative 'abstractstrategy.rb'
 
 class CpuResultStrategy < AbstractStrategy
 
@@ -47,6 +47,21 @@ class CpuResultStrategy < AbstractStrategy
           initialize_metric(@average_metric_list,"%idle",dev)
           @average_metric_list["%idle"].find {|key_data| key_data[:dev_name] == dev}[:results] = idle
         end
+        result.scan(/(\d+:\d+:\d+ \S+)\s+(\S+)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)$/).map do |time, cpu,user,nice,system,iowait,steal,idle|
+          dev = "#{File.basename(sysstats_file)}-#{cpu}"
+          initialize_metric(@detailed_metric_list,"%user",dev)
+          @detailed_metric_list["%user"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => user}
+          initialize_metric(@detailed_metric_list,"%nice",dev)
+          @detailed_metric_list["%nice"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => nice}
+          initialize_metric(@detailed_metric_list,"%system",dev)
+          @detailed_metric_list["%system"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => system}
+          initialize_metric(@detailed_metric_list,"%iowait",dev)
+          @detailed_metric_list["%iowait"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => iowait}
+          initialize_metric(@detailed_metric_list,"%steal",dev)
+          @detailed_metric_list["%steal"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => steal}
+          initialize_metric(@detailed_metric_list,"%idle",dev)
+          @detailed_metric_list["%idle"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => idle}
+        end 
       end
     end
   end

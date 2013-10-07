@@ -1,10 +1,10 @@
-require_relative 'result.rb'
+require_relative 'abstractstrategy.rb'
 
 
 class DiskPagingResultStrategy < AbstractStrategy
   attr_accessor :average_metric_list,:detailed_metric_list 
 
-  def initialize(name,test_type,id, config_path = nil)
+  def load_metric(name,test_type,id, config_path = nil)
     @average_metric_list = {
       "pgpgin/s" => [],
       "pgpgout/s" => [],

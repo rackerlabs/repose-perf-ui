@@ -1,35 +1,28 @@
 require_relative 'models.rb'
 require_relative 'runner.rb'
+require_relative 'plugin.rb'
+
+require 'yaml'
 
 module Models
-	class Bootstrap
-		include ResultModule
+  class Bootstrap
+    include ResultModule
+		
+    def runner_list
+      {
+ 	:jmeter => Models::JMeterRunner.new,
+ 	:pravega => Models::PravegaRunner.new,
+  	:flood => Models::FloodRunner.new,
+  	:autobench => Models::AutoBenchRunner.new
+      }
+    end
 
-		def os
-		  @os ||= (
-		    host_os = RbConfig::CONFIG['host_os']
-		    case host_os
-		    when /mswin|msys|mingw|cygwin|bccwin|wince|emc/
-		      :windows
-		    when /darwin|mac os/
-		      :macosx
-		    when /linux/
-		      :linux
-		    when /solaris|bsd/
-		      :unix
-		    else
-		      raise Error::WebDriverError, "unknown os: #{host_os.inspect}"
-		    end
-		  )
-		end
-
-		def runner_list
-		  {
-		  	:jmeter => Models::JMeterRunner.new,
-		  	:pravega => Models::PravegaRunner.new,
-		  	:flood => Models::FloodRunner.new,
-		  	:autobench => Models::AutoBenchRunner.new
-		  }
-		end
-	end
+    def load_plugins
+      folder_location = "#{config['home_dir']}/plugins"
+      Dir.glob("#{folder_location}/**/plugin.rb").each do |entry| 
+        require entry unless File.directory?(entry)
+      end
+      Plugin.plugin_list 
+    end
+  end
 end

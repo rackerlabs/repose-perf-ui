@@ -14,7 +14,7 @@
       do-xsd-grammar-transform="true"
       enable-pre-process-extension="true"
       xsl-engine="XalanC"
-      xsd-engine="SaxonEE"
+      xsd-engine="Xerces"
       dot-output="validator.dot"
       join-xpath-checks="true"/>
 </validators>

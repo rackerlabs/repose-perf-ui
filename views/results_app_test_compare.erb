@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Repose - Applications</title>
+    <title><%= app_detail[:title] %> - Results - <%= app_detail[:test_type] %> - Compare</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
     <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
@@ -14,7 +14,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/">Repose Perf Tests</a>
+      <a class="navbar-brand" href="/"><%= app_detail[:title] %></a>
       <div class="nav-collapse collapse bs-navbar-collapse">
         <ul class="nav navbar-nav">
           <li><a href="/tests">Running Tests</a></li>
@@ -27,8 +27,8 @@
       <ul class="breadcrumb">
         <li><a href="/">Home</a></li>
         <li><a href="/results">Results</a></li>
-        <li><a href="/results/<%= app_detail.app_id %>"><%= app_detail.name %></a></li>
-        <li class="active"><%= app_detail.test_type %></li>
+        <li><a href="/results/<%= app_detail[:app_id] %>"><%= app_detail[:app_id] %></a></li>
+        <li class="active"><%= app_detail[:test_type] %></li>
       </ul>
       <div class="panel panel-summary">
         <div class="panel-heading">
@@ -46,10 +46,10 @@
               </tr>
             </thead>
             <tbody>
-<% app_detail.compared_result_set_list.each do |key, result_list| %>
+<% app_detail[:compared_result_set_list].each do |key, result_list| %>
               <tr>
                 <td><%= result_list[0]['tag']  %></td>
-                <td><a href="/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/id/<%= key %>"><%= result_list[0][:length].to_f %>(<%= result_list[1][:length].to_f %>) - difference of <%= result_list[0][:length].to_f - result_list[1][:length].to_f %> s</a></td>
+                <td><a href="/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/id/<%= key %>"><%= result_list[0][:length].to_f %>(<%= result_list[1][:length].to_f %>) - difference of <%= result_list[0][:length].to_f - result_list[1][:length].to_f %> s</a></td>
                 <td><%= result_list[0][:average].to_f %> ms (<%= result_list[1][:average].to_f %> ms) - difference of <%= result_list[0][:average].to_f - result_list[1][:average].to_f %> ms</td>
                 <td><%= result_list[0][:throughput].to_f %> rps (<%= result_list[1][:throughput].to_f %> rps) - difference of <%= result_list[0][:throughput].to_f - result_list[1][:throughput].to_f %> rps</td>
                 <td><%= result_list[0][:errors].to_f %> total errors (<%= result_list[1][:errors].to_f %> total errors) - difference of <%= result_list[0][:errors].to_f - result_list[1][:errors].to_f %> total errors</td>
@@ -106,17 +106,12 @@
               text: 'Milliseconds'
             }
           },
-          xAxis:{
-            type: 'datetime',
-            dateTimeLabelFormats: {
-                day: '%Y-%b-%d'
-            }
-          },
-          series: [{
-            name: 'Average Response Time overhead'
-          }]
+          series: [
+            {name: 'Compare 1 - Average Response Time'},
+            {name: 'Compare 2 - Response Time overhead'}
+          ]
         };        
-        var memory_option = {
+        var throughput_option = {
           chart: {
             renderTo: 'memory',
             defaultSeriesType: 'spline',
@@ -126,20 +121,15 @@
           },
           yAxis:{
             title: {
-              text: '%'
+              text: 'Requests/sec'
             }
           },
-          xAxis:{
-            type: 'datetime',
-            dateTimeLabelFormats: {
-                day: '%Y-%b-%d'
-            }
-          },
-          series: [{
-            name: 'Average throughput overhead'
-          }]
+          series: [
+            {name: 'Compare 1 - Average Response Time'},
+            {name: 'Compare 2 - Response Time overhead'}
+          ]
         };        
-        var cpu_option = {
+        var error_option = {
           chart: {
             renderTo: 'cpu',
             defaultSeriesType: 'spline',
@@ -149,34 +139,34 @@
           },
           yAxis:{
             title: {
-              text: '%'
+              text: 'Total'
             }
           },
-          xAxis:{
-            type: 'datetime',
-            dateTimeLabelFormats: {
-                day: '%Y-%b-%d'
-            }
-          },
-          series: [{
-            name: 'Error overhead'
-          }]
-        };        
+          series: [
+            {name: 'Compare 1 - Average Response Time'},
+            {name: 'Compare 2 - Response Time overhead'}
+          ]
+        };   
 
-        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/avg', function(data) {
-          var data2 = data.map(convertDate);
-          art_option.series[0].data = data2;
+        var results = <%= app_detail[:compared_result_set_list].map {|key,result_list| key } %>.join(",");     
+
+        $.getJSON('/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/metric/avg/compare/' + results, function(data) {
+console.log(data);
+          art_option.series[0].data = data.compare_one;
+          art_option.series[1].data = data.compare_two;
           var art_chart = new Highcharts.Chart(art_option);
         }); 
-        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/throughput', function(data) {
-          var data2 = data.map(convertDate);
-          memory_option.series[0].data = data2;
-          var memory_chart = new Highcharts.Chart(memory_option);
+        $.getJSON('/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/metric/throughput/compare/' + results, function(data) {
+console.log(data);
+          throughput_option.series[0].data = data.compare_one;
+          throughput_option.series[1].data = data.compare_two;
+          var throughput_chart = new Highcharts.Chart(throughput_option);
         }); 
-        $.getJSON('/results/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/errors', function(data) {
-          var data2 = data.map(convertDate);
-          cpu_option.series[0].data = data2;
-          var cpu_chart = new Highcharts.Chart(cpu_option);
+        $.getJSON('/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/metric/errors/compare/' + results, function(data) {
+console.log(data);
+          error_option.series[0].data = data.compare_one;
+          error_option.series[1].data = data.compare_two;
+          var error_chart = new Highcharts.Chart(error_option);
         }); 
       });
 

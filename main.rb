@@ -42,7 +42,9 @@ require_relative  './Models/database.rb'
   
 
   bootstrap_config = Models::Bootstrap.new.config
-
+  plugins = Models::Bootstrap.new.load_plugins
+  
+puts "plugins: #{plugins}"
   load_test_list = {
     :load_test => Models::PerfTest.new(1, 'Load Test', 'Test description'),
     :duration_test => Models::PerfTest.new(2, 'Duration Test','Test description'),
@@ -200,7 +202,10 @@ require_relative  './Models/database.rb'
       else
         app[:result_set_list] = Results::PastSummaryResults.new(name, test.chomp('_test')) 
       end
+      app[:plugin_list] = []
+      plugins.each {|p| app[:plugin_list] << {:id => p.to_s, :data => p.show_plugin_names.map {|id| {:id => id[:id], :name => id[:name] } } } }
       app[:result_set_list].each do |result|
+        
 =begin
   
         result.network_results = {}
@@ -227,24 +232,90 @@ require_relative  './Models/database.rb'
   end
 
   post '/results/:name/:test' do |name, test|
-    app = app_list[name.to_sym]
+    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
     if app and load_test_list.keys.include?(test.to_sym)
-      app.compared_result_set_list = app.results.compared_test_results(params[:compare])
+      app[:results] = Results::PastSummaryResults.new(name, test.chomp('_test')) 
+      app[:compared_result_set_list] = app[:results].compared_test_results(params[:compare])
+      app[:test_type] = test
+      app[:app_id] = name
+      app[:title] = bootstrap_config['name']
       erb :results_app_test_compare, :locals => {:app_detail => app }
     else
       status 404
     end
   end
 
+  get '/results/:name/:test/id/:id/plugin/:plugin/:option' do |name, test, id, plugin, option|
+    #get average results for plugin
+    #get detailed results for plugin to graph
+    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
+    if app and load_test_list.keys.include?(test.to_sym)
+      plugin_instance = plugins.find {|p| p.to_s == plugin }
+      app[:summary_plugin_data] = plugin_instance.new.show_summary_data(name, test, option, id)
+      detailed_plugin_data = plugin_instance.new.show_detailed_data(name, test, option, id)
+      detailed_plugin_result = {}
+      detailed_plugin_data.each do |key, value|
+        detailed_plugin_result[key] = {}
+        detailed_plugin_result[key][:headers] = value[:headers]
+        detailed_plugin_result[key][:content] = {}
+        value[:content].each do |instance, data|
+          detailed_plugin_result[key][:content][instance] = plugin_instance.new.order_by_date(value[:content][instance])
+        end  
+      end
+      app[:detailed_plugin_data] = detailed_plugin_result
+      app[:detailed_unordered_plugin_data] = detailed_plugin_data
+      app[:test_type] = test
+      app[:app_id] = name
+      app[:title] = bootstrap_config['name']
+      app[:plugin_name] = plugin
+      app[:option] = option
+      erb :results_plugin, :locals => {:app_detail => app }
+    else
+      status 404
+    end
+  end
+
+  get '/results/:name/:test/metric/:metric/compare/:ids' do |name, test, metric, ids|
+    #get result files from file under files/apps/:name/results/:test/:date/:metric
+    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
+    id_list = ids.split(",")
+    begin
+      if app and load_test_list.keys.include?(test.to_sym)
+        app[:results] = Results::PastSummaryResults.new(name, test.chomp('_test')) 
+        @results = {} unless @results
+        id_list.each do |id|
+          @results[id] = Array.new
+          detailed_results = app[:results].detailed_results(id)
+          if detailed_results[0][0].respond_to?(metric.to_sym)
+            detailed_results[0].each { |result| @results[id] << [result.date, result.send(metric.to_sym).to_f] }
+          end
+        end
+
+        results = { :compare_one => @results[id_list[0]], :compare_two => @results[id_list[1]] }
+        content_type :json
+        body results.to_json
+      else
+        status 404
+      end
+    rescue RuntimeError => e
+      status 404
+      body e.message
+    end
+  end
+
   get '/results/:name/:test/metric/:metric' do |name, test, metric|
     #parse from previous result_set
-    app = app_list[name.to_sym]
-    results = []
+    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
+    results = {} unless results
+    results[metric.to_sym] = []
     if app and load_test_list.keys.include?(test.to_sym)
-      app.results = Results::PastSummaryResults.new(name, test.chomp('_test'))
-      app.result_set_list = app.results.overhead_test_results 
-      if app.result_set_list[0].respond_to?(metric.to_sym)
-        app.result_set_list.each { |result| results << [result.date, result.send(metric.to_sym).to_f] }
+      if bootstrap_config['app_type'] == 'OVERHEAD'
+        app[:result_set_list] = Results::PastSummaryResults.new(name, test.chomp('_test')).overhead_test_results 
+      else
+        app[:result_set_list] = Results::PastSummaryResults.new(name, test.chomp('_test')) 
+      end
+      if app[:result_set_list][0].respond_to?(metric.to_sym)
+        app[:result_set_list].each { |result| results[metric.to_sym] << [result.date, result.send(metric.to_sym).to_f] }
       end
       content_type :json
     else
@@ -255,20 +326,21 @@ require_relative  './Models/database.rb'
 
   get '/results/:name/:test/id/:id/date/:date' do |name, test, id, date|
     #get result files from file under files/apps/:name/results/:test/:date
-    app = app_list[name.to_sym]
+    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
     #group by then order by start time.  The first will always be repose
     begin
       if app and load_test_list.keys.include?(test.to_sym)
-        app.results = Results::PastSummaryResults.new(name, test.chomp('_test'))
-        app.detailed_results = app.results.detailed_results id
-        app.date = date
-        app.test_id = id
-        app.test_type = test
-        file_location = app.results.detailed_results_file_location(id)
-        app.request_response_list = Models::Test.new.get_results_requests_by_file_location(file_location)
-        app.config_list = Models::Configuration.new.get_by_result_file_location(file_location)
-        app.test_location = Models::TestLocationFactory.get_by_file_location(file_location)
-        erb :results_detail, :locals => {:app_detail => app}
+        app[:results] = Results::PastSummaryResults.new(name, test.chomp('_test'))
+        app[:detailed_results] = app[:results].detailed_results id
+        app[:date] = date
+        app[:test_id] = id
+        app[:test_type] = test
+        file_location = app[:results].detailed_results_file_location(id)
+        app[:request_response_list] = Models::Test.new.get_results_requests_by_file_location(file_location)
+        app[:config_list] = Models::Configuration.new.get_by_result_file_location(file_location)
+        app[:test_location] = Models::TestLocationFactory.get_by_file_location(file_location)
+        app[:title] = bootstrap_config['name']
+        erb :results_instance_detail, :locals => {:app_detail => app}
       else
         status 404
       end
@@ -280,18 +352,18 @@ require_relative  './Models/database.rb'
 
   get '/results/:name/:test/metric/:metric/id/:id/date/:date' do |name, test, metric, id, date|
     #get result files from file under files/apps/:name/results/:test/:date/:metric
-    app = app_list[name.to_sym]
+    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
     begin
       if app and load_test_list.keys.include?(test.to_sym)
-        app.results = Results::PastSummaryResults.new(name, test.chomp('_test'))
-        app.detailed_results = app.results.detailed_results(id)
+        app[:results] = Results::PastSummaryResults.new(name, test.chomp('_test'))
+        app[:detailed_results] = app[:results].detailed_results(id)
         repose_results = []
         origin_results = []
-        if app.detailed_results[0][0].respond_to?(metric.to_sym)
-          app.detailed_results[0].each { |result| repose_results << [result.date, result.send(metric.to_sym).to_f] }
+        if app[:detailed_results][0][0].respond_to?(metric.to_sym)
+          app[:detailed_results][0].each { |result| repose_results << [result.date, result.send(metric.to_sym).to_f] }
         end
-        if app.detailed_results[1][0].respond_to?(metric.to_sym)
-          app.detailed_results[1].each { |result| origin_results << [result.date, result.send(metric.to_sym).to_f] }
+        if app[:detailed_results][1][0].respond_to?(metric.to_sym)
+          app[:detailed_results][1].each { |result| origin_results << [result.date, result.send(metric.to_sym).to_f] }
         end
         results = { :repose => repose_results, :origin => origin_results }
         content_type :json

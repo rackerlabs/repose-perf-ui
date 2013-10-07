@@ -1,7 +1,8 @@
-require_relative 'result.rb'
+require_relative 'abstractstrategy.rb'
 
 class KernelResultStrategy < AbstractStrategy
   attr_accessor :average_metric_list,:detailed_metric_list 
+
   def initialize(name,test_type,id, config_path = nil)
     @average_metric_list = {
       "dentunusd" => [],
@@ -36,6 +37,17 @@ class KernelResultStrategy < AbstractStrategy
           @average_metric_list["inode-nr"].find {|key_data| key_data[:dev_name] == dev}[:results] = inodenr
           initialize_metric(@average_metric_list,"pty-nr",dev)
           @average_metric_list["pty-nr"].find {|key_data| key_data[:dev_name] == dev}[:results] = ptynr
+        end
+        result.scan(/(\d+:\d+:\d+ \S+)\s+(\d+\.?\d*?)\s+(\d+\.?\d*?)\s+(\d+\.?\d*?)\s+(\d+\.?\d*?)$/).map do |time, dentunusd, filenr, inodenr, ptynr|
+          dev = File.basename(sysstats_file)
+          initialize_metric(@detailed_metric_list,"dentunusd",dev)
+          @detailed_metric_list["dentunusd"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => dentunusd}
+          initialize_metric(@detailed_metric_list,"file-nr",dev)
+          @detailed_metric_list["file-nr"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value =>  filenr}
+          initialize_metric(@detailed_metric_list,"inode-nr",dev)
+          @detailed_metric_list["inode-nr"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => inodenr}
+          initialize_metric(@detailed_metric_list,"pty-nr",dev)
+          @detailed_metric_list["pty-nr"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value =>  ptynr}
         end
       end
     end
