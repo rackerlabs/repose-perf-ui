@@ -230,21 +230,24 @@ module Results
       os_results = test_locations[1]
       temp_time = 0
       repose_summary_results = []
-      File.readlines("#{repose_results}/summary.log").each do |line|     
+      File.readlines("#{repose_results}/summary.log").each do |line|    
+        time_line = line.scan(/summary \=\s+\d+\s+in\s+(\d+(?:\.\d)?)s/) 
         t = line.scan(/summary \+\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/)
-        temp_time = temp_time + t[0][0].to_i unless t.empty?
+        temp_time = time_line[0][0].to_i unless time_line.empty?
         repose_summary_results << SummaryResult.new(temp_time, t[0][1], t[0][2], t[0][3]) unless t.empty?
       end if File.exists?("#{repose_results}/summary.log")
-      
+
       temp_time = 0
       os_summary_results = []
       File.readlines("#{os_results}/summary.log").each do |line|     
+        time_line = line.scan(/summary \=\s+\d+\s+in\s+(\d+(?:\.\d)?)s/) 
         t = line.scan(/summary \+\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/)
-        temp_time = temp_time + t[0][0].to_i unless t.empty?
+        temp_time = time_line[0][0].to_i unless time_line.empty?
         os_summary_results << SummaryResult.new(temp_time, t[0][1], t[0][2], t[0][3]) unless t.empty?
       end  if File.exists?("#{os_results}/summary.log")
       [repose_summary_results,os_summary_results]
     end
+
 
 =begin
   [ Result.new('start date','test length','average overhead', 'throughput overhead', 'errors overhead', 'id that matches both tests')]
