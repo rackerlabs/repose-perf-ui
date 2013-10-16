@@ -126,11 +126,13 @@ puts "plugins: #{plugins}"
   loop through plugins here
 =end
   get '/tests/:name/:test' do |name, test|
-    app = app_list[name.to_sym]
+    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
     if app and load_test_list.keys.include?(test.to_sym)
-      app.results = Results::LiveSummaryResults.start_running_results(name, test.chomp('_test'))
-      app.result_set_list = app.results.summary_results 
-      app.test_type = test
+      app[:results] = Results::LiveSummaryResults.start_running_results(name, test.chomp('_test'))
+      app[:result_set_list] = app[:results].summary_results 
+      app[:test_type] = test
+      app[:app_id] = name.to_sym
+      app[:title] = bootstrap_config['name']
       erb :tests_app_test_detail, :locals => {:app_detail => app }
     else
       status 404
@@ -140,7 +142,7 @@ puts "plugins: #{plugins}"
 
   get '/tests/:name/:test/metric/:metric' do |name, test, metric|
     #parse from summary file and jmx filei
-    app = app_list[name.to_sym]
+    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
     if app and load_test_list.keys.include?(test.to_sym)
       temp_results = []
       live_results = Results::LiveSummaryResults.running_tests[name][test.chomp('_test')]
@@ -158,7 +160,7 @@ puts "plugins: #{plugins}"
 
   get '/tests/:name/:test/metric/:metric/live' do |name, test, metric|
     #get last values from summary file and jmx file
-    app = app_list[name.to_sym]
+    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
     if app and load_test_list.keys.include?(test.to_sym) and !app.results.test_ended
       temp_results = []
       if app.results && app.results.summary_results[0].respond_to?(metric.to_sym)
@@ -253,6 +255,7 @@ puts "plugins: #{plugins}"
       plugin_instance = plugins.find {|p| p.to_s == plugin }
       app[:summary_plugin_data] = plugin_instance.new.show_summary_data(name, test, option, id)
       detailed_plugin_data = plugin_instance.new.show_detailed_data(name, test, option, id)
+puts detailed_plugin_data
       detailed_plugin_result = {}
       detailed_plugin_data.each do |key, value|
         detailed_plugin_result[key] = {}

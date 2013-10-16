@@ -14,12 +14,13 @@ class AbstractStrategy
         #get directory
         #get begin time, end time, tag name in entry meta file
 #needs to take in options to split by repose vs origin
-        test_type = "load" if test_type == "adhoc"
-        json_file = JSON.parse(File.read("#{entry}/meta/#{test_type}_test.json"))
-        if json_file['id'] == id
+        json_file = JSON.parse(File.read("#{entry}/meta/#{test_type}_test.json")) if File.exists?("#{entry}/meta/#{test_type}_test.json")
+puts json_file
+#TODO: this is a hack for Repose only.  Please abstract to app-specific.
+        if json_file['id'] == id && json_file['tag'].include?("with Repose")
           populate_metric(entry, id, json_file['start'], json_file['stop'])
           break
-        end
+        end if json_file
       end
     end
   end

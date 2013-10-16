@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Repose - Applications</title>
+    <title><%= app_detail[:title] %> - Applications</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
     <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
@@ -14,7 +14,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/">Repose Perf Tests</a>
+      <a class="navbar-brand" href="/"><%= app_detail[:title] %></a>
       <div class="nav-collapse collapse bs-navbar-collapse">
         <ul class="nav navbar-nav">
           <li class="active"><a href="/tests">Running Tests</a></li>
@@ -27,8 +27,8 @@
       <ul class="breadcrumb">
         <li><a href="/">Home</a></li>
         <li><a href="/tests">Running Tests</a></li>
-        <li><a href="/tests/<%= app_detail.app_id %>"><%= app_detail.name %></a></li>
-        <li class="active"><%= app_detail.test_type %></li>
+        <li><a href="/tests/<%= app_detail[:app_id] %>"><%= app_detail[:app_id] %></a></li>
+        <li class="active"><%= app_detail[:test_type] %></li>
       </ul>
       <div class="panel">
         <div class="panel-heading">
@@ -74,7 +74,7 @@
               load: function(){
                 var series = this.series[0];
                 setInterval(function(){
-                  $.getJSON('/tests/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/avg/live', function(data) {
+                  $.getJSON('/tests/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/metric/avg/live', function(data) {
                     console.log(series);
                     if (!data.ended)
                       for(var i = 0, max = data.results.length;  i < max; i ++)
@@ -111,7 +111,7 @@
               load: function(){
                 var series = this.series[0];
                 setInterval(function(){
-                  $.getJSON('/tests/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/throughput/live', function(data) {
+                  $.getJSON('/tests/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/metric/throughput/live', function(data) {
                     console.log(series);
                     if (!data.ended)
                       for(var i = 0, max = data.results.length;  i < max; i ++)
@@ -148,7 +148,7 @@
               load: function(){
                 var series = this.series[0];
                 setInterval(function(){
-                  $.getJSON('/tests/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/errors/live', function(data) {
+                  $.getJSON('/tests/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/metric/errors/live', function(data) {
                     console.log(series);
                     if (!data.ended)
                       for(var i = 0, max = data.results.length;  i < max; i ++)
@@ -177,20 +177,20 @@
           }]
         };        
 
-        $.getJSON('/tests/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/avg', function(data) {
+        $.getJSON('/tests/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/metric/avg', function(data) {
           if (!data.ended){
             art_option.series[0].data = data.results;
             var art_chart = new Highcharts.Chart(art_option);
           } 
             
         }); 
-        $.getJSON('/tests/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/throughput', function(data) {
+        $.getJSON('/tests/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/metric/throughput', function(data) {
           if (!data.ended){
             throughput_option.series[0].data = data.results;
             var throughput_chart = new Highcharts.Chart(throughput_option);
           }
         }); 
-        $.getJSON('/tests/<%= app_detail.app_id %>/<%= app_detail.test_type %>/metric/errors', function(data) {
+        $.getJSON('/tests/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/metric/errors', function(data) {
           if (!data.ended){
             error_option.series[0].data = data.results;
             var error_chart = new Highcharts.Chart(error_option);

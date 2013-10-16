@@ -82,6 +82,11 @@ class UbuntuPerfmonPlugin < Plugin
     end
 
     def show_summary_data(name, test, id, test_id, options=nil)
+puts "test"
+puts id
+puts test_id
+puts name
+puts test
       network = UbuntuPerfmonPlugin.show_plugin_names.find {|i| i[:id] == id }
       Results::PastNetworkResults.format_network(NetworkResult.new(network[:klass].new(name,test.chomp('_test'), test_id)).retrieve_average_results,network[:id].to_sym,{})
     end
