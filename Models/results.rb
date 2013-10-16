@@ -62,7 +62,7 @@ module Results
         if File.directory?(entry)
           #get directory
           #get begin time, end time, tag name in entry meta file
-          test_type = "load" if test_type == "adhoc"
+          #test_type = "load" if test_type == "adhoc"
           #get jxm data like so
           @test_list << parse_file(entry)
         end
@@ -158,15 +158,15 @@ module Results
         if File.directory?(entry)
           #get directory
           #get begin time, end time, tag name in entry meta file
-          test_type = "load" if test_type == "adhoc"
-          test_json = JSON.parse(File.read("#{entry}/meta/#{test_type}_test.json"))
-          test_hash.merge!(test_json)
+          #test_type = "load" if test_type == "adhoc"
+          test_json = JSON.parse(File.read("#{entry}/meta/#{test_type}_test.json")) if File.exists?("#{entry}/meta/#{test_type}_test.json")
+          test_hash.merge!(test_json) if test_json
 
           #get runner and parse data from runner
-          runner_class = Models::Bootstrap.new.runner_list[test_json['runner'].to_sym]
+          runner_class = Models::Bootstrap.new.runner_list[test_json['runner'].to_sym] if test_json
 
           #get summary 
-          @test_list << runner_class.compile_summary_results(test_hash, entry)
+          @test_list << runner_class.compile_summary_results(test_hash, entry) if runner_class
         end
       end
 
