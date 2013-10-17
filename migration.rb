@@ -99,6 +99,7 @@ if opts[:action] == 'stop'
     system "ssh root@#{server.ipv4_address} -f 'service sysstat stop '"
   end
   logger.debug "done with clearing up the servers"
+  logger.debug "with repose #{opts[:with_repose]}"
   unless opts[:with_repose]
     logger.debug "remove all servers for #{opts[:app]}"
     env.tear_down("#{opts[:app]}_adhoc")
@@ -177,7 +178,10 @@ elsif opts[:action] == 'start'
       unless opts[:release].empty?
         system "ssh root@#{server.ipv4_address} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --version #{opts[:release]}'" 
       else
-        system "ssh root@#{server.ipv4_address} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --snapshot'"       
+        logger.info "copy over repose-valve, extensions filter bundle, and filter bundle"
+        server.scp "project-set/core/valve/target/repose-valve.jar", "/home/repose/usr/share/repose/"
+        Dir.glob("/root/.m2/repository/com/rackspace/papi/components/extensions/extensions-filter-bundle/*-SNAPSHOT/*.ear") { |file| server.scp file, "/home/repose/usr/share/repose/filters/extensions-filter-bundle.ear"}
+        Dir.glob("/root/.m2/repository/com/rackspace/papi/components/filter-bundle/*-SNAPSHOT/*.ear") { |file| server.scp file, "/home/repose/usr/share/repose/filters/filter-bundle.ear"}
       end
       logger.debug "stop jmxtrans"
       system "ssh root@#{server.ipv4_address} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
@@ -198,7 +202,7 @@ elsif opts[:action] == 'start'
   logger.debug "end time: #{end_time}"
   logger.debug "tag: #{opts[:tag]}"
   test_type_template = opts[:with_repose] ? "repose_test" : "origin_test"
-  test_json_contents = TestTemplate.new(start_time, end_time, opts[:tag], opts[:id], opts[:with_repose], File.read("#{target_dir}/#{opts[:test_type]}_test.json")).render
+  test_json_contents = TestTemplate.new(start_time, end_time, opts[:tag], opts[:id], opts[:test_type], File.read("#{target_dir}/#{opts[:test_type]}_test.json")).render
   File.open("#{target_dir}/#{opts[:test_type]}_test.json", 'w') { |f| f.write(test_json_contents) }
   logger.debug test_json_contents
   logger.debug "took care of test json content"

@@ -197,7 +197,7 @@ elsif opts[:action] == 'start'
   logger.debug "end time: #{end_time}"
   logger.debug "tag: #{opts[:tag]}"
   test_type_template = opts[:with_repose] ? "repose_test" : "origin_test"
-  test_json_contents = TestTemplate.new(start_time, end_time, opts[:tag], opts[:id], opts[:with_repose], File.read("#{target_dir}/#{opts[:test_type]}_test.json")).render
+  test_json_contents = TestTemplate.new(start_time, end_time, opts[:tag], opts[:id], opts[:test_type], File.read("#{target_dir}/#{opts[:test_type]}_test.json")).render
   File.open("#{target_dir}/load_test.json", 'w') { |f| f.write(test_json_contents) }
   logger.debug test_json_contents
   logger.debug "took care of test json content"
