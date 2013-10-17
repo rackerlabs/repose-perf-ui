@@ -4,7 +4,6 @@ module Models
 
     def self.get_by_name(app_name)
       test_location_dir = "#{config['home_dir']}/files/apps/#{app_name}/tests/setup/main"
-      puts  Dir.exists?(test_location_dir)
       test_file = Dir.entries(test_location_dir).find { |file_name| file_name.start_with?("test_")} if Dir.exists?(test_location_dir)
       raise ArgumentError, "No test file exists for #{app_name}" unless test_file
       
