@@ -26,11 +26,9 @@ class CpuResultStrategy < AbstractStrategy
   end 
 
   def populate_metric(entry, id, start, stop)
-puts "entry: #{entry}"
     Dir.glob("#{entry}/sysstats.log*").each do |sysstats_file|
       #execute file and get back io results
       io_results = `sar -u -f #{sysstats_file}`.split(/\r?\n/)
-puts io_results
       io_results.each do |result|
         result.scan(/Average:\s+(\S+)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)$/).map do |cpu,user,nice,system,iowait,steal,idle|
           #get device name and then time

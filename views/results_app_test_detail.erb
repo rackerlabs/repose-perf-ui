@@ -51,8 +51,7 @@
 <% app_detail[:result_set_list].each do |result| %>
               <tr>
                 <td><%= result.tag %></td>
-<% puts result.date %>
-                <td><a href="/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/id/<%= result.id %>/date/<%= result.date %>"><%= DateTime.strptime(result.date.chomp("000"), '%s') if result.date.is_a?(Fixnum) %></td>
+                <td><a href="/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/id/<%= result.id %>/date/<%= result.date %>"><%= DateTime.strptime(result.date.chomp("000"), '%s')  %></td>
                 <td><%= result.avg %> ms</td>
                 <td><%= result.throughput %> rps</td>
                 <td><%= result.errors %> total errors</td>

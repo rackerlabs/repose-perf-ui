@@ -255,7 +255,6 @@ puts "plugins: #{plugins}"
       plugin_instance = plugins.find {|p| p.to_s == plugin }
       app[:summary_plugin_data] = plugin_instance.new.show_summary_data(name, test, option, id)
       detailed_plugin_data = plugin_instance.new.show_detailed_data(name, test, option, id)
-puts detailed_plugin_data
       detailed_plugin_result = {}
       detailed_plugin_data.each do |key, value|
         detailed_plugin_result[key] = {}

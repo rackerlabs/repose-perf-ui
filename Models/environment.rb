@@ -132,9 +132,8 @@ class Environment
        server.destroy if server.name =~ /#{Regexp.escape(name)}/
     end
     @lb_service.load_balancers.each do |lb|  
-      puts lb.inspect
-      puts lb.name
-      puts name
+      @logger.info lb.name
+      @logger.info name
       if lb.name =~ /#{Regexp.escape(name)}/
         lb.destroy
       end
