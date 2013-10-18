@@ -179,9 +179,9 @@ elsif opts[:action] == 'start'
         system "ssh root@#{server.ipv4_address} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --version #{opts[:release]}'" 
       else
         logger.info "copy over repose-valve, extensions filter bundle, and filter bundle"
-        server.scp "project-set/core/valve/target/repose-valve.jar", "/home/repose/usr/share/repose/"
-        Dir.glob("/root/.m2/repository/com/rackspace/papi/components/extensions/extensions-filter-bundle/*-SNAPSHOT/*.ear") { |file| server.scp file, "/home/repose/usr/share/repose/filters/extensions-filter-bundle.ear"}
-        Dir.glob("/root/.m2/repository/com/rackspace/papi/components/filter-bundle/*-SNAPSHOT/*.ear") { |file| server.scp file, "/home/repose/usr/share/repose/filters/filter-bundle.ear"}
+        server.scp "/home/jenkins/adhoc/project-set/core/valve/target/repose-valve.jar", "/home/repose/usr/share/repose/"
+        Dir.glob("/home/jenkins/.m2/repository/com/rackspace/papi/components/extensions/extensions-filter-bundle/*-SNAPSHOT/*.ear") { |file| server.scp file, "/home/repose/usr/share/repose/filters/extensions-filter-bundle.ear"}
+        Dir.glob("/home/jenkins/.m2/repository/com/rackspace/papi/components/filter-bundle/*-SNAPSHOT/*.ear") { |file| server.scp file, "/home/repose/usr/share/repose/filters/filter-bundle.ear"}
       end
       logger.debug "stop jmxtrans"
       system "ssh root@#{server.ipv4_address} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
