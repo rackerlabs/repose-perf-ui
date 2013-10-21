@@ -19,7 +19,11 @@ class FilterStrategy < ReposeAbstractStrategy
       "client-auth:75thPercentile" => [],
       "client-auth:Mean" => [],
       "translation:75thPercentile" => [],
-      "translation:Mean" => []
+      "translation:Mean" => [],
+      "content-normalization:Mean" => [],
+      "content-normalization:75thPercentile" => [],
+      "ip-identity:Mean" => [],
+      "ip-identity:75thPercentile" => []
     }
 
     @detailed_metric_list = {
@@ -36,7 +40,11 @@ class FilterStrategy < ReposeAbstractStrategy
       "client-auth:75thPercentile" => [],
       "client-auth:Mean" => [],
       "translation:75thPercentile" => [],
-      "translation:Mean" => []
+      "translation:Mean" => [],
+      "content-normalization:Mean" => [],
+      "content-normalization:75thPercentile" => [],
+      "ip-identity:Mean" => [],
+      "ip-identity:75thPercentile" => []
     }
     super(name,test_type,id,config_path)
   end 

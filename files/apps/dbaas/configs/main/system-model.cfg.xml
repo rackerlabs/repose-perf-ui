@@ -2,10 +2,10 @@
 
 <!-- To configure Repose see: http://wiki.openrepose.org/display/REPOSE/Configuration -->
 <system-model xmlns="http://docs.rackspacecloud.com/repose/system-model/v2.0">
-  <repose-cluster id="repose-cluster" rewrite-host-header="false">
+  <repose-cluster id="repose" rewrite-host-header="false">
     <nodes>
-        <% for @node in @nodes %>
-        <node id="repose_dbaas-<%= @node[:id] %>" hostname="<%= @node[:address] %>" http-port="7070"/>
+        <% @nodes.each_index do |index| %>
+        <node id="repose-<%= index %>" hostname="<%= @nodes[index][:address] %>" http-port="7070"/>
         <% end %>
     </nodes>
     <filters>
