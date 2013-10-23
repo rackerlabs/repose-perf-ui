@@ -260,11 +260,12 @@ puts "plugins: #{plugins}"
         detailed_plugin_result[key] = {}
         detailed_plugin_result[key][:headers] = value[:headers]
         detailed_plugin_result[key][:content] = {}
+        detailed_plugin_result[key][:description] = value[:description]
         value[:content].each do |instance, data|
           detailed_plugin_result[key][:content][instance] = plugin_instance.new.order_by_date(value[:content][instance])
         end  
       end
-puts detailed_plugin_result
+
       app[:detailed_plugin_data] = detailed_plugin_result
       app[:detailed_unordered_plugin_data] = detailed_plugin_data
       app[:test_type] = test

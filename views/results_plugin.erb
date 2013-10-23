@@ -43,7 +43,7 @@
             <tr>
               <th>instance</th>
   <% value[:headers].each do |header| %>
-              <th><%= header %></th>
+              <th><span class="metric_desc" data-toggle="tooltip" title="<%= value[:description][header] %>" data-placement="bottom"><%= header %></span></th>
   <% end %>
             </tr>
           </thead>
@@ -119,6 +119,7 @@
     <script type="text/javascript">
       $(document).ready(function() {
         window.prettyPrint && prettyPrint()
+        $(".metric_desc").tooltip()
         $(".accordion-toggle").collapse();
 <% app_detail[:detailed_unordered_plugin_data].each do |key, value| %>
   <% value[:content].each do |instance, data| %>
@@ -126,6 +127,7 @@
           chart: {
             renderTo: '<%= key %>_<%= instance.gsub(/[.-]/,'_') %>',
             type: 'area',
+            zoomType: 'x'
           },
           title: {
             text: '<%= key %> <%= instance %>'

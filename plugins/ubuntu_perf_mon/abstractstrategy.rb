@@ -5,6 +5,10 @@ class AbstractStrategy
 
   attr_reader :folder_location
 
+  def self.metric_description
+    {}
+  end
+
   def initialize(name, test_type,id, config_path)
     config = config(config_path)
     test_type.chomp!("_test")
@@ -24,9 +28,9 @@ class AbstractStrategy
     end
   end
 
-  def initialize_metric(list,key, dev)
+  def initialize_metric(list,key, dev, description = "")
     unless list[key].find{|key_data| key_data.has_key?(:dev_name) and key_data[:dev_name] == dev}
-      list[key] << {:dev_name  => dev, :results => []}
+      list[key] << {:dev_name  => dev, :results => [], :description => description}
     end
   end 
 end

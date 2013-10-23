@@ -4,6 +4,18 @@ class CpuResultStrategy < AbstractStrategy
 
   attr_accessor :average_metric_list,:detailed_metric_list 
 
+  def self.metric_description
+    {
+      "%user" => "Percentage of CPU utilization that occurred while executing at the user level (application). Note that this field includes time spent running virtual processors.",
+      "%usr" => "Percentage of CPU utilization that occurred while executing at the user level (application). Note that this field does NOT include time spent running virtual processors.",
+      "%nice" => "Percentage of CPU utilization that occurred while executing at the user level with nice priority.",
+      "%system" => "Percentage of CPU utilization that occurred while executing at the system level (kernel). Note that this field includes time spent servicing hardware and software interrupts.",
+      "%iowait" => "Percentage of time that the CPU or CPUs were idle during which the system had an outstanding disk I/O request.",
+      "%steal" => "Percentage of time spent in involuntary wait by the virtual CPU or CPUs while the hypervisor was servicing another virtual processor.",
+      "%idle" => "Percentage of time that the CPU or CPUs were idle and the system did not have an outstanding disk I/O request."
+    }
+  end
+
   def initialize(name,test_type,id, config_path = nil)
     @average_metric_list = {
       "%user" => [],
@@ -22,6 +34,8 @@ class CpuResultStrategy < AbstractStrategy
       "%steal" => [],
       "%idle" => []
     }
+   
+
     super(name,test_type,id,config_path)
   end 
 
