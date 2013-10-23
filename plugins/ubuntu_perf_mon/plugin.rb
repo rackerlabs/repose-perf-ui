@@ -77,13 +77,25 @@ class UbuntuPerfmonPlugin < Plugin
           :id => 'device_network',
           :name => 'Device Network metrics',
           :klass => DeviceNetworkResultStrategy
+        },
+        {
+          :id => 'device_disk',
+          :name => 'Device Disk metrics',
+          :klass => DeviceDiskResultStrategy
+        },
+        {
+          :id => 'device_failure',
+          :name => 'Device Network Failure metrics',
+          :klass => DeviceFailureNetworkResultStrategy
         }
       ]
     end
 
     def show_summary_data(name, test, id, test_id, options=nil)
       network = UbuntuPerfmonPlugin.show_plugin_names.find {|i| i[:id] == id }
-      Results::PastNetworkResults.format_network(NetworkResult.new(network[:klass].new(name,test.chomp('_test'), test_id)).retrieve_average_results,network[:id].to_sym,{})
+      result = Results::PastNetworkResults.format_network(NetworkResult.new(network[:klass].new(name,test.chomp('_test'), test_id)).retrieve_average_results,network[:id].to_sym,{},network[:klass].metric_description)
+      puts result
+      result
     end
 
 =begin

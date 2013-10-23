@@ -161,13 +161,13 @@ puts "plugins: #{plugins}"
   get '/tests/:name/:test/metric/:metric/live' do |name, test, metric|
     #get last values from summary file and jmx file
     app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
-    if app and load_test_list.keys.include?(test.to_sym) and !app.results.test_ended
+    if app and load_test_list.keys.include?(test.to_sym) and !app[:results].test_ended
       temp_results = []
-      if app.results && app.results.summary_results[0].respond_to?(metric.to_sym)
-        app.results.new_summary_values.each { |result| temp_results << [result.date, result.send(metric.to_sym).to_f] }
+      if app[:results] && app[:results].summary_results[0].respond_to?(metric.to_sym)
+        app[:results].new_summary_values.each { |result| temp_results << [result.date, result.send(metric.to_sym).to_f] }
       end
       content_type :json
-      response = { :results => temp_results, :ended => app.results.test_ended}
+      response = { :results => temp_results, :ended => app[:results].test_ended}
     else
       status 404
       response = { :results => [], :ended => true}
@@ -260,11 +260,12 @@ puts "plugins: #{plugins}"
         detailed_plugin_result[key] = {}
         detailed_plugin_result[key][:headers] = value[:headers]
         detailed_plugin_result[key][:content] = {}
+        detailed_plugin_result[key][:description] = value[:description]
         value[:content].each do |instance, data|
           detailed_plugin_result[key][:content][instance] = plugin_instance.new.order_by_date(value[:content][instance])
         end  
       end
-puts detailed_plugin_result
+
       app[:detailed_plugin_data] = detailed_plugin_result
       app[:detailed_unordered_plugin_data] = detailed_plugin_data
       app[:test_type] = test

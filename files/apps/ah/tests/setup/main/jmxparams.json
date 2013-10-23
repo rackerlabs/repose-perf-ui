@@ -42,21 +42,8 @@
               }
             } 
           ],
-          "obj" : "repose-node-0-com.rackspace.papi:type=Memory",
-          "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage" ]
-        }, 
-        {
-          "outputWriters" : [ 
-            {
-              "@class" : "com.googlecode.jmxtrans.model.output.KeyOutWriter",
-              "settings" : {
-                "outputFile" : "/home/repose/logs/jmxdata.out",
-                "typeNames": ["name"]
-              }
-            } 
-          ],
           "obj" : "java.lang:type=Memory",
-          "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage" ]
+          "attr" : [ "HeapMemoryUsage" ]
         }, 
         {
           "outputWriters" : [ 
@@ -94,73 +81,8 @@
               }
             } 
           ],
-          "obj" : "java.lang:type=MemoryPool,name=CMS Old Gen",
+          "obj" : "java.lang:type=MemoryPool,name=*",
           "attr" : [ "Usage","CollectionUsage" ]
-        }, 
-        {
-          "outputWriters" : [ 
-            {
-              "@class" : "com.googlecode.jmxtrans.model.output.KeyOutWriter",
-              "settings" : {
-                "outputFile" : "/home/repose/logs/jmxdata.out",
-                "typeNames": ["name"]
-              }
-            } 
-          ],
-          "obj" : "java.lang:type=MemoryPool,name=CMS Perm Gen",
-          "attr" : [ "Usage","CollectionUsage" ]
-        }, 
-        {
-          "outputWriters" : [ 
-            {
-              "@class" : "com.googlecode.jmxtrans.model.output.KeyOutWriter",
-              "settings" : {
-                "outputFile" : "/home/repose/logs/jmxdata.out",
-                "typeNames": ["name"]
-              }
-            } 
-          ],
-          "obj" : "java.lang:type=MemoryPool,name=Code Cache",
-          "attr" : [ "Usage","CollectionUsage" ]
-        }, 
-        {
-          "outputWriters" : [ 
-            {
-              "@class" : "com.googlecode.jmxtrans.model.output.KeyOutWriter",
-              "settings" : {
-                "outputFile" : "/home/repose/logs/jmxdata.out",
-                "typeNames": ["name"]
-              }
-            } 
-          ],
-          "obj" : "java.lang:type=MemoryPool,name=Par Eden Space",
-          "attr" : [ "Usage","CollectionUsage" ]
-        }, 
-        {
-          "outputWriters" : [ 
-            {
-              "@class" : "com.googlecode.jmxtrans.model.output.KeyOutWriter",
-              "settings" : {
-                "outputFile" : "/home/repose/logs/jmxdata.out",
-                "typeNames": ["name"]
-              }
-            } 
-          ],
-          "obj" : "java.lang:type=MemoryPool,name=Par Survivor Space",
-          "attr" : [ "Usage","CollectionUsage" ]
-        }, 
-        {
-          "outputWriters" : [ 
-            {
-              "@class" : "com.googlecode.jmxtrans.model.output.KeyOutWriter",
-              "settings" : {
-                "outputFile" : "/home/repose/logs/jmxdata.out",
-                "typeNames": ["name"]
-              }
-            } 
-          ],
-          "obj" : "java.lang:type=OperatingSystem",
-          "attr" : [ "OpenFileDescriptorCount","MaxFileDescriptorCount","CommittedVirtualMemorySize","TotalSwapSpaceSize","FreeSwapSpaceSize","ProcessCpuTime","FreePhysicalMemorySize","TotalPhysicalMemorySize","SystemLoadAverage" ]
         }, 
         {
           "outputWriters" : [ 

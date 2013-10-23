@@ -3,6 +3,15 @@ require_relative 'abstractstrategy.rb'
 class TcpNetworkResultStrategy < AbstractStrategy
   attr_accessor :average_metric_list,:detailed_metric_list 
 
+  def self.metric_description
+    {
+      "active/s" => "The number of times TCP connections have made a direct transition to the SYN-SENT state from the CLOSED state per second [tcpActiveOpens].",
+      "passive/s" => "The number of times TCP connections have made a direct transition to the SYN-RCVD state from the LISTEN state per second [tcpPassiveOpens].",
+      "iseg/s" => "The total number of segments received per second, including those received in error [tcpInSegs].  This count includes segments received on currently established connections.",
+      "oseg/s" => "The total number of segments sent per second, including those on current connections but excluding those containing only retransmitted octets [tcpOutSegs]."
+    }
+  end
+
   def initialize(name,test_type,id, config_path = nil)
     @average_metric_list = {
       "active/s" => [],

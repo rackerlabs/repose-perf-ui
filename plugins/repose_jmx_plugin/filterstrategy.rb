@@ -19,7 +19,11 @@ class FilterStrategy < ReposeAbstractStrategy
       "client-auth:75thPercentile" => [],
       "client-auth:Mean" => [],
       "translation:75thPercentile" => [],
-      "translation:Mean" => []
+      "translation:Mean" => [],
+      "content-normalization:Mean" => [],
+      "content-normalization:75thPercentile" => [],
+      "ip-identity:Mean" => [],
+      "ip-identity:75thPercentile" => []
     }
 
     @detailed_metric_list = {
@@ -36,7 +40,11 @@ class FilterStrategy < ReposeAbstractStrategy
       "client-auth:75thPercentile" => [],
       "client-auth:Mean" => [],
       "translation:75thPercentile" => [],
-      "translation:Mean" => []
+      "translation:Mean" => [],
+      "content-normalization:Mean" => [],
+      "content-normalization:75thPercentile" => [],
+      "ip-identity:Mean" => [],
+      "ip-identity:75thPercentile" => []
     }
     super(name,test_type,id,config_path)
   end 
@@ -46,7 +54,7 @@ class FilterStrategy < ReposeAbstractStrategy
       #execute file and get back io results
       File.open(jmx_file, 'r') do |file_handle|
         file_handle.each_line do |result|
-          result.scan(/^localhost.*JmxReporter\$Timer\.(.*)\.(\w+)\s+(\d+\.?\d+?)\s+(\d+)$/).map do |metric,counter,value,timestamp|
+          result.scan(/^localhost.*JmxReporter\$Timer\.(.*)\.(\w+)\s+(\d*\.?\d+?)\s+(\d+)$/).map do |metric,counter,value,timestamp|
             dev = "#{File.basename(jmx_file)}"
             initialize_metric(@detailed_metric_list,"#{metric}:#{counter}",dev)
             @detailed_metric_list["#{metric}:#{counter}"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => timestamp, :value => value}
@@ -54,6 +62,5 @@ class FilterStrategy < ReposeAbstractStrategy
         end
       end
     end
-puts @detailed_metric_list
   end
 end

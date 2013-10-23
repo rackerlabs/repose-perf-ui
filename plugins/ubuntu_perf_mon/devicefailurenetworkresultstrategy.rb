@@ -3,7 +3,21 @@ require_relative 'abstractstrategy.rb'
 class DeviceFailureNetworkResultStrategy < AbstractStrategy
   attr_accessor :average_metric_list,:detailed_metric_list 
 
-  def load_metric(name,test_type,id, config_path = nil)
+  def self.metric_description
+    {
+      "rxerr/s" => "Total number of bad packets received per second.",
+      "txerr/s" => "Total number of errors that happened per second while transmitting packets.",
+      "coll/s" => "Number of collisions that happened per second while transmitting packets.",
+      "rxdrop/s" => "Number of received packets dropped per second because of a lack of space in linux buffers.",
+      "txdrop/s" => "Number of transmitted packets dropped per second because of a lack of space in linux buffers.",
+      "txcarr/s" => "Number of carrier-errors that happened per second while transmitting packets.",
+      "rxfifo/s" => "Number of FIFO overrun errors that happened per second on received packets.",
+      "txfifo/s" => "Number of FIFO overrun errors that happened per second on transmitted packets.",
+      "rxfram/s" => "Number of frame alignment errors that happened per second on received packets."
+    }
+  end
+
+  def initialize(name,test_type,id, config_path = nil)
     @average_metric_list = {
       "rxerr/s" => [],
       "txerr/s" => [],

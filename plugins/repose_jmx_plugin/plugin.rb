@@ -1,6 +1,9 @@
 require_relative './../../Models/plugin.rb'
 require_relative 'filterstrategy.rb'
 require_relative 'jvmmetricsstrategy.rb'
+require_relative 'jvmmemorystrategy.rb'
+require_relative 'jvmthreadstrategy.rb'
+require_relative 'garbagecollectionstrategy.rb'
 
 class ReposeJmxPlugin < Plugin
   def self.supported_os_list
@@ -15,9 +18,19 @@ class ReposeJmxPlugin < Plugin
         :klass => FilterStrategy
       },
       {
-        :id => 'jvm_metrics',
-        :name => 'JVM metrics',
-        :klass => JvmMetricsStrategy
+        :id => 'gc',
+        :name => 'Garbage Collection',
+        :klass => GarbageCollectionStrategy
+      },
+      {
+        :id => 'jvm_memory',
+        :name => 'JVM Memory',
+        :klass => JvmMemoryStrategy
+      },
+      {
+        :id => 'jvm_threads',
+        :name => 'JVM Threads',
+        :klass => JvmThreadStrategy
       }
     ]
   end

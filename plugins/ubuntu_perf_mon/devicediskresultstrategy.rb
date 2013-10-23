@@ -3,6 +3,19 @@ require_relative 'abstractstrategy.rb'
 class DeviceDiskResultStrategy < AbstractStrategy
   attr_accessor :average_metric_list,:detailed_metric_list 
 
+  def self.metric_description
+    {
+      "tps" => "Indicate the number of transfers per second that were issued to the device. Multiple logical requests can be combined into a single I/O request to the device. A transfer is of indeterminate size.",
+      "rd_sec/s" => "Number of sectors read from the device. The size of a sector is 512 bytes.",
+      "wr_sec/s" => "Number of sectors written to the device. The size of a sector is 512 bytes.",
+      "avgrq-sz" => "The average size (in sectors) of the requests that were issued to the device.",
+      "avgqu-sz" => "The average queue length of the requests that were issued to the device.",
+      "await" => "The average time (in milliseconds) for I/O requests issued to the device to be served. This includes the time spent by the requests in queue and the time spent servicing them.",
+      "svctm" => "The average service time (in milliseconds) for I/O requests that were issued to the device.",
+      "%util" => "Percentage of CPU time during which I/O requests were issued to the device (bandwidth utilization for the device). Device saturation occurs when this value is close to 100%."
+    }
+  end
+
   def initialize(name, test_type, id, config_path = nil)
   
     @average_metric_list = {
