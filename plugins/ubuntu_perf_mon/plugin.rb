@@ -116,4 +116,10 @@ class UbuntuPerfmonPlugin < Plugin
       end
       result
     end
+
+    def store_data(start_time,end_time)
+      #this is where the data will be loaded
+      #TODO: set up an adapter (either scp, local file store, rest api, DB) and pull data according to timestamps.  Save in Redis
+      #redis will zip data up and store it in app_plugin_start_end key and zipped value.  Maybe should be Mongo instead or Riak?
+    end
   end

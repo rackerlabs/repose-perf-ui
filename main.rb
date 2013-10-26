@@ -29,7 +29,8 @@ class PerfApp < Sinatra::Base
 
 
 =begin
-  load all plugins based on OS
+  load all plugins based on OS and application
+  TODO: the plugin load will need to move down based on application desired.  Also each application will now have sub-apps to support repose's multiple client configurations vs. Atom Hopper single configuration
 =end
   
 

@@ -15,22 +15,32 @@ class ReposeJmxPlugin < Plugin
       {
         :id => 'filters',
         :name => 'Filter breakdown',
-        :klass => FilterStrategy
+        :klass => FilterStrategy,
+        :type => :time_series
       },
       {
         :id => 'gc',
         :name => 'Garbage Collection',
-        :klass => GarbageCollectionStrategy
+        :klass => GarbageCollectionStrategy,
+        :type => :time_series
       },
       {
         :id => 'jvm_memory',
         :name => 'JVM Memory',
-        :klass => JvmMemoryStrategy
+        :klass => JvmMemoryStrategy,
+        :type => :time_series
       },
       {
         :id => 'jvm_threads',
         :name => 'JVM Threads',
-        :klass => JvmThreadStrategy
+        :klass => JvmThreadStrategy,
+        :type => :time_series
+      },
+      {
+        :id => 'logs',
+        :name => 'Repose logs',
+        :klass => ReposeLogStrategy,
+        :type => :blob
       }
     ]
   end

@@ -9,6 +9,9 @@ class AbstractStrategy
     {}
   end
 
+=begin
+  TODO: move folder location to redis.  Rest remains the same
+=end
   def initialize(name, test_type,id, config_path)
     config = config(config_path)
     test_type.chomp!("_test")
