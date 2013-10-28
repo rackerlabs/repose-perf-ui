@@ -11,15 +11,7 @@ require_relative './Models/configuration.rb'
 require_relative './Models/testlocation.rb'
 require_relative './Models/results.rb'
 
-=begin
-require_relative  './Models/application.rb'
-require_relative  './Models/request.rb'
-require_relative  './Models/response.rb'
-require_relative  './Models/result.rb'
-require_relative  './Models/database.rb'
-
-=end
-#class PerfApp < Sinatra::Base
+class PerfApp < Sinatra::Base
 
   Logging.color_scheme( 'bright',
     :levels => {
@@ -403,6 +395,6 @@ puts "plugins: #{plugins}"
       body r.message
     end
   end
-#end
+end
 
 #PerfApp.new
