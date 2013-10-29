@@ -10,6 +10,7 @@
 
 require 'yaml'
 require 'logging'
+require 'redis'
 require File.expand_path("apps/bootstrap.rb", Dir.pwd)
 
 module Apps

@@ -54,8 +54,9 @@ module Apps
     def load_plugins
       raise NotImplementedError, 'Your configuration has not yet been instantiated.  The reason for that is most likely because you are calling load_plugins from Bootstrap itself instead of calling it from an application\'s bootstrap.' unless @config
       plugin_list = @config['application']['plugins']
-      plugin_list.each do |key, entry| 
-        require entry unless File.directory?(entry)
+      plugin_list.each do |key, entry|
+        plugin = File.expand_path(entry, Dir.pwd) 
+        require plugin unless File.directory?(plugin)
       end
       Plugin.plugin_list 
     end
