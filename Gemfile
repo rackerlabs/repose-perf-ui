@@ -1,4 +1,5 @@
 source 'https://rubygems.org' 
+gem 'ruby-graphviz','~>1.0.8'
 gem 'bson_ext','~>1.4.0', :require => 'bson'
 gem 'nokogiri', '~>1.6.0'
 gem 'rack', '~>1.5.2' 
