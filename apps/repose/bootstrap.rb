@@ -10,14 +10,14 @@
 
 require 'yaml'
 require 'logging'
-require File.expand_path("Models/bootstrap.rb", Dir.pwd)
+require File.expand_path("apps/bootstrap.rb", Dir.pwd)
 
 module Apps
   class ReposeBootstrap < Bootstrap
  
 
     def initialize(logger = nil)
-      @logger = logger ? logger : BoostrapRepose.logger
+      @logger = logger ? logger : ReposeBootstrap.logger
       @config = YAML.load_file(File.expand_path("config/apps/repose.yaml", Dir.pwd))
       @logger.debug "loaded config: #{@config}"  
     end

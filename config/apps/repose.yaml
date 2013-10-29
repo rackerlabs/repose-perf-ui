@@ -1,7 +1,0 @@
-application:
-  name: Repose
-  location: apps/repose/bootstrap.rb
-  plugins:
-    location: plugins/ubuntu_perf_mon/plugin.rb
-    location: plugins/repose_jmx_plugin/plugin.rb
-
