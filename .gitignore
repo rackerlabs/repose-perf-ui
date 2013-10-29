@@ -6,3 +6,8 @@ nohup.out
 *.dot
 config.yaml
 results/*
+coverage/
+Gemfile.lock
+*.png
+*.log
+*.db
