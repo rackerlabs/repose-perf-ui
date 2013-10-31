@@ -11,8 +11,7 @@ require 'logging'
 require 'rbconfig'
 require 'yaml'
 
-def get_server_ips(lb_name)
-  logger.debug "we just ran a test on performance flavor with repose"
+def get_server_ips(lb_name, logger, env)
   logger.debug "load balancer name: #{lb_name}"
   lb_ip = env.lb_service.load_balancers.find do |lb| 
     lb.name =~ /#{Regexp.escape(lb_name)}/ 
@@ -85,7 +84,7 @@ Trollop::die :test_type, "must be specified" unless opts[:test_type]
 logger.debug opts
 
 logger.debug "start shell"
-system "ssh-agent -c"
+system "ssh-agent -s"
 ssh_agent_id = $?.pid
 logger.debug "shell started in pid #{ssh_agent_id}"
 
@@ -115,28 +114,33 @@ if opts[:action] == 'stop'
   if opts[:flavor_type] == 'performance' 
     if opts[:with_repose]
       #performance with repose!
-      server_ip_info = get_server_ips("repose_lb_perf_flavors_withrepose")
+      logger.debug "we just ran a test on performance flavor with repose"
+      server_ip_info = get_server_ips("repose_lb_perf_flavors_withrepose", logger, env)
     else
       #performance without repose!
-      server_ip_info = get_server_ips("repose_lb_perf_flavors_withoutrepose")
+      logger.debug "we just ran a test on performance flavor without repose"
+      server_ip_info = get_server_ips("repose_lb_perf_flavors_withoutrepose", logger, env)
     end
   else
     if opts[:with_repose]
       #original with repose!
-      server_ip_info = get_server_ips("repose_lb_original_withrepose")
+      logger.debug "we just ran a test on original flavor with repose"
+      server_ip_info = get_server_ips("repose_lb_original_withrepose", logger, env)
     else
       #original with repose!
-      server_ip_info = get_server_ips("repose_lb_original_withoutrepose")
+      logger.debug "we just ran a test on original flavor without repose"
+      server_ip_info = get_server_ips("repose_lb_original_withoutrepose", logger, env)
     end
   end
   server_ip_info[:nodes].each do |server|
     logger.debug server
+    logger.debug "scp root@#{server}:/home/repose/logs/sysstats.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/sysstats.log_#{server}"
     system "scp root@#{server}:/home/repose/logs/sysstats.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/sysstats.log_#{server}"
     logger.debug "with repose: #{opts[:with_repose]}"
     if opts[:with_repose]
       system "ssh root@#{server} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
       system "ssh root@#{server} 'curl http://localhost:6666 -v'"      
-      logger.debug "copying over to #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/jmxdata.out"
+      logger.debug "copying over from scp root@#{server}:/home/repose/logs/jmxdata.out to #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/jmxdata.out"
       system "scp root@#{server}:/home/repose/logs/jmxdata.out #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/jmxdata.out_#{server}"
       
       system "ssh root@#{server} 'rm -rf /home/repose/configs/* '" 
@@ -185,57 +189,77 @@ elsif opts[:action] == 'start'
   env.connect(:iad)
   env.load_balance_connect(:iad)
   
-  #TODO: get servers based on the flavor type
+  if opts[:flavor_type] == 'performance' 
+    if opts[:with_repose]
+      #performance with repose!
+      logger.debug "we are setting up a test on performance flavor with repose"
+      server_ip_info = get_server_ips("repose_lb_perf_flavors_withrepose", logger, env)
+    else
+      #performance without repose!
+      logger.debug "we are setting up a test on performance flavor without repose"
+      server_ip_info = get_server_ips("repose_lb_perf_flavors_withoutrepose", logger, env)
+    end
+  else
+    if opts[:with_repose]
+      #original with repose!
+      logger.debug "we are setting up a test on original flavor with repose"
+      server_ip_info = get_server_ips("repose_lb_original_withrepose", logger, env)
+    else
+      #original with repose!
+      logger.debug "we are setting up a test on original flavor without repose"
+      server_ip_info = get_server_ips("repose_lb_original_withoutrepose", logger, env)
+    end
+  end
 
-  nodes = env.servers.find_all {|server| server.name =~ /#{Regexp.escape(opts[:app])}/}.map {|server| {:id => server.id, :address => server.ipv4_address}}
-
-  logger.debug "Nodes: #{nodes}"
+  logger.debug "Nodes: #{server_ip_info[:nodes]}"
 
   #modify system-model and dd xmls and stage all configs. 
-  system_model_contents = SystemModelTemplate.new(nodes,File.read("#{config_target_dir}/system-model.cfg.xml")).render
+  system_model_contents = SystemModelTemplate.new(server_ip_info[:nodes],File.read("#{config_target_dir}/system-model.cfg.xml")).render
   File.open("#{config_target_dir}/system-model.cfg.xml", 'w') { |f| f.write(system_model_contents) }
 
   #load configs
   #download repose and spin up
   #load and spin up auth and mock responders
 
-  env.servers.select {|server| server.state == 'ACTIVE' && server.name =~ /#{Regexp.escape(opts[:app])}/ }.each do |server|
-    system "ssh -o 'StrictHostKeyChecking no' #{server.ipv4_address} uptime"
+  server_ip_info[:nodes].each do |server|
+    logger.debug "set up strick host checking"
+    #system "ssh -o 'StrictHostKeyChecking no' #{server} uptime"
     Dir.glob("#{config_target_dir}/**") do |file| 
       logger.debug "is #{file} a directory: #{File.directory?(file)}"
-      server.scp file, "/home/repose/configs/", {:recursive => true}
+      logger.debug "copy files over with this command: scp -r #{file} root@#{server}:/home/repose/configs/"
+      system "scp -r #{file} root@#{server}:/home/repose/configs/"
     end
 
-    server.scp "#{target_dir}/auth_responder.js", "/home/mocks/auth_responder/server.js"
-    server.scp "#{target_dir}/mock_responder.js", "/home/mocks/mock_responder/server.js"
-    server.scp "#{source_dir}/jmxparams.json","/usr/share/jmxtrans/example.json"
+    system "scp #{target_dir}/auth_responder.js root@#{server}:/home/mocks/auth_responder/server.js"
+    system "scp #{target_dir}/mock_responder.js root@#{server}:/home/mocks/mock_responder/server.js"
+    system "scp #{source_dir}/jmxparams.json root@#{server}:/usr/share/jmxtrans/example.json"
 
     logger.info "everything is uploaded"
-    system "ssh root@#{server.ipv4_address} -f 'nohup node /home/mocks/auth_responder/server.js & '" 
-    logger.info "started auth on #{server.ipv4_address}"
-    system "ssh root@#{server.ipv4_address} -f 'nohup node /home/mocks/mock_responder/server.js & '" 
-    logger.info "started mock on #{server.ipv4_address}"
+    system "ssh root@#{server} -f 'nohup node /home/mocks/auth_responder/server.js & '" 
+    logger.info "started auth on #{server}"
+    system "ssh root@#{server} -f 'nohup node /home/mocks/mock_responder/server.js & '" 
+    logger.info "started mock on #{server}"
     #download repose
     if opts[:with_repose]
       unless opts[:release].empty?
-        system "ssh root@#{server.ipv4_address} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --version #{opts[:release]}'" 
+        system "ssh root@#{server} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --version #{opts[:release]}'" 
       else
-        system "ssh root@#{server.ipv4_address} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --snapshot'"       
+        system "ssh root@#{server} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --snapshot'"       
       end
       logger.debug "stop jmxtrans"
-      system "ssh root@#{server.ipv4_address} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
+      system "ssh root@#{server} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
       logger.debug "start jmxtrans"
-      system "ssh root@#{server.ipv4_address} -f 'cd /usr/share/jmxtrans ; ./jmxtrans.sh start example.json '" 
+      system "ssh root@#{server} -f 'cd /usr/share/jmxtrans ; ./jmxtrans.sh start example.json '" 
       #start repose
       logger.debug "start repose"
-      system "ssh root@#{server.ipv4_address} -f 'nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ -s 6666 start & '" 
+      system "ssh root@#{server} -f 'nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ -s 6666 start & '" 
     end
     logger.debug "start logging"
-    system "ssh root@#{server.ipv4_address} -f 'sar -o /home/repose/logs/sysstats.log 30 >/dev/null 2>&1 & '"
+    system "ssh root@#{server} -f 'sar -o /home/repose/logs/sysstats.log 30 >/dev/null 2>&1 & '"
   end
   length = opts[:length] ? opts[:length].to_i : 60
 
-  start_time = 1000 * (Time.now.to_i + (5 * 60))
+  start_time = 1000 * (Time.now.to_i + (2 * 60))
   logger.debug "start time: #{start_time}"
   end_time = start_time + (length * 60 * 1000)
   logger.debug "end time: #{end_time}"
@@ -246,22 +270,15 @@ elsif opts[:action] == 'start'
   logger.debug test_json_contents
   logger.debug "took care of test json content"
 
-  lb = env.load_balance_connect :dfw
-  logger.debug "load balancer #{lb}"
-
-  if opts[:with_repose]
-    lb_ip = env.lb_service.load_balancers.find { |lb| lb.name =~ /#{Regexp.escape(opts[:app])}_withrepose/ }.virtual_ips.find {|ip| ip.ip_version == 'IPV4' && ip.type == 'PUBLIC' }.address
-  else
-    lb_ip = env.lb_service.load_balancers.find { |lb| lb.name =~ /#{Regexp.escape(opts[:app])}_withoutrepose/ }.virtual_ips.find {|ip| ip.ip_version == 'IPV4' && ip.type == 'PUBLIC' }.address
-  end
+  lb_ip = server_ip_info[:lb]
   logger.debug "load balance ip address: #{lb_ip}"
 
-  jmeter_contents = JmeterTemplate.new(start_time, end_time, 20, 60, lb_ip, File.read("#{target_dir}/test_#{opts[:app]}.jmx")).render
-  logger.debug jmeter_contents 
-  File.open("#{target_dir}/test_#{opts[:app]}.jmx", 'w') { |f| f.write(jmeter_contents) }
+  #jmeter_contents = JmeterTemplate.new(start_time, end_time, 20, 60, lb_ip, File.read("#{target_dir}/test_#{opts[:app]}.jmx")).render
+  #logger.debug jmeter_contents 
+  #File.open("#{target_dir}/test_#{opts[:app]}.jmx", 'w') { |f| f.write(jmeter_contents) }
   #start tiem and stop time should both be in millis starting at 5 minutes AFTER spinup of all servers and scp'ing all files
   #modify runner file (ip, threads, start, stop, rampup) and stage 
-  logger.debug "took care of jmeter json content"
+  #logger.debug "took care of jmeter json content"
 
   #make results directory
   Dir.mkdir("#{config['home_dir']}/files/apps/#{opts[:app]}/results") unless Dir.exists?("#{config['home_dir']}/files/apps/#{opts[:app]}/results")
@@ -275,7 +292,18 @@ elsif opts[:action] == 'start'
   FileUtils.cp_r("#{config_target_dir}/." , "#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/configs")
 
   #start test
-  system "/root/apache-jmeter-2.9/bin/jmeter -n -t #{target_dir}/test_#{opts[:app]}.jmx -p /root/apache-jmeter-2.9/bin/load_test.properties >> #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/summary.log" 
+  test_agent = env.service.servers.find {|server| server.name =~ /test_agent/}.ipv4_address
+  logger.debug "test agent: #{test_agent}"
+
+  system "scp #{target_dir}/test_#{opts[:app]}.jmx root@#{test_agent}:/home/apache/test.jmx"  
+  system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test.jmx -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{lb_ip} -Jthreads=#{runner_json['threads']} -Jramp=#{runner_json['rampup']} -Jport=80 -Jduration=#{length * 60 * 1000} >> /home/apache/summary.log & '"
+  
+  until Time.now.to_i * 1000 >= end_time
+    logger.debug "time now: #{Time.now.to_i}.  waiting until #{end_time}"
+    sleep(30)
+  end
+  system "scp root@#{test_agent}:/home/apache/summary.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/summary.log"
+  system "ssh root@#{test_agent} 'rm /home/apache/summary.log '"  
 end
 
 logger.debug "stop shell"
