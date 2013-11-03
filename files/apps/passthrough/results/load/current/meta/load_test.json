@@ -1,8 +1,0 @@
-{
-  "node_count": 2,
-  "runner":"jmeter",
-  "start":"1381886383000",
-  "stop":"1381889983000",
-  "tag" : "jenkins-repose-pt-passthrough-43 with Repose",
-  "id" : "jenkins-repose-pt-passthrough-43"
-}
