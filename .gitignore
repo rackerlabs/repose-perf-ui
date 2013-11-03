@@ -6,3 +6,4 @@ nohup.out
 *.dot
 config.yaml
 results/*
+files/apps/passthrough/results/*
