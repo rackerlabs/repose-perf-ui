@@ -7,3 +7,7 @@ nohup.out
 config.yaml
 results/*
 files/apps/passthrough/results/*
+coverage/*
+*.png
+*.db
+*.lock

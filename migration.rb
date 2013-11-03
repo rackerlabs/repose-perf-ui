@@ -217,12 +217,12 @@ elsif opts[:action] == 'start'
   end
   logger.debug "load balance ip address: #{lb_ip}"
 
-  jmeter_contents = JmeterTemplate.new(start_time, end_time, 20, 60, lb_ip, File.read("#{target_dir}/test_#{opts[:app]}.jmx")).render
-  logger.debug jmeter_contents 
-  File.open("#{target_dir}/test_#{opts[:app]}.jmx", 'w') { |f| f.write(jmeter_contents) }
+  #jmeter_contents = JmeterTemplate.new(start_time, end_time, 20, 60, lb_ip, File.read("#{target_dir}/test_#{opts[:app]}.jmx")).render
+  #logger.debug jmeter_contents 
+  #File.open("#{target_dir}/test_#{opts[:app]}.jmx", 'w') { |f| f.write(jmeter_contents) }
   #start tiem and stop time should both be in millis starting at 5 minutes AFTER spinup of all servers and scp'ing all files
   #modify runner file (ip, threads, start, stop, rampup) and stage 
-  logger.debug "took care of jmeter json content"
+  #logger.debug "took care of jmeter json content"
 
   #make results directory
   Dir.mkdir("#{config['home_dir']}/files/apps/#{opts[:app]}/results") unless Dir.exists?("#{config['home_dir']}/files/apps/#{opts[:app]}/results")
