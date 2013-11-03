@@ -1,13 +1,3 @@
-=begin
-  This class will have load the following data:
-  - plugins for this class
-  - name of application
-  - description of application
-  - methods:
-    - start_test
-    - finish_test
-=end
-
 require 'yaml'
 require 'logging'
 require 'redis'
@@ -17,24 +7,23 @@ module Apps
   class ReposeBootstrap < Bootstrap
  
 
-    def initialize(logger = nil)
-      @logger = logger ? logger : ReposeBootstrap.logger
+    def initialize(redis_info = nil, logger = nil)
+      @logger = logger ? logger : Bootstrap.logger
       @config = YAML.load_file(File.expand_path("config/apps/repose.yaml", Dir.pwd))
       @logger.debug "loaded config: #{@config}"  
+      if redis_info
+        raise ArgumentError, "required information missing from your storage connection." unless redis_info.has_key?(:host)
+      end
+      @db = Bootstrap.backend_connect(redis_info)
+      @logger.debug "loaded backend: #{@db.inspect}"
     end
 
-    def start_test_recording(timestamp = nil)
-      start_time = timestamp ? timestamp : Time.now
-      #store the start time in Redis
+    def start_test_recording(id, timestamp = nil)
+      super("repose:test:#{id}:start", timestamp)
     end
 
-    def stop_test_recording(timestamp = nil)
-      end_time = timestamp ? timestamp : Time.now
-      #load data for plugins here (from base class)
-      plugins = load_plugins
-      plugins.each do |plugin|
-        plugin.store_data(start_time,end_time)
-      end 
+    def stop_test_recording(id, timestamp = nil)
+      super("repose:test:#{id}:start", timestamp)
     end
   end
 end

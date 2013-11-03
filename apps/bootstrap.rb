@@ -2,10 +2,11 @@ require File.expand_path("Models/runner.rb", Dir.pwd)
 require File.expand_path("Models/plugin.rb", Dir.pwd)
 
 require 'yaml'
+require 'redis'
 
 module Apps
   class Bootstrap
-    attr_reader :config, :logger
+    attr_reader :config
     @@applications ||= []
 
     def self.logger
@@ -42,13 +43,26 @@ module Apps
       @@applications << {:id => dir_name, :klass => klass}
     end
 
-    def runner_list
+    def self.runner_list
       {
- 	:jmeter => Models::JMeterRunner.new,
- 	:pravega => Models::PravegaRunner.new,
-  	:flood => Models::FloodRunner.new,
-  	:autobench => Models::AutoBenchRunner.new
+        :jmeter => Models::JMeterRunner.new,
+        :pravega => Models::PravegaRunner.new,
+        :flood => Models::FloodRunner.new,
+        :autobench => Models::AutoBenchRunner.new
       }
+    end
+    
+    def self.backend_connect(redis_info = nil)
+      if redis_info
+        raise ArgumentError, "required information was not provided to connect to backend data store" unless redis_info[:host]
+        port = redis_info.has_key?(:port) ? redis_info[:port] : 6379
+        db_number = redis_info.has_key?(:db) ? redis_info[:db] : 1
+        db = {:host => redis_info[:host], :port => port, :db => db_number}
+      else
+        config = YAML.load_file(File.expand_path("config/config.yaml", Dir.pwd))
+        db = {:host => config['redis']['host'], :port => config['redis']['port'], :db => config['redis']['db']}
+      end
+      db
     end
 
     def load_plugins
@@ -61,12 +75,23 @@ module Apps
       Plugin.plugin_list 
     end
 
-    def start_test_recording
-      raise NotImplementedError, 'Your bootstrap must implement start_test_recording method'
+    def start_test_recording(id, timestamp = nil)
+      start_time = timestamp ? timestamp : Time.now
+      #store the start time in Redis
+      {:response => Redis.new(@db).set(id, start_time), :time => start_time} 
     end
 
-    def stop_test_recording
-      raise NotImplementedError, 'Your bootstrap must implement stop_test_recording method'
+    def stop_test_recording(id, timestamp = nil)
+      start_time = Redis.new(@db).get(id)
+      raise ArgumentError, "start time for this test was not found.  Did you forget to start the test?" unless start_time
+      end_time = timestamp ? timestamp : Time.now
+      #load data for plugins here (from base class)
+      plugins = load_plugins
+      plugins.each do |plugin|
+        plugin.new.store_data(Redis.new(@db), start_time, end_time)
+      end 
+      Redis.new(@db).del(id)
+      "OK"
     end
   end
 end
