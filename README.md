@@ -20,5 +20,24 @@ hERmes has extensive testing with Cucumber (<code>cucumber tests/</code>) and un
     - stores timestamp
 - Test configurations:
 	<code>[application_name]:[sub_application]:tests:setup:main:request_response</code>
+	- stores a hash of key (request or response) and value (json object of request/response)
+	- EXAMPLE:
+	    <code>> hgetall app:sub_app:tests:setup:main:request_response</code>
+	    <code>  
+	    1) "response_0"
+		2) "{\"response_code\":\"201\"}"
+		3) "request_0"
+		4) "{\"request_id\":1,\"method\":\"POST\",\"uri\":\"/event\",\"body\":\"{\"name\":\"test\"}\",\"headers\":[\"X-Auth-Token: valid-token\",\"Content-Type: application/json\"]}"
+		5) "response_1"
+		6) "{\"response_code\":200}"
+		7) "request_1"
+		8) "{\"request_id\":2,\"method\":\"GET\",\"uri\":\"/event?limit=100\",\"headers\":[\"X-Auth-Token: valid-token\"]}"
+       </code>
 - Application configurations (list):
     <code>[application_name]:[sub_application]:configs:main</code>
+    - stores a list of json objects with name, location, and value
+    - EXAMPLE
+	    <code>> lrange app:sub_app:configs:main 0 -1</code>
+	    <code>
+	    1) "{\"name\":\"config_one.xml\",\"data\":\"PHJhdGUtbGltaXRpbmcgZGF0YXN0b3JlPSJkaXN0cmlidXRlZC9oYXNoLXJpbmciIHVzZS1jYXB0dXJlLWdyb3Vwcz0iZmFsc2UiIHhtbG5zPSJodHRwOi8vZG9jcy5yYWNrc3BhY2VjbG91ZC5jb20vcmVwb3NlL3JhdGUtbGltaXRpbmcvdjEuMCI+DQogICA8cmVxdWVzdC1lbmRwb2ludCB1cmktcmVnZXg9Ii9saW1pdHMiIGluY2x1ZGUtYWJzb2x1dGUtbGltaXRzPSJmYWxzZSIgLz4NCiANCiAgIDxsaW1pdC1ncm91cCBpZD0ibGltaXRlZCIgZ3JvdXBzPSJCRVRBX0dyb3VwIElQX1N0YW5kYXJkIiBkZWZhdWx0PSJmYWxzZSI+DQogICAgICA8bGltaXQgdXJpPSIqIiB1cmktcmVnZXg9Ii9zb21ldGhpbmcvKC4qKSIgaHR0cC1tZXRob2RzPSJQVVQiIHVuaXQ9Ik1JTlVURSIgdmFsdWU9IjEwIiAvPg0KICAgICAgPGxpbWl0IHVyaT0iKiIgdXJpLXJlZ2V4PSIvc29tZXRoaW5nLyguKikiIGh0dHAtbWV0aG9kcz0iR0VUIiB1bml0PSJNSU5VVEUiIHZhbHVlPSIxMCIgLz4NCiAgIDwvbGltaXQtZ3JvdXA+DQogDQogIDxsaW1pdC1ncm91cCBpZD0ibGltaXRlZC1hbGwiIGdyb3Vwcz0iTXlfR3JvdXAiIGRlZmF1bHQ9InRydWUiPg0KICAgICAgPGxpbWl0IHVyaT0iKiIgdXJpLXJlZ2V4PSIvc29tZXRoaW5nLyguKikiIGh0dHAtbWV0aG9kcz0iQUxMIiB1bml0PSJIT1VSIiB2YWx1ZT0iMTAiIC8+DQogICA8L2xpbWl0LWdyb3VwPg0KPC9yYXRlLWxpbWl0aW5nPg==\"}"  
+        </code>
