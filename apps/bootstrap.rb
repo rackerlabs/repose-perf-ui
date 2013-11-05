@@ -6,7 +6,7 @@ require 'redis'
 
 module Apps
   class Bootstrap
-    attr_reader :config
+    attr_reader :config, :db
     @@applications ||= []
 
     def self.logger
@@ -34,6 +34,7 @@ module Apps
     end
 
     def self.application_list
+      load_applications if @@applications.empty?
       @@applications
     end
 

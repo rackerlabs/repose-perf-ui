@@ -14,3 +14,11 @@ hERmes is an aggregation tool for disparate data for analytical purposes.  It ta
 <h2>Testing</h2>
 hERmes has extensive testing with Cucumber (<code>cucumber tests/</code>) and unit test (<code>ruby tests/Models/test_helper.rb</code>).  The code coverage is compiled by simplecov.
 
+<h2>Data store configuration</h2>
+- Starting and stopping recordings:
+    <code>[application_name]:test:[unique_id]:[sub_application]:[test_type]:start</code>
+    - stores timestamp
+- Test configurations:
+	<code>[application_name]:[sub_application]:tests:setup:main:request_response</code>
+- Application configurations (list):
+    <code>[application_name]:[sub_application]:configs:main</code>

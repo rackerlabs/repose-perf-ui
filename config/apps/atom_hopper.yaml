@@ -1,9 +1,0 @@
-application:
-  name: Atom Hopper
-  location: apps/atom_hopper/bootstrap.rb
-  plugins:
-    location: plugins/ubuntu_perf_mon/plugin.rb
-    location: plugins/postgres/plugin.rb
-    location: plugins/atom_feed/plugin.rb
-    location: plugins/atom_graphite/plugin.rb
-

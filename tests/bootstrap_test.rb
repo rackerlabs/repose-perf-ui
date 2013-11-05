@@ -63,7 +63,7 @@ class BootstrapTest < Test::Unit::TestCase
     assert_not_nil(Apps::Bootstrap.application_list)
     repose_bootstrap = Apps::Bootstrap.application_list.find {|a| a[:id] == 'repose'}[:klass]
     timestamp = Time.now + 1000 
-    response = repose_bootstrap.new.start_test_recording(1, timestamp)
+    response = repose_bootstrap.new.start_test_recording(1, 'main', 'load', timestamp)
     assert_equal("OK", response[:response])
     assert_equal(timestamp, response[:time])
   end
@@ -83,7 +83,7 @@ class BootstrapTest < Test::Unit::TestCase
     repose_bootstrap = Apps::Bootstrap.application_list.find {|a| a[:id] == 'repose'}[:klass]
     repose_bootstrap.new.start_test_recording(1)
     timestamp = Time.now + 1000
-    response = repose_bootstrap.new.stop_test_recording(1, timestamp)
+    response = repose_bootstrap.new.stop_test_recording(1, 'main', 'load', timestamp)
     assert_equal("OK", response)
   end
   

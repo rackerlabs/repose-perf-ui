@@ -3,7 +3,7 @@ require 'json'
 require 'logging'
 require 'rbconfig'
 
-require_relative './Models/bootstrap.rb'
+require_relative './apps/bootstrap.rb'
 require_relative './Models/models.rb'
 require_relative './Models/perftest.rb'
 require_relative './Models/test.rb'
@@ -31,19 +31,17 @@ class PerfApp < Sinatra::Base
 =begin
   load all plugins based on OS and application
   TODO: the plugin load will need to move down based on application desired.  Also each application will now have sub-apps to support repose's multiple client configurations vs. Atom Hopper single configuration
-=end
-  
-
   bootstrap_config = Models::Bootstrap.new.config
   plugins = Models::Bootstrap.new.load_plugins
-  
 puts "plugins: #{plugins}"
+  
   load_test_list = {
     :load_test => Models::PerfTest.new(1, 'Load Test', 'Test description'),
     :duration_test => Models::PerfTest.new(2, 'Duration Test','Test description'),
     :benchmark_test => Models::PerfTest.new(3, 'Benchmark Test','Test description'),
     :adhoc_test => Models::PerfTest.new(4, 'Adhoc Test','Test description')
   }
+=end 
 
   results = nil
 
@@ -51,37 +49,67 @@ puts "plugins: #{plugins}"
   configure do
     set :views, "#{File.dirname(__FILE__)}/views"
     set :public_dir, "#{File.dirname(__FILE__)}/public"
+    enable :show_exceptions
   end
 
   get '/' do
     erb :index, :locals => {
-      :data => {
-        :name => bootstrap_config['name'], 
-        :description => bootstrap_config['description'],
-        :title => bootstrap_config['name']
+      :data => Apps::Bootstrap.application_list
+    }    
+  end
+  
+  get '/:application' do |application|
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app
+      new_app = app[:klass].new
+      erb :app_index, :locals => {
+        :data => {
+          :name => new_app.config['application']['name'], 
+          :description => new_app.config['application']['description'],
+          :title => new_app.config['application']['name'],
+          :application => app[:id]
+        }
       }
-    }
-  end
-
-  get '/applications' do
-    erb :applications, :locals => {
-      :application_list => bootstrap_config['applications'],
-      :title => bootstrap_config['name']
-    }
-  end
-
-  get '/applications/:name' do |name|
-    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
-    if app 
-      app[:app_id] = name.to_sym
-      app[:request_response_list] = Models::Test.new.get_setup_requests_by_name(name)
-      app[:config_list] = Models::Configuration.new.get_by_name(name)
-      app[:test_location] = Models::TestLocationFactory.get_by_name(name)
-      app[:title] = bootstrap_config['name']
-      erb :app_detail, :locals => {:app_detail => app}
     else
       status 404
-      body "Not found"
+    end
+  end
+
+  get '/:application/applications' do |application|
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app
+      new_app = app[:klass].new
+      erb :applications, :locals => {
+        :application_list => new_app.config['application']['sub_apps'],
+        :title => new_app.config['application']['name'],
+        :application => app[:id]
+      }
+    else
+      status 404
+    end
+  end
+
+  get '/:application/applications/:name' do |application, name|
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app 
+      new_app = app[:klass].new
+      sub_app = new_app.config['application']['sub_apps'].find {|k, v| v['id'] == name}
+      if sub_app
+        #app[:config_list] = Models::Configuration.new.get_by_name(name)
+        #app[:test_location] = Models::TestLocationFactory.get_by_name(name)
+        erb :app_detail, :locals => {
+          :application => app[:id],
+          :sub_app_id => name.to_sym,
+          :title => new_app.config['application']['name'],
+          :request_response_list => Models::Test.new(new_app.db).get_setup_requests_by_name(app[:id], name),
+          :config_list => Models::Configuration.new(new_app.db).get_by_name(app[:id], name),
+          :test_location => Models::TestLocation.new('t','y','x')
+        }
+      else
+        status 404
+      end
+    else
+      status 404
     end
   end
 
@@ -95,11 +123,18 @@ puts "plugins: #{plugins}"
     end
   end
 
-  get '/tests' do
-    erb :tests, :locals => {
-      :application_list => bootstrap_config['applications'],
-      :title => bootstrap_config['name']
-    }
+  get '/:application/tests' do |application|
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app
+      new_app = app[:klass].new
+      erb :tests, :locals => {
+        :application_list => new_app.config['application']['sub_apps'],
+        :title => new_app.config['application']['name'],
+        :application => app[:id]
+      }
+    else
+      status 404
+    end
   end
 
   get '/tests/:name' do |name|

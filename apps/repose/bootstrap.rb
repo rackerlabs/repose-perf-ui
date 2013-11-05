@@ -18,12 +18,12 @@ module Apps
       @logger.debug "loaded backend: #{@db.inspect}"
     end
 
-    def start_test_recording(id, timestamp = nil)
-      super("repose:test:#{id}:start", timestamp)
+    def start_test_recording(id, sub_app = 'main', type = 'load', timestamp = nil)
+      super("repose:test:#{id}:#{sub_app}:#{type}:start", timestamp)
     end
 
-    def stop_test_recording(id, timestamp = nil)
-      super("repose:test:#{id}:start", timestamp)
+    def stop_test_recording(id, sub_app = 'main', type = 'load', timestamp = nil)
+      super("repose:test:#{id}:#{sub_app}:#{type}:start", timestamp)
     end
   end
 end
