@@ -16,6 +16,7 @@ module Apps
       end
       @db = Bootstrap.backend_connect(redis_info)
       @logger.debug "loaded backend: #{@db.inspect}"
+      
     end
 
     def start_test_recording(id, sub_app = 'main', type = 'load', timestamp = nil)

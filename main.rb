@@ -95,15 +95,13 @@ puts "plugins: #{plugins}"
       new_app = app[:klass].new
       sub_app = new_app.config['application']['sub_apps'].find {|k, v| v['id'] == name}
       if sub_app
-        #app[:config_list] = Models::Configuration.new.get_by_name(name)
-        #app[:test_location] = Models::TestLocationFactory.get_by_name(name)
         erb :app_detail, :locals => {
           :application => app[:id],
           :sub_app_id => name.to_sym,
           :title => new_app.config['application']['name'],
           :request_response_list => Models::Test.new(new_app.db).get_setup_requests_by_name(app[:id], name),
           :config_list => Models::Configuration.new(new_app.db).get_by_name(app[:id], name),
-          :test_location => Models::TestLocation.new('t','y','x')
+          :test_location => Models::TestLocationFactory.new(new_app.db).get_by_name(app[:id], name)
         }
       else
         status 404
@@ -113,13 +111,26 @@ puts "plugins: #{plugins}"
     end
   end
 
-  get '/applications/:name/test_download/:file_name' do |name, file_name|
-    begin
-      downloaded_file = Models::TestLocationFactory.get_by_name(name).download
-      send_file downloaded_file, :filename => file_name, :type => 'Application/octet-stream'
-    rescue ArgumentError => e
+  get '/:application/applications/:name/test_download/:file_name' do |application, name, file_name|
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app 
+      new_app = app[:klass].new
+      sub_app = new_app.config['application']['sub_apps'].find {|k, v| v['id'] == name}
+      if sub_app
+        begin 
+          downloaded_file =  Models::TestLocationFactory.new(new_app.db).get_by_name(app[:id], name).download
+          attachment "test_file"
+          content_type = 'Application/octet-stream'
+          body downloaded_file
+        rescue ArgumentError => e
+          status 404
+          body e.message
+        end
+      else
+        status 404
+      end
+    else
       status 404
-      body e.message
     end
   end
 
@@ -137,34 +148,47 @@ puts "plugins: #{plugins}"
     end
   end
 
-  get '/tests/:name' do |name|
-    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
-    if app
-      app[:load_test_list] = load_test_list
-      app[:app_id] = name.to_sym
-      app[:title] = bootstrap_config['name']
-      erb :tests_list, :locals => {:app_detail => app}
+  get '/:application/tests/:name' do |application, name|
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app 
+      new_app = app[:klass].new
+      sub_app = new_app.config['application']['sub_apps'].find {|k, v| v['id'] == name}
+      if sub_app
+        erb :tests_list, :locals => {
+          :application => app[:id],
+          :sub_app_id => name.to_sym,
+          :title => new_app.config['application']['name'],
+          :load_test_list => Apps::Bootstrap.test_list
+        }
+      else
+        status 404
+      end
     else
       status 404
-      body "Not found"
     end
   end
 
 =begin
   loop through plugins here
 =end
-  get '/tests/:name/:test' do |name, test|
-    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
-    if app and load_test_list.keys.include?(test.to_sym)
-      app[:results] = Results::LiveSummaryResults.start_running_results(name, test.chomp('_test'))
-      app[:result_set_list] = app[:results].summary_results 
-      app[:test_type] = test
-      app[:app_id] = name.to_sym
-      app[:title] = bootstrap_config['name']
-      erb :tests_app_test_detail, :locals => {:app_detail => app }
+  get '/:application/tests/:name/:test' do |application, name, test|
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app 
+      new_app = app[:klass].new
+      sub_app = new_app.config['application']['sub_apps'].find {|k, v| v['id'] == name}
+      if sub_app
+        erb :tests_app_test_detail, :locals => {
+          :application => app[:id],
+          :sub_app_id => name.to_sym,
+          :title => new_app.config['application']['name'],
+          :results => Results::LiveSummaryResults.start_running_results(name, test.chomp('_test')),
+          :result_set_list => Results::LiveSummaryResults.start_running_results(name, test.chomp('_test')).summary_results
+        }
+      else
+        status 404
+      end
     else
       status 404
-      body "Not found"
     end
   end
 
@@ -203,30 +227,66 @@ puts "plugins: #{plugins}"
     body response.to_json
   end
 
-  get '/results' do
-    erb :results, :locals => {
-      :application_list => bootstrap_config['applications'],
-      :title => bootstrap_config['name']
-    }
-  end
-
-  get '/results/:name' do |name|
-    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
+  get '/:application/results' do |application|
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app
-      app[:load_test_list] = load_test_list
-      app[:app_id] = name.to_sym
-      app[:title] = bootstrap_config['name']
-      erb :results_list, :locals => {:app_detail => app}
+      new_app = app[:klass].new
+      erb :results, :locals => {
+        :application_list => new_app.config['application']['sub_apps'],
+        :title => new_app.config['application']['name'],
+        :application => app[:id]
+      }
     else
       status 404
-      body "Not found"
     end
   end
 
-  get '/results/:name/:test' do |name, test|
+  get '/:application/results/:name' do |application, name|
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app 
+      new_app = app[:klass].new
+      sub_app = new_app.config['application']['sub_apps'].find {|k, v| v['id'] == name}
+      if sub_app
+        erb :results_list, :locals => {
+          :application => app[:id],
+          :sub_app_id => name.to_sym,
+          :title => new_app.config['application']['name'],
+          :load_test_list => Apps::Bootstrap.test_list
+        }
+      else
+        status 404
+      end
+    else
+      status 404
+    end
+  end
+
+  get '/:application/results/:name/:test' do |application, name, test|
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app 
+      new_app = app[:klass].new
+      sub_app = new_app.config['application']['sub_apps'].find {|k, v| v['id'] == name}
+      if sub_app
+        erb :results_app_test_detail, :locals => {
+          :application => app[:id],
+          :sub_app_id => name.to_sym,
+          :title => new_app.config['application']['name'],
+          :result_set_list => Results::PastSummaryResults.new(application, name, 
+            new_app.config['application']['type'].to_sym, test.chomp('_test')).test_results,
+          :test_type => test,
+          :plugin_list => 
+        }
+      else
+        status 404
+      end
+    else
+      status 404
+    end
+
     #get result files from file under  files/apps/:name/results/:test/summary
     app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
     if app and load_test_list.keys.include?(test.to_sym)
+      #TODO: this is where we will have bootstrap.application_type being either :comparison or :sole
       if bootstrap_config['app_type'] == 'OVERHEAD'
         app[:result_set_list] = Results::PastSummaryResults.new(name, test.chomp('_test')).overhead_test_results 
       else
@@ -234,23 +294,6 @@ puts "plugins: #{plugins}"
       end
       app[:plugin_list] = []
       plugins.each {|p| app[:plugin_list] << {:id => p.to_s, :data => p.show_plugin_names.map {|id| {:id => id[:id], :name => id[:name] } } } }
-      app[:result_set_list].each do |result|
-        
-=begin
-  
-        result.network_results = {}
-        Results::PastNetworkResults.format_network(NetworkResult.new(CpuResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:cpu,result.network_results)
-        Results::PastNetworkResults.format_network(NetworkResult.new(KernelResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:kernel,result.network_results)
-        Results::PastNetworkResults.format_network(NetworkResult.new(MemorySwapResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:memory_swap,result.network_results)
-        Results::PastNetworkResults.format_network(NetworkResult.new(MemoryPageResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:memory_page,result.network_results)
-        Results::PastNetworkResults.format_network(NetworkResult.new(MemoryUtilizationResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:memory_utilization,result.network_results)
-        Results::PastNetworkResults.format_network(NetworkResult.new(TcpFailureNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:tcp_failure,result.network_results)
-        Results::PastNetworkResults.format_network(NetworkResult.new(TcpNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:tcp,result.network_results)
-        Results::PastNetworkResults.format_network(NetworkResult.new(IpFailureNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:ip_failure,result.network_results)
-        Results::PastNetworkResults.format_network(NetworkResult.new(IpNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:ip,result.network_results)
-        Results::PastNetworkResults.format_network(NetworkResult.new(DeviceNetworkResultStrategy.new(name,test.chomp('_test'), result.id)).retrieve_average_results,:ip,result.network_results)
-=end
-      end
       app[:test_type] = test
       app[:app_id] = name
       app[:title] = bootstrap_config['name']

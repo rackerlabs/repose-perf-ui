@@ -31,13 +31,32 @@ module Results
 
   class PastSummaryResults
     include ResultModule
-    attr_reader :test_list
+    attr_reader :test_list, :store
 
-    def initialize(name, test_type, config_path = nil)
+    def initialize(application, name, application_type, test_type, db, config_path = nil)
       config = config(config_path)
-      #load all tmp_directories
       @test_list = []
       test_type.chomp!("_test")
+      
+=begin      
+      results meta are stored in application:sub_app:results:test_type:meta list
+        - {'id':id_timestamp, '[test-type]_test_[runner].json':'base64', 'auth_responder.js':'base64', 'jmxparams.json':'base64'}
+      #results configs are stored in application:sub_app:results:test_type:configs hash
+        - {'id':id_timestamp, 'config.xml':'base64'}
+      #results results are stored in application:sub_app:results:test_type:results hash
+        - {'id':id_timestamp, 'summary.log': 'base64'}
+=end
+      @store = Redis.new(db)
+      
+      meta_results = @store.hgetall("#{application}:#{name}:results:#{test_type}:meta")
+      config_results = @store.hgetall("#{application}:#{name}:results:#{test_type}:configs")
+      result_results = @store.hgetall("#{application}:#{name}:results:#{test_type}:results")
+      
+      meta_results.each do |meta|
+        Apps::Bootstrap.runner_list
+      end
+      
+      
       folder_location = "#{config['home_dir']}/files/apps/#{name}/results/#{test_type}"
 
       Dir.glob("#{folder_location}/tmp_*").each do |entry| 

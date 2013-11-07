@@ -8,6 +8,7 @@ module Apps
   class Bootstrap
     attr_reader :config, :db
     @@applications ||= []
+    @@test_list ||= []
 
     def self.logger
       Logging.color_scheme( 'bright',
@@ -64,6 +65,15 @@ module Apps
         db = {:host => config['redis']['host'], :port => config['redis']['port'], :db => config['redis']['db']}
       end
       db
+    end
+    
+    def self.test_list()
+      if @@test_list.empty?
+        config = YAML.load_file(File.expand_path("config/config.yaml", Dir.pwd))
+        @@test_list = config['test_list']
+        logger.debug "loaded test list: #{@@test_list.inspect}"
+      end
+      @@test_list
     end
 
     def load_plugins

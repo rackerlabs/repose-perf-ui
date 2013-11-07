@@ -1,21 +1,33 @@
 module Models
   class TestLocationFactory
     extend ResultModule
+    
+    attr_reader :store
+    
+    def initialize(db)
+      @store = Redis.new(db)
+    end
+    
 
-    def self.get_by_name(app_name)
-      test_location_dir = "#{config['home_dir']}/files/apps/#{app_name}/tests/setup/main"
-      test_file = Dir.entries(test_location_dir).find { |file_name| file_name.start_with?("test_")} if Dir.exists?(test_location_dir)
-      raise ArgumentError, "No test file exists for #{app_name}" unless test_file
-      
-      case File.extname(test_file)
-      when ".jmx"
-        href = test_file
-        type = :jmeter
-      else
-        raise ArgumentError, "Unknown test file for #{app_name} (#{test_file})"
+    def get_by_name(app_name, name)
+      test_values = @store.hgetall("#{app_name}:#{name}:tests:setup:main:script")
+      raise ArgumentError, "No test file exists for #{app_name} and #{name}" unless test_values
+      href, type = ''
+      test_values.each do |key, value|
+        if key.include?("type")
+          case value
+          when "jmeter"
+            type = :jmeter
+          else
+            raise ArgumentError, "Unknown test file for #{app_name} (#{test_file})"
+          end
+        end 
+        if key.include?("test")
+          href = Base64.decode64(value)
+        end 
       end
 
-      return TestLocation.new(href,type,test_location_dir)
+      return TestLocation.new(href, type)
     end
 
     def self.get_by_file_location(file_location)
@@ -38,16 +50,15 @@ module Models
   class TestLocation
     include Models
 
-    attr_reader :href, :type, :test_location_dir 
+    attr_reader :href, :type 
     
-    def initialize(href,type,location)
+    def initialize(href,type)
       @href = href
       @type = type
-      @test_location_dir = location
     end
 
     def download
-      "#{@test_location_dir}/#{@href}"
+      @href
     end
   end
 end
