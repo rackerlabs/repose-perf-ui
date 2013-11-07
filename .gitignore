@@ -6,3 +6,9 @@ nohup.out
 *.dot
 config.yaml
 */results/*
+results/*
+files/apps/passthrough/results/*
+coverage/*
+*.png
+*.db
+*.lock

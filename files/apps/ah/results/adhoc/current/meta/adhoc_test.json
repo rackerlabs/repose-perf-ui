@@ -1,9 +1,0 @@
-{
-  "node_count": 2,
-  "runner":"jmeter",
-  "start":"1383853130000",
-  "stop":"1383856730000",
-  "tag" : "AKKA ClientAuthN against origin service",
-  "id" : "jenkins-repose-pt-static-adhoc-239",
-  "test_type": "adhoc"
-}

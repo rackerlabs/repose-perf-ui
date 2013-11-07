@@ -2,7 +2,7 @@
 
 <!-- To configure Repose see: http://wiki.openrepose.org/display/REPOSE/Configuration -->
 <system-model xmlns="http://docs.rackspacecloud.com/repose/system-model/v2.0">
-  <repose-cluster id="repose">
+  <repose-cluster id="repose" rewrite-host-header="false">
     <nodes>
         <% @nodes.each_index do |index| %>
         <node id="repose-<%= index %>" hostname="<%= @nodes[index] %>" http-port="7070"/>
@@ -11,8 +11,8 @@
     <filters>
     </filters>
     <destinations>
-      <endpoint id="passthrough_localhost" protocol="http" hostname="localhost" root-path="" port="8080" default="true"/>
+      <!-- Update this endpoint if you want Repose to send requests to a different service -->
+      <endpoint id="target" protocol="http" hostname="localhost" root-path="/" port="8080" default="true"/>
     </destinations>
   </repose-cluster>
 </system-model>
-
