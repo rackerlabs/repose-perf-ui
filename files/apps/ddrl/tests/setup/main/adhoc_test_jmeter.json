@@ -1,4 +1,4 @@
 {
   "threads":20,
-  "rampup":1800
+  "rampup":900
 }

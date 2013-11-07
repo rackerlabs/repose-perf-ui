@@ -5,7 +5,7 @@
   <repose-cluster id="repose">
     <nodes>
         <% @nodes.each_index do |index| %>
-        <node id="repose-<%= index %>" hostname="<%= @nodes[index][:address] %>" http-port="7070"/>
+        <node id="repose-<%= index %>" hostname="<%= @nodes[index] %>" http-port="7070"/>
         <% end %>
     </nodes>
     <filters>

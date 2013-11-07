@@ -5,4 +5,4 @@ nohup.out
 *swp
 *.dot
 config.yaml
-results/*
+*/results/*

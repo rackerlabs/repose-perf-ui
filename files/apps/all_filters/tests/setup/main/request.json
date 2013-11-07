@@ -1,0 +1,25 @@
+{
+"tests":
+[
+  {
+    "request_id": 1,
+    "method": "GET",
+    "uri": "/v1.0/{user}/flavors",
+    "headers": [
+      "x-auth-token: valid-admin-token${user}",
+      "x-auth-project-id: test",
+      "accept: application/json"
+    ]
+  },
+  {
+    "request_id": 2,
+    "method": "GET",
+    "uri": "/v1.0/{user}/limits",
+    "headers": [
+      "x-auth-token: valid-admin-token${user}",
+      "x-auth-project-id: test",
+      "accept: application/json"
+    ]
+  }
+]
+}

@@ -10,6 +10,15 @@ module Models
         temp_hash[:average] = average
         temp_hash[:errors] = errors
       end 
+      if temp_hash[:length].nil?
+        summary = `tail -1 #{summary_location}`
+        summary.scan(/summary =\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/).map do |time_offset,throughput,average,errors| 
+          temp_hash[:length] = time_offset
+          temp_hash[:throughput] = throughput
+          temp_hash[:average] = average
+          temp_hash[:errors] = errors
+        end
+      end 
       test_hash.merge!(temp_hash) 
       test_hash
     end
