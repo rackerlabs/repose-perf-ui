@@ -4,6 +4,47 @@
       "port" : "9999",
       "host" : "localhost",
       "queries" : [ 
+	{
+      	  "obj" : "\"repose-repose-0-com.rackspace.papi\":type=\"FilterProcessingTime\",scope=\"Delay\",name=*",
+      	  "attr" : [ "75thPercentile", "Mean" ],
+          "outputWriters" : [
+            {
+              "@class" : "com.googlecode.jmxtrans.model.output.KeyOutWriter",
+              "settings" : {
+                "outputFile" : "/home/repose/logs/jmxdata.out",
+                "debug":true,
+                "typeNames": ["name"]
+              }
+            }
+          ]
+    	},
+	{
+      	  "obj" : "\"repose-repose-1-com.rackspace.papi\":type=\"FilterProcessingTime\",scope=\"Delay\",name=*",
+      	  "attr" : [ "75thPercentile", "Mean" ],
+          "outputWriters" : [
+            {
+              "@class" : "com.googlecode.jmxtrans.model.output.KeyOutWriter",
+              "settings" : {
+                "outputFile" : "/home/repose/logs/jmxdata.out",
+                "debug":true,
+                "typeNames": ["name"]
+              }
+            }
+          ]
+    	},
+        {
+          "outputWriters" : [ 
+            {
+              "@class" : "com.googlecode.jmxtrans.model.output.KeyOutWriter",
+              "settings" : {
+                "outputFile" : "/home/repose/logs/jmxdata.out",
+                "typeNames": ["name"]
+              }
+            } 
+          ],
+          "obj" : "repose-node-0-com.rackspace.papi:type=Memory",
+          "attr" : [ "HeapMemoryUsage", "NonHeapMemoryUsage" ]
+        }, 
         {
           "outputWriters" : [ 
             {

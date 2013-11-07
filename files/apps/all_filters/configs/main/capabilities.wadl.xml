@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application xmlns="http://wadl.dev.java.net/2009/02"
+             xmlns:xs="http://www.w3.org/2001/XMLSchema">
+   <resource_type id="List_Versions">
+      <resource path="/">
+         <method name="GET">
+            <doc title="List Versions">
+                        WRITEME
+                    </doc>
+         </method>
+      </resource>
+   </resource_type>
+   <resource_type id="List_Version_Details">
+      <resource path="/v1.0">
+         <method name="GET">
+            <doc title="List Version Details">
+                        WRITEME
+                    </doc>
+         </method>
+      </resource>
+   </resource_type>
+   <resource_type id="Create_Servers">
+      <resource path="/v1.0/{tenantId}/servers">
+         <param style="template" type="xs:string" name="tenantId"/>
+         <method name="POST">
+            <doc title="Create Database Instance">
+                        WRITEME
+                    </doc>
+         </method>
+      </resource>
+   </resource_type>
+   <resource_type id="List_Servers">
+      <resource path="/v1.0/{tenantId}/servers">
+         <param style="template" type="xs:string" name="tenantId"/>
+         <method name="GET">
+            <doc title="List All Database Instances">
+                        WRITEME
+                    </doc>
+         </method>
+      </resource>
+   </resource_type>
+   <resource_type id="List_Server">
+      <resource path="/v1.0/{tenantId}/servers/{instanceId}">
+         <param style="template" type="xs:string" name="tenantId"/>
+         <param style="template" type="xs:string" name="instanceId"/>
+         <method name="GET">
+            <doc title="List Database Instance Status and Details">
+                        WRITEME
+                    </doc>
+         </method>
+      </resource>
+   </resource_type>
+</application>

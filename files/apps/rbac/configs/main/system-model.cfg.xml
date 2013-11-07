@@ -9,6 +9,10 @@
         <% end %>
     </nodes>
     <filters>
+      <filter name="content-normalization" />
+      <filter name="http-logging" />
+      <filter name="client-auth" />
+      <filter name="api-validator" />
     </filters>
     <destinations>
       <!-- Update this endpoint if you want Repose to send requests to a different service -->

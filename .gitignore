@@ -5,6 +5,7 @@ nohup.out
 *swp
 *.dot
 config.yaml
+*/results/*
 results/*
 files/apps/passthrough/results/*
 coverage/*

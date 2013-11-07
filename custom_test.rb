@@ -153,6 +153,7 @@ if opts[:action] == 'stop'
     system "ssh root@#{server} -f 'service sysstat stop '"
   end
 elsif opts[:action] == 'start'
+  logger.debug "directory check: #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current"
   raise ArgumentError, "Test already running" if Dir.exists?("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current")
   #setup directories
   source_dir = "#{config['home_dir']}/files/apps/#{opts[:app]}/tests/setup/main/"
@@ -241,10 +242,18 @@ elsif opts[:action] == 'start'
     logger.info "started mock on #{server}"
     #download repose
     if opts[:with_repose]
-      unless opts[:release].empty?
-        system "ssh root@#{server} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --version #{opts[:release]}'" 
+      if opts[:release].empty?
+        #add build from branch here 
+        logger.info "copy over repose-valve, extensions filter bundle, and filter bundle"
+        server.scp "/home/jenkins/adhoc/project-set/core/valve/target/repose-valve.jar", "/home/repose/usr/share/repose/"
+        Dir.glob("/home/jenkins/.m2/repository/com/rackspace/papi/components/extensions/extensions-filter-bundle/*-SNAPSHOT/*.ear") { |file| server.scp file, "/home/repose/usr/share/repose/filters/extensions-filter-bundle.ear"}
+        Dir.glob("/home/jenkins/.m2/repository/com/rackspace/papi/components/filter-bundle/*-SNAPSHOT/*.ear") { |file| server.scp file, "/home/repose/usr/share/repose/filters/filter-bundle.ear"}
       else
-        system "ssh root@#{server} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --snapshot'"       
+        if opts[:release] == 'snapshot'
+          system "ssh root@#{server} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --snapshot'"      
+        else
+          system "ssh root@#{server} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --version #{opts[:release]}'" 
+        end
       end
       logger.debug "stop jmxtrans"
       system "ssh root@#{server} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
@@ -266,7 +275,7 @@ elsif opts[:action] == 'start'
   logger.debug "tag: #{opts[:tag]}"
   test_type_template = opts[:with_repose] ? "repose_test" : "origin_test"
   test_json_contents = TestTemplate.new(start_time, end_time, opts[:tag], opts[:id], opts[:test_type], File.read("#{target_dir}/#{opts[:test_type]}_test.json")).render
-  File.open("#{target_dir}/load_test.json", 'w') { |f| f.write(test_json_contents) }
+  File.open("#{target_dir}/#{opts[:test_type]}_test.json", 'w') { |f| f.write(test_json_contents) }
   logger.debug test_json_contents
   logger.debug "took care of test json content"
 
@@ -299,10 +308,11 @@ elsif opts[:action] == 'start'
   system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test.jmx -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{lb_ip} -Jthreads=#{runner_json['threads']} -Jramp=#{runner_json['rampup']} -Jport=80 -Jduration=#{length * 60 * 1000} >> /home/apache/summary.log & '"
   
   until Time.now.to_i * 1000 >= end_time
-    logger.debug "time now: #{Time.now.to_i}.  waiting until #{end_time}"
+    logger.debug "time now: #{Time.now.to_i}000.  waiting until #{end_time}"
     sleep(30)
   end
   system "scp root@#{test_agent}:/home/apache/summary.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/summary.log"
+  system "ssh root@#{test_agent} -f '/home/apache/apache-jmeter-2.10/bin/shutdown.sh ; sleep 10 '"
   system "ssh root@#{test_agent} 'rm /home/apache/summary.log '"  
 end
 

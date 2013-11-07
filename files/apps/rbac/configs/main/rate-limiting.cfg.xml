@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rate-limiting datastore="distributed/hash-ring" overLimit-429-responseCode="false" xmlns="http://docs.rackspacecloud.com/repose/rate-limiting/v1.0">
+  <request-endpoint uri-regex="^/v\d+\.\d+/\.+/limits/" include-absolute-limits="false"/>
+<limit-group id="default" groups="default_group" default="true">
+    <!-- Versions -->
+    <limit uri="/*" uri-regex="/$" http-methods="GET" unit="MINUTE" value="100"/>
+    <limit uri="/*" uri-regex="/v\d+\.\d+/$" http-methods="GET" unit="MINUTE" value="100"/>
+    <limit uri="/*" uri-regex="/v\d+\.\d+/(\d+)/backups$" http-methods="POST" unit="MINUTE" value="5"/>
+    <limit uri="/*" uri-regex="/v\d+\.\d+/(\d+)/backups/(.+)$" http-methods="GET" unit="MINUTE" value="1000"/>
+    <limit uri="/*" uri-regex="/v\d+\.\d+/(\d+)/backups$" http-methods="GET" unit="MINUTE" value="1000"/>
+    <!-- Flavors -->
+    <limit uri="/*" uri-regex="/v\d+\.\d+/(\d+)/flavors$" http-methods="GET" unit="MINUTE" value="1000"/>
+    <limit uri="/*" uri-regex="/v\d+\.\d+/(\d+)/flavors/(\d+)$" http-methods="GET" unit="MINUTE" value="1000"/>
+</limit-group>
+</rate-limiting>
