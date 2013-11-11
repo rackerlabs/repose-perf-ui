@@ -39,15 +39,17 @@ class CpuResultStrategy < AbstractStrategy
     super(name,test_type,id,config_path)
   end 
 
-  def populate_metric(entry, id, start, stop)
-    Dir.glob("#{entry}/sysstats.log*").each do |sysstats_file|
+  def populate_metric(entries, fs_ip, id, start, stop)
+    entries.each do |entry|
       #execute file and get back io results
-      io_results = `sar -u -f #{sysstats_file}`.split(/\r?\n/)
-      io_results.each do |result|
+      #sar -u -f will execute on store_data and not here
+      #io_results = `sar -u -f #{entry}`.split(/\r?\n/)
+      open("http://#{fs_ip}#{entry}").readlines.each do |result|
+      #io_results.each do |result|
         result.scan(/Average:\s+(\S+)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)$/).map do |cpu,user,nice,system,iowait,steal,idle|
           #get device name and then time
           #only use time that's between start and end (in the 24 hour period the time has to be between those 2)
-          dev = "#{File.basename(sysstats_file)}-#{cpu}"
+          dev = "#{File.basename(entry)}-#{cpu}"
           initialize_metric(@average_metric_list,"%user",dev)
           @average_metric_list["%user"].find {|key_data| key_data[:dev_name] == dev}[:results] = user
           initialize_metric(@average_metric_list,"%nice",dev)
@@ -62,7 +64,7 @@ class CpuResultStrategy < AbstractStrategy
           @average_metric_list["%idle"].find {|key_data| key_data[:dev_name] == dev}[:results] = idle
         end
         result.scan(/(\d+:\d+:\d+ \S+)\s+(\S+)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)$/).map do |time, cpu,user,nice,system,iowait,steal,idle|
-          dev = "#{File.basename(sysstats_file)}-#{cpu}"
+          dev = "#{File.basename(entry)}-#{cpu}"
           initialize_metric(@detailed_metric_list,"%user",dev)
           @detailed_metric_list["%user"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => user}
           initialize_metric(@detailed_metric_list,"%nice",dev)

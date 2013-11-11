@@ -92,21 +92,21 @@ class UbuntuPerfmonPlugin < Plugin
       ]
     end
 
-    def show_summary_data(application, name, test, id, test_id, options=nil)
+    def show_summary_data(app, application, name, test, id, test_id, options=nil)
       network_strategy = UbuntuPerfmonPlugin.show_plugin_names.find {|i| i[:id] == id }
-      PastNetworkResults.format_network(
-        NetworkResult.new(
-          network_strategy[:klass].new(
-            application, 
-            name,
-            test.chomp('_test'), 
-            test_id
-          )
-        ).retrieve_average_results,
-        network_strategy[:id].to_sym,
-        {},
-        network_strategy[:klass].metric_description
-      )
+      store = Redis.new(app.db)
+      #get meta results and either 
+      meta_results = store.hgetall("#{application}:#{name}:results:#{test_type}:#{id}:meta")
+      test_json = JSON.parse(meta_results['test'])
+      
+      if application_type == :comparison
+        first_result = retrieve_average_results(app, application, name, test, test_id, test_json, network_strategy)
+        guid = test_json['comparison_guid']
+        second_result = retrieve_average_results(app, application, name, test, guid, test_json, network_strategy)
+        first_result.zip(second_result)
+      else
+        retrieve_average_results(app, application, name, test, test_id, network_strategy)
+      end
     end
 
 =begin
@@ -143,5 +143,23 @@ class UbuntuPerfmonPlugin < Plugin
       #this is where the data will be loaded
       #TODO: set up an adapter (either scp, local file store, rest api, DB) and pull data according to timestamps.  Save in Redis
       #redis will zip data up and store it in app_plugin_start_end key and zipped value.  Maybe should be Mongo instead or Riak?
+    end
+    
+    def retrieve_average_results(app, application, name, test, test_id, test_json, network_strategy)
+      PastNetworkResults.format_network(
+          NetworkResult.new(
+            network_strategy[:klass].new(
+              app,
+              application, 
+              name,
+              test.chomp('_test'), 
+              test_id,
+              test_json
+            )
+          ).retrieve_average_results,
+          network_strategy[:id].to_sym,
+          {},
+          network_strategy[:klass].metric_description
+        )
     end
   end

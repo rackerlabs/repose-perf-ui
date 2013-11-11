@@ -102,9 +102,8 @@ hERmes has extensive testing with Cucumber (<code>cucumber tests/</code>) and un
             - start - ticks of when test started
             - stop - ticks of when test stopped
             - description - description of the test.  For comparison apps, this describes the difference between the two tests
-            - name - name of the test.  For comparison apps, the tests that are to be combined MUST HAVE THE SAME NAME
-            
-                - for plugins, this would be usable when you want to pull overhead data (get the same name from another guid)
+            - comparison_guid - for comparison apps, this is used to map the other guid.  The two tests that are to be combined must link to each other.  Only present for comparison apps (where you always want to check overhead)
+            - name - name of the test.
                 
         - request -> json object with request information
         - response -> json object with response information

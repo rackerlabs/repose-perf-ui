@@ -28,15 +28,6 @@ class PerfApp < Sinatra::Base
   logger = Logging.logger(STDOUT)
   logger.level = :debug
 
-
-=begin
-  load all plugins based on OS and application
-  TODO: the plugin load will need to move down based on application desired.  Also each application will now have sub-apps to support repose's multiple client configurations vs. Atom Hopper single configuration
-  bootstrap_config = Models::Bootstrap.new.config
-  plugins = Models::Bootstrap.new.load_plugins
-puts "plugins: #{plugins}"
-=end 
-
   results = nil
 
   # In your main application file
@@ -219,7 +210,7 @@ puts "plugins: #{plugins}"
     end
   end
 
-  get '/results/:name/:test/id/:id/plugin/:plugin/:option' do |name, test, id, plugin, option|
+  get '/:application/results/:name/:test/id/:id/plugin/:plugin/:option' do |name, test, id, plugin, option|
     #get average results for plugin
     #get detailed results for plugin to graph
     #TODO: modify the plugin show summary/detailed/order data to retrieve from specific areas the plugin's allowed to retrieve from (this may be different than the regular data store but is not recommended)
@@ -231,7 +222,10 @@ puts "plugins: #{plugins}"
       end
       if sub_app and Apps::Bootstrap.test_list.keys.include?(test)
         plugin_instance = plugins.find {|p| p.to_s == plugin }
-        summary_plugin_data = plugin_instance.new.show_summary_data(application, name, test, option, id)
+=begin
+  get summary data.  Pass in new_app, application, name, test type, plugin name, option of the plugin (strategy)
+=end
+        summary_plugin_data = plugin_instance.new.show_summary_data(new_app, application, name, test, option, id)
         detailed_plugin_data = plugin_instance.new.show_detailed_data(name, test, option, id)
         detailed_plugin_result = {}
         detailed_plugin_data.each do |key, value|

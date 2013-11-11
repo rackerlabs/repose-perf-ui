@@ -11,24 +11,26 @@ class AbstractStrategy
 
 =begin
   TODO: move folder location to redis.  Rest remains the same
+  input: 
+    app - bootstrap class (Repose, AH, etc)
+    application - app name (repose, atom_hopper, etc)
+    name - sub app name (main, all_filters, etc)
+    test_type - test type (load, adhoc, etc)
+    id - guid
+  action:
+    get data result from sysstats
+    get meta results
+    populate @average_metric_list and @detailed_metric_list lists 
 =end
-  def initialize(application, name, test_type, id, config_path)
-    config = config(config_path)
+  def initialize(app, application, name, test_type, id, test_json, config_path)
+    store = Redis.new(app.db)
+    application_type = app.config['application']['type'].to_sym
     test_type.chomp!("_test")
-    @folder_location = "#{config['home_dir']}/files/apps/#{name}/results/#{test_type}"
-    Dir.glob("#{folder_location}/tmp_*").each do |entry| 
-      if File.directory?(entry)
-        #get directory
-        #get begin time, end time, tag name in entry meta file
-#needs to take in options to split by repose vs origin
-        json_file = JSON.parse(File.read("#{entry}/meta/#{test_type}_test.json")) if File.exists?("#{entry}/meta/#{test_type}_test.json")
-#TODO: this is a hack for Repose only.  Please abstract to app-specific.
-        if json_file['id'] == id && json_file['tag'].include?("with Repose")
-          populate_metric(entry, id, json_file['start'], json_file['stop'])
-          break
-        end if json_file
-      end
-    end
+    data_result = store.hget("#{application}:#{name}:results:#{test_type}:#{id}:data", "sysstats")
+    #{'locations':['path1','path2']}
+    entries = JSON.parse(data_result)['locations']
+    
+    populate_metric(entries, fs_ip, id, test_json['start'], test_json['stop'])
   end
 
   def initialize_metric(list,key, dev, description = "")
