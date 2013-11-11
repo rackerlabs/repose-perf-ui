@@ -16,7 +16,7 @@ class CpuResultStrategy < AbstractStrategy
     }
   end
 
-  def initialize(application, name, test_type, id, config_path = nil)
+  def initialize(name,test_type,id, config_path = nil)
     @average_metric_list = {
       "%user" => [],
       "%nice" => [],

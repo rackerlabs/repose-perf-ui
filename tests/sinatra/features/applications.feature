@@ -1,38 +1,42 @@
 Feature: Application Page
 	In order to view applications
 	As a performance test user
-	I want to view the application page
+	I want to view the sub applications page for each application
 
-	Scenario: Navigate to applications page
-		When I navigate to '/applications'
+	Scenario: Navigate to sub applications page of atom_hopper application
+		When I navigate to '/atom_hopper/applications'
 		Then the response should be "200"
-		And the page should contain "dbaas,ah,csl,passthrough,ddrl,metrics_on_off" applications
+		And the page should contain "main" applications
 
-	Scenario: Navigate to dbaas application
-		When I navigate to '/applications/dbaas'
+	Scenario: Navigate to sub applications page of invalid application
+		When I navigate to '/invalid/applications'
+		Then the response should be "404"
+
+	Scenario: Navigate to main application
+		When I navigate to '/atom_hopper/applications/main'
 		Then the response should be "200"
-		And the page should contain "container_cfg_xml,client_auth_n_cfg_xml,content_normalization_cfg_xml,translation_cfg_xml" configuration
+		And the page should contain "config1_xml" configuration
 
-	Scenario: Download dbaas test runner file
-		When I click on '/applications/dbaas/test_download/test_dbaas.jmx'
+	Scenario: Download main test runner file
+		When I click on '/atom_hopper/applications/main/test_download/jmeter'
 		Then the response should be "200"
-		And the download page should match the "jmeter_dbaas" version
+		And the download page should match the "jmeter_main" version
 
-	Scenario: Navigate to ah application
-		When I navigate to '/applications/ah'
-		Then the response should be "200"
-		And the page should contain "container_cfg_xml,client_auth_n_cfg_xml,rate_limiting_cfg_xml,translation_cfg_xml" configuration
+	Scenario: Navigate to invalid sub application of atom_hopper application
+		When I navigate to '/atom_hopper/applications/invalid'
+		Then the response should be "404"
 
-	Scenario: Download ah test runner file
-		When I click on '/applications/ah/test_download/test_ah.jmx'
-		Then the response should be "200"
-		And the download page should match the "jmeter_ah" version
-
-	Scenario: Navigate to invalid application
-		When I navigate to '/applications/invalid'
+	Scenario: Navigate to invalid sub application of invalid application
+		When I navigate to '/invalid/applications/invalid'
 		Then the response should be "404"
 
 	Scenario: Download invalid test runner file
-		When I click on '/applications/not_found/test_download/test_not_found.jmx'
+		When I click on '/atom_hopper/applications/not_found/test_download/jmeter'
 		Then the response should be "404"
-		And the error page should match the "No test file exists for not_found"
+		And the error page should match the "No test script exists for atom_hopper/not_found"
+
+	Scenario: Download test runner file from invalid application
+		When I click on '/invalid/applications/not_found/test_download/jmeter'
+		Then the response should be "404"
+		And the error page should match the "No test script exists for invalid/not_found"
+		

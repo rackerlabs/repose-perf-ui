@@ -23,40 +23,45 @@ module Models
       @store = Redis.new(db)
     end
 
-    def get_results_requests_by_file_location(test_location)
-      request_text = File.read("#{test_location}/meta/request.json")  if File.exists?("#{test_location}/meta/request.json") 
-      response_text = File.read("#{test_location}/meta/response.json") if File.exists?("#{test_location}/meta/response.json")
-      request_json = JSON.parse(request_text) if request_text && request_text.is_json?
-      response_json = JSON.parse(response_text) if response_text && response_text.is_json?
+    def get_result_requests(application, name, test_type, id)
+      requests = @store.hget("#{application}:#{name}:results:#{test_type}:#{id}:meta", "request")
+      responses = @store.hget("#{application}:#{name}:results:#{test_type}:#{id}:meta", "response")
       request_list = []
       response_list = [] 
       coder = HTMLEntities.new
-      request_json["tests"].each do |request|
-        request_list << Models::Request.new(request["method"], request["uri"], request["headers"], coder.encode(request["body"]))
-      end if request_json
-      response_json["tests"].each do |response|
-        response_list << Models::Response.new(response["response_code"])
-      end if response_json
+      
+      requests_json = JSON.parse(requests) if requests
+      responses_json = JSON.parse(responses) if responses
+      
+      requests_json.each do |request|
+        request_list << Request.new(request["method"], request["uri"], request["headers"], coder.encode(request["body"]))
+      end
+      
+      responses_json.each do |response|
+        response_list << Response.new(response["response_code"])        
+      end
 
       request_list.zip(response_list)
-
     end
 
     def get_setup_requests_by_name(application, name)
-      request_responses = @store.hgetall("#{application}:#{name}:tests:setup:main:request_response")
+      requests = @store.get("#{application}:#{name}:tests:setup:request_response:request")
+      responses = @store.get("#{application}:#{name}:tests:setup:request_response:response")
       request_list = []
       response_list = [] 
       coder = HTMLEntities.new
-      request_responses.each do |key, value|
-        if key.include?("request")
-          request = JSON.parse(value) 
-          request_list << Request.new(request["method"], request["uri"], request["headers"], coder.encode(request["body"]))
-        end
-        if key.include?("response")
-          response = JSON.parse(value)  
-          response_list << Response.new(response["response_code"])
-        end
+      
+      requests_json = JSON.parse(requests) if requests
+      responses_json = JSON.parse(responses) if responses
+      
+      requests_json.each do |request|
+        request_list << Request.new(request["method"], request["uri"], request["headers"], coder.encode(request["body"]))
       end
+      
+      responses_json.each do |response|
+        response_list << Response.new(response["response_code"])        
+      end
+
       request_list.zip(response_list)
     end
 

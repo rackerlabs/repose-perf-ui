@@ -2,15 +2,16 @@ module Models
   class TestLocationFactory
     extend ResultModule
     
-    attr_reader :store
+    attr_reader :store, :fs_ip
     
-    def initialize(db)
+    def initialize(db, fs_ip)
       @store = Redis.new(db)
+      @fs_ip = fs_ip
     end
     
 
     def get_by_name(app_name, name)
-      test_values = @store.hgetall("#{app_name}:#{name}:tests:setup:main:script")
+      test_values = @store.hgetall("#{app_name}:#{name}:tests:setup:script")
       raise ArgumentError, "No test file exists for #{app_name} and #{name}" unless test_values
       href, type = ''
       test_values.each do |key, value|
@@ -23,27 +24,28 @@ module Models
           end
         end 
         if key.include?("test")
-          href = Base64.decode64(value)
+          location = JSON.parse(value)
+          href = open("http://#{@fs_ip}#{location['location']}") {|f| f.read }
         end 
       end
 
       return TestLocation.new(href, type)
     end
 
-    def self.get_by_file_location(file_location)
-      test_location_dir = "#{file_location}/meta"
-      test_file = Dir.entries(test_location_dir).find { |file_name| file_name.start_with?("test_")}  if Dir.exists?(test_location_dir)
-      raise ArgumentError, "No test file exists for #{file_location}" unless test_file
-      
-      case File.extname(test_file)
-      when ".jmx"
-        href = test_file
+    def get_result(application, name, test_type, id)
+      script = @store.hget("#{application}:#{name}:results:#{test_type}:#{id}:meta", "script")
+      raise ArgumentError, "No test file exists for #{app_name} and #{name}" unless script
+      href, type = ''
+      script_json = JSON.parse(script)
+      case script_json['type']
+      when "jmeter"
         type = :jmeter
       else
-        raise ArgumentError, "Unknown test file for #{file_location} (#{test_file})"
+        raise ArgumentError, "Unknown test file for #{app_name} (#{test_file})"
       end
+      href = open("http://#{@fs_ip}#{script_json['location']}") {|f| f.read }
 
-      return TestLocation.new(href,type,test_location_dir)
+      return TestLocation.new(href, type)
     end
   end
 

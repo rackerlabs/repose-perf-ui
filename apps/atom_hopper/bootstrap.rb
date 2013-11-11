@@ -16,6 +16,8 @@ module Apps
       end
       @db = Bootstrap.backend_connect(redis_info)
       @logger.debug "loaded backend: #{@db.inspect}"
+      @fs_ip = Bootstrap.backend_fs
+      @logger.debug "loaded ip: #{@fs_ip}"      
     end
 
     def start_test_recording(id, timestamp = nil)

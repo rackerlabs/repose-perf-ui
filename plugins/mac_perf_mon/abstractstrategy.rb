@@ -12,7 +12,7 @@ class AbstractStrategy
 =begin
   TODO: move folder location to redis.  Rest remains the same
 =end
-  def initialize(application, name, test_type, id, config_path)
+  def initialize(name, test_type,id, config_path)
     config = config(config_path)
     test_type.chomp!("_test")
     @folder_location = "#{config['home_dir']}/files/apps/#{name}/results/#{test_type}"

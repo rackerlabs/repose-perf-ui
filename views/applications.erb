@@ -29,10 +29,10 @@
         <li class="active">Applications</li>
       </ul>
       <div class="list-group">
-        <% application_list.each do |key, item| %>
-        <a href="/<%= application %>/applications/<%= item['id'] %>" class="list-group-item">
-          <h4 class="list-group-item-heading"><%= item['name'] %></h4>
-          <p class="list-group-item-text"><%= item['description'] %></p>
+      	<% application_list.each do |app| %>
+        <a href="/<%= application %>/applications/<%= app['id'] %>" class="list-group-item">
+          <h4 class="list-group-item-heading"><%= app['name'] %></h4>
+          <p class="list-group-item-text"><%= app['description'] %></p>
         </a>
         <% end %>
       </div>

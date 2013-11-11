@@ -1,4 +1,5 @@
 require_relative './../../Models/plugin.rb'
+require_relative 'results.rb'
 require_relative 'cpuresultstrategy.rb'
 require_relative 'kernelresultstrategy.rb'
 require_relative 'devicediskresultstrategy.rb'
@@ -91,19 +92,40 @@ class UbuntuPerfmonPlugin < Plugin
       ]
     end
 
-    def show_summary_data(name, test, id, test_id, options=nil)
-      network = UbuntuPerfmonPlugin.show_plugin_names.find {|i| i[:id] == id }
-      result = Results::PastNetworkResults.format_network(NetworkResult.new(network[:klass].new(name,test.chomp('_test'), test_id)).retrieve_average_results,network[:id].to_sym,{},network[:klass].metric_description)
-      puts result
-      result
+    def show_summary_data(application, name, test, id, test_id, options=nil)
+      network_strategy = UbuntuPerfmonPlugin.show_plugin_names.find {|i| i[:id] == id }
+      PastNetworkResults.format_network(
+        NetworkResult.new(
+          network_strategy[:klass].new(
+            application, 
+            name,
+            test.chomp('_test'), 
+            test_id
+          )
+        ).retrieve_average_results,
+        network_strategy[:id].to_sym,
+        {},
+        network_strategy[:klass].metric_description
+      )
     end
 
 =begin
 	show all data and return in a list of hashes
 =end
     def show_detailed_data(name, test, id, test_id, options=nil)
-      network = UbuntuPerfmonPlugin.show_plugin_names.find {|i| i[:id] == id }
-      Results::PastNetworkResults.format_network(NetworkResult.new(network[:klass].new(name,test.chomp('_test'), test_id)).retrieve_detailed_results,network[:id].to_sym,{})
+      network_strategy = UbuntuPerfmonPlugin.show_plugin_names.find {|i| i[:id] == id }
+      PastNetworkResults.format_network(
+        NetworkResult.new(
+          network_strategy[:klass].new(
+            application,
+            name,
+            test.chomp('_test'), 
+            test_id
+          )
+        ).retrieve_detailed_results,
+        network_strategy[:id].to_sym,
+        {}
+      )
     end
 
     def order_by_date(content_instance_list)

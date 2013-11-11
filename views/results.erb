@@ -29,7 +29,7 @@
         <li class="active">Results</li>
       </ul>
       <div class="list-group">
-        <% application_list.each do |key, item| %>
+        <% application_list.each do |item| %>
         <a href="/<%= application %>/results/<%= item['id'] %>" class="list-group-item">
           <h4 class="list-group-item-heading"><%= item['name'] %></h4>
           <p class="list-group-item-text"><%= item['description'] %></p>

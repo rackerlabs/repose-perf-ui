@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Bootstrap 101 Template</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="css/repose.css" rel="stylesheet" media="screen">
-    <title>Repose Performance Tests</title>
+    <title>Performance App</title>
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -15,51 +14,27 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/">Repose Perf Tests</a>
-      <div class="nav-collapse collapse bs-navbar-collapse">
-        <ul class="nav navbar-nav">
-          <li><a href="/tests">Running Tests</a></li>
-          <li><a href="/applications">Applications</a></li>
-          <li><a href="/results">Results</a></li>
-        </ul>
-      </div>
+      <a class="navbar-brand" href="/">Performance App</a>
     </div>
-    <div class="container">
-      <div class="jumbotron">
-        <h1>Repose Performance Tests</h1>
-        <p>You'll find results for all nightly performance tests running with Repose API management software.  Every application is executed under a load test, a benchmark test, and a duration test.  Load test spins up 120% of total expected load of the application and executes for 1 hour (utilizing JMeter).  Benchmark test executes concurrent user load, starting at 20 and ending at 500.  Duration test spins up 100% of total expected application load and runs for 24 hours (this is a weekend test only).  Every test is baselined against previous tests as well as against a direct call to the origin service.</p>
-        <p><a class="btn btn-primary btn-large" href="http://openrepose.org">Learn more about repose &raquo;</a></p>
-      </div>
-
-      <div class="body-content">
-
-        <!-- Example row of columns -->
-        <div class="row">
-          <div class="col-lg-4">
-            <h2>Applications</h2>
-            <p>Applications can be configured by users.  You can view application setup here and can set up/edit/delete your application.</p>
-            <p><a class="btn btn-default" href="/applications">View details &raquo;</a></p>
-          </div>
-          <div class="col-lg-4">
-            <h2>Results</h2>
-            <p>Historical results per application can be found here.  Results are split up by Repose overhead by tests (e.g. Repose duration test - origin service duration test).  Exact calls and configurations are versioned by test.</p>
-            <p><a class="btn btn-default" href="/results">View details &raquo;</a></p>
-         </div>
-          <div class="col-lg-4">
-            <h2>Running tests</h2>
-            <p>Check out which tests are running and results.</p>
-            <p><a class="btn btn-default" href="/tests">View details &raquo;</a></p>
-          </div>
-        </div>
-
-        <hr>
-
-        <footer>
-          <p>&copy; Rackspace Hosting 2013</p>
-        </footer>
-      </div>
-
-    </div> <!-- /container -->
+		<div class="modal fade" id="myModal">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		        <h4 class="modal-title">Select your application</h4>
+		      </div>
+		      <div class="modal-body">
+				<div class="list-group">
+					
+				      <a href="/atom_hopper" class="list-group-item">atom_hopper</a>
+				    
+				      <a href="/repose" class="list-group-item">repose</a>
+				    
+				</div>
+		      </div>
+		    </div><!-- /.modal-content -->
+		  </div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
     <!-- JavaScript plugins (requires jQuery) -->
     <script src="http://code.jquery.com/jquery.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
@@ -67,6 +42,10 @@
 
     <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
     <script src="js/respond.js"></script>
-    <script src="js/repose.js"></script>
+    <script type="text/javascript">
+    	$(document).ready(function() {
+    		$('#myModal').modal('show');
+    	});
+    </script>
   </body>
 </html>

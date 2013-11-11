@@ -1,24 +1,32 @@
 Feature: Results Page
 	In order to view past results
 	As a performance test user
-	I want to view the results page
+	I want to view the results page for an application
 
-	Scenario: Navigate to results page
-		When I navigate to '/results'
+	Scenario: Navigate to results page for atom_hopper application
+		When I navigate to '/atom_hopper/results'
 		Then the response should be "200"
-		And the page should contain "dbaas,ah,csl,passthrough,ddrl,metrics_on_off" applications
+		And the page should contain "main" applications
 
-	Scenario: Navigate to dbaas application results page
-		When I navigate to '/results/dbaas'
-		Then the response should be "200"
-		And the page should contain "load_test,duration_test,benchmark_test,adhoc_test" test types
-
-	Scenario: Navigate to invalid application results page
-		When I navigate to '/results/invalid'
+	Scenario: Navigate to results page for invalid app
+		When I navigate to '/invalid/results'
 		Then the response should be "404"
 
-	Scenario: Navigate to dbaas load results application results page
-		When I navigate to '/results/dbaas/load_test'
+	Scenario: Navigate to main sub application results page for atom_hopper application
+		When I navigate to '/atom_hopper/results/main'
+		Then the response should be "200"
+		And the page should contain "load_test,duration_test,stress_test,adhoc_test" test types
+
+	Scenario: Navigate to invalid application results page
+		When I navigate to '/atom_hopper/results/invalid'
+		Then the response should be "404"
+
+	Scenario: Navigate to invalid application results page for invalid application
+		When I navigate to '/invalid/results/invalid'
+		Then the response should be "404"
+
+	Scenario: Navigate to main load results for atom_hopper application
+		When I navigate to '/atom_hopper/results/main/load_test'
 		Then the response should be "200"
 		And the page should match the "dbaas_load_test_results" version
 

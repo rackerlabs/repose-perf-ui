@@ -4,19 +4,18 @@ require_relative 'models.rb'
 
 class Result
 
-  attr_reader :date, :length, :avg, :throughput, :errors, :id, :tag 
+  attr_reader :start, :length, :avg, :throughput, :errors, :id, :name, :description 
   attr_accessor :jmx_results, :network_results
 
-  def initialize(date, length, avg, throughput, errors, id, tag, jmx_results = {}, network_results = {})
-    @date = date
+  def initialize(start, length, avg, throughput, errors, name, description, id)
+    @start = start
     @avg = avg
-    @tag = tag
     @length = length
     @throughput = throughput
     @errors = errors
     @id = id
-    @jmx_results = jmx_results
-    @network_results = network_results
+    @name = name
+    @description = description
   end
 end
 
@@ -31,19 +30,14 @@ class SummaryResult
   end
 end
 
-class NetworkResult
-  attr_reader :networkStrategy
+class DetailedResult
+  attr_reader :start, :throughput, :avg, :errors
 
-  def initialize(networkStrategy)
-    @networkStrategy = networkStrategy
-  end
-
-  def retrieve_detailed_results
-    @networkStrategy.detailed_metric_list
-  end
-
-  def retrieve_average_results
-    @networkStrategy.average_metric_list
+  def initialize(start, throughput, avg, errors)
+    @start = start
+    @throughput = throughput
+    @avg = avg
+    @errors = errors
   end
 end
 

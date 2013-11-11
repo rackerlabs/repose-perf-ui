@@ -6,7 +6,7 @@ require 'redis'
 
 module Apps
   class Bootstrap
-    attr_reader :config, :db
+    attr_reader :config, :db, :fs_ip
     @@applications ||= []
     @@test_list ||= []
 
@@ -67,6 +67,29 @@ module Apps
       db
     end
     
+    def self.backend_fs
+      config = YAML.load_file(File.expand_path("config/config.yaml", Dir.pwd))
+      fs_ip = config['file_store']      
+    end
+
+    
+    def self.initialize_results
+      {
+        :comparison => {
+          :klass => Results::ComparisonResults.new,
+          :summary_view => :comparison_summary_results,
+          :detailed_view => :comparison_detailed_results,
+          :plugin_view => :comparison_plugin_results
+        },
+        :singular => {
+          :klass => Results::SingularResults.new,
+          :summary_view => :singular_summary_results,
+          :detailed_view => :singular_detailed_results,
+          :plugin_view => :singular_plugin_results
+        }
+      }
+    end
+    
     def self.test_list()
       if @@test_list.empty?
         config = YAML.load_file(File.expand_path("config/config.yaml", Dir.pwd))
@@ -79,9 +102,14 @@ module Apps
     def load_plugins
       raise NotImplementedError, 'Your configuration has not yet been instantiated.  The reason for that is most likely because you are calling load_plugins from Bootstrap itself instead of calling it from an application\'s bootstrap.' unless @config
       plugin_list = @config['application']['plugins']
-      plugin_list.each do |key, entry|
-        plugin = File.expand_path(entry, Dir.pwd) 
-        require plugin unless File.directory?(plugin)
+      @logger.debug "plugin_list: #{plugin_list}"
+      plugin_list.each do |plugin|
+        plugin.each do |key, entry|
+          @logger.debug "entry: #{entry}"
+          plugin = File.expand_path(entry, Dir.pwd) 
+          @logger.debug "plugin: #{plugin}" 
+          require plugin unless File.directory?(plugin)
+        end
       end
       Plugin.plugin_list 
     end

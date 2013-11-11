@@ -5,7 +5,7 @@ SimpleCov.start
 require 'test/unit'
 require 'yaml'
 require 'mocha/setup'
-
+=begin
 require './tests/Models/jmx_results_test.rb'
 require './tests/Models/summary_results_test.rb'
 require './tests/Models/live_summary_results_test.rb'
@@ -17,11 +17,13 @@ require './tests/Models/request_tests.rb'
 require './tests/Models/response_tests.rb'
 require './tests/Models/test_tests.rb'
 require './tests/Models/testlocation_tests.rb'
+=end
 
-system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature"
+system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature" # tests/sinatra/features/results.feature"
+=begin
 system "cucumber tests/sinatra/features/tests.feature tests/sinatra/features/results.feature tests/sinatra/features/jmx_results.feature"
 system "cucumber tests/sinatra/features/network_results.feature"
-
+=end
 =begin
 - add ability to view logs
 - add server stats to results
