@@ -100,12 +100,12 @@ class UbuntuPerfmonPlugin < Plugin
       test_json = JSON.parse(meta_results['test'])
       
       if application_type == :comparison
-        first_result = retrieve_average_results(app, application, name, test, test_id, test_json, network_strategy)
+        first_result = retrieve_average_results(app, application, name, test, test_id, test_json, id, network_strategy)
         guid = test_json['comparison_guid']
-        second_result = retrieve_average_results(app, application, name, test, guid, test_json, network_strategy)
+        second_result = retrieve_average_results(app, application, name, test, guid, test_json, id, network_strategy)
         first_result.zip(second_result)
       else
-        retrieve_average_results(app, application, name, test, test_id, network_strategy)
+        retrieve_average_results(app, application, name, test, test_id, id, network_strategy)
       end
     end
 
@@ -145,7 +145,7 @@ class UbuntuPerfmonPlugin < Plugin
       #redis will zip data up and store it in app_plugin_start_end key and zipped value.  Maybe should be Mongo instead or Riak?
     end
     
-    def retrieve_average_results(app, application, name, test, test_id, test_json, network_strategy)
+    def retrieve_average_results(app, application, name, test, test_id, test_json, plugin_id, network_strategy)
       PastNetworkResults.format_network(
           NetworkResult.new(
             network_strategy[:klass].new(
@@ -154,7 +154,8 @@ class UbuntuPerfmonPlugin < Plugin
               name,
               test.chomp('_test'), 
               test_id,
-              test_json
+              test_json,
+              plugin_id
             )
           ).retrieve_average_results,
           network_strategy[:id].to_sym,

@@ -22,13 +22,13 @@ class AbstractStrategy
     get meta results
     populate @average_metric_list and @detailed_metric_list lists 
 =end
-  def initialize(app, application, name, test_type, id, test_json, config_path)
+  def initialize(app, application, name, test_type, id, test_json, plugin_id, config_path)
     store = Redis.new(app.db)
     application_type = app.config['application']['type'].to_sym
     test_type.chomp!("_test")
     data_result = store.hget("#{application}:#{name}:results:#{test_type}:#{id}:data", "sysstats")
-    #{'locations':['path1','path2']}
-    entries = JSON.parse(data_result)['locations']
+    #{'locations':[{'name':'cpu', 'paths':['path1','path2']}]}
+    entries = JSON.parse(data_result)['locations'].find {|plugin| plugin['name'] == plugin_id.to_s }
     
     populate_metric(entries, fs_ip, id, test_json['start'], test_json['stop'])
   end
