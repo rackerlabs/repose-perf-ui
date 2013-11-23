@@ -3,8 +3,13 @@ Feature: Results Page
 	As a performance test user
 	I want to view the results page for an application
 
-	Scenario: Navigate to results page for atom_hopper application
+	Scenario: Navigate to results page for atom_hopper (singular) application
 		When I navigate to '/atom_hopper/results'
+		Then the response should be "200"
+		And the page should contain "main" applications
+
+	Scenario: Navigate to results page for overhead (overhead) application
+		When I navigate to '/overhead/results'
 		Then the response should be "200"
 		And the page should contain "main" applications
 
@@ -12,8 +17,13 @@ Feature: Results Page
 		When I navigate to '/invalid/results'
 		Then the response should be "404"
 
-	Scenario: Navigate to main sub application results page for atom_hopper application
+	Scenario: Navigate to main sub application results page for atom_hopper (singular) application
 		When I navigate to '/atom_hopper/results/main'
+		Then the response should be "200"
+		And the page should contain "load_test,duration_test,stress_test,adhoc_test" test types
+
+	Scenario: Navigate to main sub application results page for overhead application
+		When I navigate to '/overhead/results/main'
 		Then the response should be "200"
 		And the page should contain "load_test,duration_test,stress_test,adhoc_test" test types
 
@@ -25,101 +35,148 @@ Feature: Results Page
 		When I navigate to '/invalid/results/invalid'
 		Then the response should be "404"
 
-	Scenario: Navigate to main load results for atom_hopper application
+	Scenario: Navigate to main load results for atom_hopper (singular) application
 		When I navigate to '/atom_hopper/results/main/load_test'
 		Then the response should be "200"
-		And the page should match the "dbaas_load_test_results" version
+		And the page should match the "atom_hopper_main_load_test_results" version
 
-	Scenario: Navigate to dbaas duration test application results page
-		When I navigate to '/results/dbaas/duration_test'
+	Scenario: Navigate to main load results for overhead application
+		When I navigate to '/overhead/results/main/load_test'
 		Then the response should be "200"
-		And the page should match the "dbaas_duration_test_results" version
+		And the page should match the "overhead_main_load_test_results" version
 
-	Scenario: Navigate to invalid app load test application results page
-		When I navigate to '/results/invalid/load_test'
+	Scenario: Navigate to main load results for repose application
+		When I navigate to '/repose/results/main/load_test'
+		Then the response should be "200"
+		And the page should match the "repose_main_load_test_results" version
+
+	Scenario: Navigate to invalid app main sub app load test application results page
+		When I navigate to '/not_found/results/main/load_test'
 		Then the response should be "404"
 
-	Scenario: Navigate to dbaas invalid test application results page
-		When I navigate to '/results/dbaas/invalid_test'
+	Scenario: Navigate to atom hopper app invalid sub app load test application results page
+		When I navigate to '/atom_hopper/results/invalid/load_test'
 		Then the response should be "404"
 
-	Scenario: Load dbaas load test average response time metric with test ended
-		When I navigate to '/results/dbaas/load_test/metric/avg'
-		Then the response should be "200"
-		And response should be a json
-		And there should be "1" tests in response
-
-	Scenario: Load dbaas adhoc test average response time metric with test not ended
-		When I navigate to '/results/dbaas/adhoc_test/metric/avg'
-		Then the response should be "200"
-		And response should be a json
-		And there should be "0" tests in response
-
-	Scenario: Load dbaas load test throughput metric
-		When I navigate to '/results/dbaas/load_test/metric/throughput'
-		Then the response should be "200"
-		And response should be a json
-		And there should be "1" tests in response
-
-	Scenario: Load dbaas adhoc test throughput metric with test not ended
-		When I navigate to '/results/dbaas/adhoc_test/metric/throughput'
-		Then the response should be "200"
-		And response should be a json
-		And there should be "0" tests in response
-
-	Scenario: Load dbaas adhoc test errors metric
-		When I navigate to '/results/dbaas/adhoc_test/metric/errors'
-		Then the response should be "200"
-		And response should be a json
-		And there should be "0" tests in response
-
-	Scenario: Load dbaas load test invalid metric
-		When I navigate to '/results/dbaas/load_test/metric/invalid'
-		Then the response should be "200"
-		And response should be a json
-		And there should be "0" tests in response
-
-	Scenario: Load dbaas invalid test errors metric
-		When I navigate to '/results/dbaas/invalid_test/metric/errors'
-		Then the response should be "404"
-		And response should be a json
-		And there should be "0" tests in response
-
-	Scenario: Load invalid app load test errors metric
-		When I navigate to '/results/invalid/load_test/metric/errors'
-		Then the response should be "404"
-		And response should be a json
-		And there should be "0" tests in response
-
-	Scenario: Load specific dbaas test for jenkins-repose-pt-static-load-146 with test ended
-		When I navigate to '/results/dbaas/load_test/id/jenkins-repose-pt-static-load-146/date/1377583327000'
-		Then the response should be "200"
-		And the page should contain the "dbaas_load_test_id_jenkins-repose-pt-static-adhoc-146" version
-
-	Scenario: Load specific dbaas test for jenkins-repose-pt-static-load-146 with test not ended
-		When I navigate to '/results/dbaas/adhoc_test/id/jenkins-repose-pt-static-adhoc-146/date/1377583327000'
-		Then the response should be "404"
-		And the error page should match the "Both repose and origin results are not yet available"
-
-	Scenario: Load specific dbaas test where id does not exist
-		When I navigate to '/results/dbaas/load_test/id/jenkins-repose-pt-static-load-/date/1377583327000'
-		Then the response should be "404"
-		And the error page should match the "Both repose and origin results are not yet available"
-
-	Scenario: Load specific dbaas test for jenkins-repose-pt-static-load-146 where date does not exist (blank)
-		When I navigate to '/results/dbaas/load_test/id/jenkins-repose-pt-static-load-146/date/1'
-		Then the response should be "200"
-		And the page should contain the "dbaas_load_test_id_jenkins-repose-pt-static-adhoc-146-no-date" version
-
-	Scenario: Load specific dbaas test invalid test type for jenkins-repose-pt-static-load-146
-		When I navigate to '/results/dbaas/invalid_test/id/jenkins-repose-pt-static-load-/date/1377583327000'
+	Scenario: Navigate to atom_hopper main invalid test application results page
+		When I navigate to '/atom_hopper/results/main/invalid_test'
 		Then the response should be "404"
 
-	Scenario: Load specific invalid test for jenkins-repose-pt-static-load-146
-		When I navigate to '/results/dbaas/invalid_test/id/jenkins-repose-pt-static-load-/date/1377583327000'
-		Then the response should be "404"
+	Scenario: Load atom_hopper (singular) main load test average response time metric with test ended
+		When I navigate to '/atom_hopper/results/main/load_test/metric/avg'
+		Then the response should be "200"
+		And response should be a json
+		And there should be "1" "avg" records in response
 
-	Scenario: Load specific dbaas test for jenkins-repose-pt-static-load-146 with avg metric with test ended
+	Scenario: Load overhead main load test average response time metric with test ended
+		When I navigate to '/overhead/results/main/load_test/metric/avg'
+		Then the response should be "200"
+		And response should be a json
+		And there should be "1" "avg" records in response
+
+	Scenario: Load atom_hopper main adhoc test average response time metric with test not ended
+		When I navigate to '/atom_hopper/results/main/adhoc_test/metric/avg'
+		Then the response should be "404"
+		And response should be a json
+		And there should be "0" "avg" records in response
+		And "fail" json record should equal to "empty metric specified" 
+
+	Scenario: Load atom_hopper (singular) main load test throughput metric with test ended
+		When I navigate to '/atom_hopper/results/main/load_test/metric/throughput'
+		Then the response should be "200"
+		And response should be a json
+		And there should be "1" "throughput" records in response
+
+	Scenario: Load overhead main load test throughput metric with test ended
+		When I navigate to '/overhead/results/main/load_test/metric/throughput'
+		Then the response should be "200"
+		And response should be a json
+		And there should be "1" "throughput" records in response
+
+	Scenario: Load atom_hopper main load test throughput metric with test not ended
+		When I navigate to '/atom_hopper/results/main/adhoc_test/metric/throughput'
+		Then the response should be "404"
+		And response should be a json
+		And there should be "0" "throughput" records in response
+		And "fail" json record should equal to "empty metric specified" 
+
+	Scenario: Load atom_hopper (singular) main load test errors metric with test ended
+		When I navigate to '/atom_hopper/results/main/load_test/metric/errors'
+		Then the response should be "200"
+		And response should be a json
+		And there should be "1" "errors" records in response
+
+	Scenario: Load overhead main load test errors metric with test ended
+		When I navigate to '/overhead/results/main/load_test/metric/errors'
+		Then the response should be "200"
+		And response should be a json
+		And there should be "1" "errors" records in response
+
+	Scenario: Load atom_hopper main load test invalid metric with test ended
+		When I navigate to '/atom_hopper/results/main/load_test/metric/invalid'
+		Then the response should be "404"
+		And response should be a json
+		And "fail" json record should equal to "empty metric specified" 
+
+	Scenario: Load atom_hopper main invalid test throughput metric with test ended
+		When I navigate to '/atom_hopper/results/main/invalid/metric/errors'
+		Then the response should be "404"
+		And response should be a json
+		And "fail" json record should equal to "invalid test specified"
+
+	Scenario: Load atom_hopper invalid load test throughput metric with test ended
+		When I navigate to '/atom_hopper/results/invalid/load_test/metric/errors'
+		Then the response should be "404"
+		And response should be a json
+		And "fail" json record should equal to "invalid sub app specified"
+
+	Scenario: Load invalid main load test throughput metric with test ended
+		When I navigate to '/invalid/results/main/load_test/metric/errors'
+		Then the response should be "404"
+		And response should be a json
+		And "fail" json record should equal to "invalid application specified"
+
+	Scenario: Load atom hopper (singular) main load test id = e464b1b6-10ab-4332-8b30-8439496c2d19
+		When I navigate to '/atom_hopper/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19'
+		Then the response should be "200"
+		And the page should contain the "e464b1b6-10ab-4332-8b30-8439496c2d19" version
+
+	Scenario: Load atom hopper (singular) main load test id = not_found
+		When I navigate to '/atom_hopper/results/main/load_test/id/not_found'
+		Then the response should be "404"
+		And the page should contain the "not_found" version
+
+	Scenario: Load overhead main load test id = some-random-string+some-random2-string
+		When I navigate to '/overhead/results/main/load_test/id/some-random-string+some-random2-string'
+		Then the response should be "200"
+		And the page should contain the "some-random-string" version
+
+	Scenario: Load overhead main load test id = not_found
+		When I navigate to '/overhead/results/main/load_test/id/not_found'
+		Then the response should be "404"
+		And the page should contain the "not_found" version
+
+	Scenario: Load overhead main load test id = some-other-string with one part of test not ended
+		When I navigate to '/overhead/results/main/load_test/id/some-other-string'
+		Then the response should be "404"
+		And the error page should match the "Both sets of results are not yet available"
+
+	Scenario: Load atom hopper (singular) main invalid test id = e464b1b6-10ab-4332-8b30-8439496c2d19
+		When I navigate to '/atom_hopper/results/main/invalid/id/e464b1b6-10ab-4332-8b30-8439496c2d19'
+		Then the response should be "404"
+		And the page should contain the "not_found" version
+
+	Scenario: Load atom hopper (singular) invalid load test id = e464b1b6-10ab-4332-8b30-8439496c2d19
+		When I navigate to '/atom_hopper/results/invalid/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19'
+		Then the response should be "404"
+		And the page should contain the "not_found" version
+
+	Scenario: Load invalid main load test id = e464b1b6-10ab-4332-8b30-8439496c2d19
+		When I navigate to '/invalid/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19'
+		Then the response should be "404"
+		And the page should contain the "not_found" version
+
+	Scenario: STOPPED HERE!!! Load specific dbaas test for jenkins-repose-pt-static-load-146 with avg metric with test ended
 		When I navigate to '/results/dbaas/load_test/metric/avg/id/jenkins-repose-pt-static-load-146/date/1377583327000'
 		Then the response should be "200"
 		And response should be a json

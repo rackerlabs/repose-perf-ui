@@ -19,10 +19,12 @@ require './tests/Models/test_tests.rb'
 require './tests/Models/testlocation_tests.rb'
 =end
 
-system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature" # tests/sinatra/features/results.feature"
+system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature"
 =begin
-system "cucumber tests/sinatra/features/tests.feature tests/sinatra/features/results.feature tests/sinatra/features/jmx_results.feature"
-system "cucumber tests/sinatra/features/network_results.feature"
+system "cucumber tests/sinatra/features/repose_plugin.feature tests/sinatra/features/newrelic_plugin.feature tests/sinatra/features/graphite_plugin.feature"
+system "cucumber tests/sinatra/features/sysstats_plugin.feature tests/sinatra/features/postgres_plugin.feature tests/sinatra/features/nagios_plugin.feature"
+system "cucumber tests/sinatra/features/log4j_plugin.feature"
+system "cucumber tests/sinatra/features/start_stop.feature"
 =end
 =begin
 - add ability to view logs
@@ -32,4 +34,5 @@ system "cucumber tests/sinatra/features/network_results.feature"
 - add ability to start test (not while something else is running)
 - add ability to start test running from inside the server 
 - add ability to specify server size 
+- add test type for flood and autobench
 =end

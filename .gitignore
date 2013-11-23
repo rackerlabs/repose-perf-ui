@@ -1,3 +1,4 @@
+atom_hopper.yaml
 jmeter.log
 *tmp
 tmp*
@@ -13,4 +14,3 @@ Gemfile.lock
 *.db
 hERmes_viewer/
 .metadata
-*.yaml

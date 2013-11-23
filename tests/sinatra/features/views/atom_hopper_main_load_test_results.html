@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= title %> - Results - <%= application %> <%= sub_app_id %> <%= test_type %></title>
+    <title>Atom Hopper - Results - atom_hopper main load_test</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
     <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
@@ -14,21 +14,21 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/<%= application %>"><%= title %></a>
+      <a class="navbar-brand" href="/atom_hopper">Atom Hopper</a>
       <div class="nav-collapse collapse bs-navbar-collapse">
         <ul class="nav navbar-nav">
-          <li><a href="/<%= application %>/tests">Running Tests</a></li>
-          <li><a href="/<%= application %>/applications">Applications</a></li>
-          <li class="active"><a href="/<%= application %>/results">Results</a></li>
+          <li><a href="/atom_hopper/tests">Running Tests</a></li>
+          <li><a href="/atom_hopper/applications">Applications</a></li>
+          <li class="active"><a href="/atom_hopper/results">Results</a></li>
         </ul>
       </div>
     </div>
     <div class="container">
       <ul class="breadcrumb">
-        <li><a href="/<%= application %>">Home</a></li>
-        <li><a href="/<%= application %>/results">Results</a></li>
-        <li><a href="/<%= application %>/results/<%= sub_app_id %>"><%= sub_app_id %></a></li>
-        <li class="active"><%= test_type %></li>
+        <li><a href="/atom_hopper">Home</a></li>
+        <li><a href="/atom_hopper/results">Results</a></li>
+        <li><a href="/atom_hopper/results/main">main</a></li>
+        <li class="active">load_test</li>
       </ul>
       <div class="panel panel-summary">
         <div class="panel-heading">
@@ -41,53 +41,48 @@
                 <th>Name</th>
                 <th>Description</th>
                 <th>Started</th>
-                <th>ART overhead</th>
-                <th>Throughput overhead</th>
-                <th>Error overhead</th>
+                <th>ART</th>
+                <th>Throughput</th>
+                <th>Error</th>
                 <th>Plugins</th>
-                <th>Status</th>
                 <th>Compare</th>
               </tr>
             </thead>
             <tbody>
-<% result_set_list.each do |result| %>
               <tr>
-                <td><%= result.name %></td>
-                <td><%= result.description %></td>
-                <td><a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/id/<%= result.id %>"><%= DateTime.strptime(result.start.chomp("000"), '%s')  %></td>
-                <td><%= result.avg %> ms</td>
-                <td><%= result.throughput %> rps</td>
-                <td><%= result.errors %> total errors</td>
+                <td>jenkins-repose-pt-static-adhoc-231</td>
+                <td>adhoc test with performance flavor #1 with Repose</td>
+                <td><a href="/atom_hopper/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19">2013-11-06T19:01:13+00:00</td>
+                <td>19 ms</td>
+                <td>807.8 rps</td>
+                <td>3000169 total errors</td>
                 <td>
-<% plugin_list.each do |plugin| %>
-<% puts plugin %>
                   <div class="btn-group">
-                    <a class="btn dropdown-toggle" role="button" data-toggle="dropdown" href="#"><%= plugin[:id] %><span class="caret"></span></a>
+                    <a class="btn dropdown-toggle" role="button" data-toggle="dropdown" href="#">MacOsxPlugin<span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
-<% plugin[:data].each do |option| %>
-                      <li><a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/id/<%= result.id %>/plugin/<%= plugin[:id] %>/<%= option[:id] %>"><%= option[:name] %></a></li>
-<% end %>
+                      <li><a href="/atom_hopper/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19/plugin/MacOsxPlugin/cpu">CPU metrics</a></li>
+                      <li><a href="/atom_hopper/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19/plugin/MacOsxPlugin/kernel">Kernel metrics</a></li>
+                      <li><a href="/atom_hopper/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19/plugin/MacOsxPlugin/memory_swap">Memory Swap metrics</a></li>
+                      <li><a href="/atom_hopper/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19/plugin/MacOsxPlugin/memory_page">Memory page metrics</a></li>
+                      <li><a href="/atom_hopper/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19/plugin/MacOsxPlugin/memory_utilization">Memory utilization metrics</a></li>
+                      <li><a href="/atom_hopper/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19/plugin/MacOsxPlugin/tcp_failure_network">TCP Failure metrics</a></li>
+                      <li><a href="/atom_hopper/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19/plugin/MacOsxPlugin/tcp_network">TCP</a></li>
+                      <li><a href="/atom_hopper/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19/plugin/MacOsxPlugin/ip_failure_network">IP Failure metrics</a></li>
+                      <li><a href="/atom_hopper/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19/plugin/MacOsxPlugin/ip_network">IP metrics</a></li>
+                      <li><a href="/atom_hopper/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19/plugin/MacOsxPlugin/device_network">Device Network metrics</a></li>
+                      <li><a href="/atom_hopper/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19/plugin/MacOsxPlugin/device_disk">Device Disk metrics</a></li>
+                      <li><a href="/atom_hopper/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19/plugin/MacOsxPlugin/device_failure">Device Network Failure metrics</a></li>
                     </ul>
                   </div>
-<% end %>
                 </td>
-                <td>
-<% if result.status == :completed %>                	
-    <span class="btn btn-success">Completed</span>
-<% else %>
-    <span class="btn btn-warning">In Progress</span>
-<% end %>    
-    			</td>
-    
                 <td>
                   <div class="checkbox">
                     <label>
-                      <input type="checkbox" name="compare[]" value="<%=result.id %>">
+                      <input type="checkbox" name="compare[]" value="e464b1b6-10ab-4332-8b30-8439496c2d19">
                     </label>
                   </div>
                 </td>
               </tr>
-<% end %>
             </tbody>
             <tfoot>
               <tr>
@@ -140,6 +135,7 @@
           chart: {
             renderTo: 'art',
             defaultSeriesType: 'spline',
+            zoomType: 'x'
           },
           title: {
             text: 'Average Response Time'
@@ -163,6 +159,7 @@
           chart: {
             renderTo: 'memory',
             defaultSeriesType: 'spline',
+            zoomType: 'x'
           },
           title: {
             text: 'Average Throughput'
@@ -186,6 +183,7 @@
           chart: {
             renderTo: 'cpu',
             defaultSeriesType: 'spline',
+            zoomType: 'x'
           },
           title: {
             text: 'Error Count'
@@ -206,19 +204,19 @@
           }]
         };        
 
-        $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/metric/avg', function(data) {
+        $.getJSON('/atom_hopper/results/main/load_test/metric/avg', function(data) {
 console.log(data);
           var data2 = data.avg.map(convertDate);
           art_option.series[0].data = data2;
           var art_chart = new Highcharts.Chart(art_option);
         }); 
-        $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/metric/throughput', function(data) {
+        $.getJSON('/atom_hopper/results/main/load_test/metric/throughput', function(data) {
 console.log(data);
           var data2 = data.throughput.map(convertDate);
           memory_option.series[0].data = data2;
           var memory_chart = new Highcharts.Chart(memory_option);
         }); 
-        $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/metric/errors', function(data) {
+        $.getJSON('/atom_hopper/results/main/load_test/metric/errors', function(data) {
 console.log(data);
           var data2 = data.errors.map(convertDate);
           cpu_option.series[0].data = data2;

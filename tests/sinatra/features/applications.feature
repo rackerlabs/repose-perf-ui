@@ -26,6 +26,14 @@ Feature: Application Page
 		When I navigate to '/atom_hopper/applications/invalid'
 		Then the response should be "404"
 
+	Scenario: Navigate to main sub application of repose application, which doesn't have requests and responses
+		When I navigate to '/repose/applications/main'
+		Then the page should match the "response_and_requests_not_found" version
+
+	Scenario: Navigate to main sub application of no_store application, which has a misconfigured file store
+		When I navigate to '/no_store/applications/main'
+		Then the page should match the "misconfigured_file_store" version
+
 	Scenario: Navigate to invalid sub application of invalid application
 		When I navigate to '/invalid/applications/invalid'
 		Then the response should be "404"

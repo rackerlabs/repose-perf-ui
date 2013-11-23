@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Overhead - Results - overhead main load_test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/css/repose.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/overhead">Overhead</a>
+      <div class="nav-collapse collapse bs-navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/overhead/tests">Running Tests</a></li>
+          <li><a href="/overhead/applications">Applications</a></li>
+          <li class="active"><a href="/overhead/results">Results</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container">
+      <ul class="breadcrumb">
+        <li><a href="/overhead">Home</a></li>
+        <li><a href="/overhead/results">Results</a></li>
+        <li><a href="/overhead/results/main">main</a></li>
+        <li class="active">load_test</li>
+      </ul>
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Test Results</h3>
+        </div>
+        <form method="POST">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Started</th>
+                <th>ART overhead</th>
+                <th>Throughput overhead</th>
+                <th>Error overhead</th>
+                <th>Plugins</th>
+                <th>Status</th>
+                <th>Compare</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>jenkins-repose-pt-static-adhoc-231</td>
+                <td>adhoc test with performance flavor #1 with Repose</td>
+                <td><a href="/overhead/results/main/load_test/id/some-random-string+some-random2-string">2013-11-06T19:01:13+00:00</td>
+                <td>26.0 ms</td>
+                <td>-11.899999999999977 rps</td>
+                <td>-3000160 total errors</td>
+                <td>
+                  <div class="btn-group">
+                    <a class="btn dropdown-toggle" role="button" data-toggle="dropdown" href="#">MacOsxPlugin<span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                      <li><a href="/overhead/results/main/load_test/id/some-random-string+some-random2-string/plugin/MacOsxPlugin/cpu">CPU metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-random-string+some-random2-string/plugin/MacOsxPlugin/kernel">Kernel metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-random-string+some-random2-string/plugin/MacOsxPlugin/memory_swap">Memory Swap metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-random-string+some-random2-string/plugin/MacOsxPlugin/memory_page">Memory page metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-random-string+some-random2-string/plugin/MacOsxPlugin/memory_utilization">Memory utilization metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-random-string+some-random2-string/plugin/MacOsxPlugin/tcp_failure_network">TCP Failure metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-random-string+some-random2-string/plugin/MacOsxPlugin/tcp_network">TCP</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-random-string+some-random2-string/plugin/MacOsxPlugin/ip_failure_network">IP Failure metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-random-string+some-random2-string/plugin/MacOsxPlugin/ip_network">IP metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-random-string+some-random2-string/plugin/MacOsxPlugin/device_network">Device Network metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-random-string+some-random2-string/plugin/MacOsxPlugin/device_disk">Device Disk metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-random-string+some-random2-string/plugin/MacOsxPlugin/device_failure">Device Network Failure metrics</a></li>
+                    </ul>
+                  </div>
+                </td>
+                <td>
+                	
+    <span class="btn btn-success">Completed</span>
+    
+    			</td>
+    
+                <td>
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" name="compare[]" value="some-random-string+some-random2-string">
+                    </label>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>jenkins-repose-pt-static-adhoc-231</td>
+                <td>adhoc test with performance flavor #1 with Repose</td>
+                <td><a href="/overhead/results/main/load_test/id/some-other-string">2013-11-06T19:01:13+00:00</td>
+                <td>45 ms</td>
+                <td>795.9 rps</td>
+                <td>9 total errors</td>
+                <td>
+                  <div class="btn-group">
+                    <a class="btn dropdown-toggle" role="button" data-toggle="dropdown" href="#">MacOsxPlugin<span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                      <li><a href="/overhead/results/main/load_test/id/some-other-string/plugin/MacOsxPlugin/cpu">CPU metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-other-string/plugin/MacOsxPlugin/kernel">Kernel metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-other-string/plugin/MacOsxPlugin/memory_swap">Memory Swap metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-other-string/plugin/MacOsxPlugin/memory_page">Memory page metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-other-string/plugin/MacOsxPlugin/memory_utilization">Memory utilization metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-other-string/plugin/MacOsxPlugin/tcp_failure_network">TCP Failure metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-other-string/plugin/MacOsxPlugin/tcp_network">TCP</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-other-string/plugin/MacOsxPlugin/ip_failure_network">IP Failure metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-other-string/plugin/MacOsxPlugin/ip_network">IP metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-other-string/plugin/MacOsxPlugin/device_network">Device Network metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-other-string/plugin/MacOsxPlugin/device_disk">Device Disk metrics</a></li>
+                      <li><a href="/overhead/results/main/load_test/id/some-other-string/plugin/MacOsxPlugin/device_failure">Device Network Failure metrics</a></li>
+                    </ul>
+                  </div>
+                </td>
+                <td>
+    <span class="btn btn-warning">In Progress</span>
+    
+    			</td>
+    
+                <td>
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" name="compare[]" value="some-other-string">
+                    </label>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="6">
+                  <button type="submit" class="btn btn-primary">Compare Tests</button>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </form>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Average Response Time</h3>
+        </div>
+        <div id="art" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Error Count</h3>
+        </div>
+        <div id="cpu" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Average Throughput</h3>
+        </div>
+        <div id="memory" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+    </div>
+    <hr>
+    <footer>
+      <p>&copy; Rackspace Hosting 2013</p>
+    </footer>
+  </div> <!-- /container -->
+    <!-- JavaScript plugins (requires jQuery) -->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+<!--    <script src="/js/bootstrap.min.js"></script>-->
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.1.0/moment.min.js"></script>
+
+    <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+    <script src="/js/respond.js"></script>
+    <script src="/js/repose.min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        var art_option = {
+          chart: {
+            renderTo: 'art',
+            defaultSeriesType: 'spline',
+          },
+          title: {
+            text: 'Average Response Time'
+          },
+          yAxis:{
+            title: {
+              text: 'Milliseconds'
+            }
+          },
+          xAxis:{
+            type: 'datetime',
+            dateTimeLabelFormats: {
+                day: '%Y-%b-%d'
+            }
+          },
+          series: [{
+            name: 'Average Response Time'
+          }]
+        };        
+        var memory_option = {
+          chart: {
+            renderTo: 'memory',
+            defaultSeriesType: 'spline',
+          },
+          title: {
+            text: 'Average Throughput'
+          },
+          yAxis:{
+            title: {
+              text: 'requests/sec'
+            }
+          },
+          xAxis:{
+            type: 'datetime',
+            dateTimeLabelFormats: {
+                day: '%Y-%b-%d'
+            }
+          },
+          series: [{
+            name: 'Average throughput'
+          }]
+        };        
+        var cpu_option = {
+          chart: {
+            renderTo: 'cpu',
+            defaultSeriesType: 'spline',
+          },
+          title: {
+            text: 'Error Count'
+          },
+          yAxis:{
+            title: {
+              text: 'Total'
+            }
+          },
+          xAxis:{
+            type: 'datetime',
+            dateTimeLabelFormats: {
+                day: '%Y-%b-%d'
+            }
+          },
+          series: [{
+            name: 'Error count'
+          }]
+        };        
+
+        $.getJSON('/overhead/results/main/load_test/metric/avg', function(data) {
+console.log(data);
+          var data2 = data.avg.map(convertDate);
+          art_option.series[0].data = data2;
+          var art_chart = new Highcharts.Chart(art_option);
+        }); 
+        $.getJSON('/overhead/results/main/load_test/metric/throughput', function(data) {
+console.log(data);
+          var data2 = data.throughput.map(convertDate);
+          memory_option.series[0].data = data2;
+          var memory_chart = new Highcharts.Chart(memory_option);
+        }); 
+        $.getJSON('/overhead/results/main/load_test/metric/errors', function(data) {
+console.log(data);
+          var data2 = data.errors.map(convertDate);
+          cpu_option.series[0].data = data2;
+          var cpu_chart = new Highcharts.Chart(cpu_option);
+        }); 
+      });
+
+      function convertDate(value){
+        var temp_date = new Date(parseInt(value[0]));
+        return [parseInt(value[0]), Math.abs(value[1])];
+      }
+    </script>
+  </body>
+</html>

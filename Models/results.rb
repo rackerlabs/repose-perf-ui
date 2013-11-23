@@ -6,7 +6,58 @@ require_relative 'models.rb'
 
 module Results
   class ComparisonResults
-    def test_results(test_list)
+    def test_results(db, fs_ip, test_list)
+      #compare 2 guids
+      puts "test_list :#{test_list}"
+      overhead_test_list = []
+      store = Redis.new(db)
+      temp_list = []
+      begin 
+        test_list.each do |test|
+          meta_results = store.hgetall("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:meta")
+          data_result = store.hget("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:data", "results")
+          
+          puts test[:guid]
+          test_json = JSON.parse(meta_results['test'])
+          test.merge!(test_json) if test_json
+          runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
+          summary_data = JSON.parse(data_result)['location']
+  
+          runner_class.compile_summary_results(test, test[:guid], "http://#{fs_ip}#{summary_data}")
+
+          temp = Result.new(
+              test['start'],test[:length],test[:average],
+              test[:throughput], test[:errors], test['name'], test['description'], test[:guid], :in_progress)
+
+          comparison_guid = test_json['comparison_guid']
+          
+          #if comparison guid exists, join the two values and add to overhead list.  Results to compare will always be the variable call.
+          #comparison_guid will always be on the control test
+          if comparison_guid
+            result_to_compare = temp_list.find {|t| t.id == comparison_guid }
+            overhead_test_list << Result.new( 
+              result_to_compare.start,
+              result_to_compare.length.to_i - temp.length.to_i, 
+              result_to_compare.avg.to_f - temp.avg.to_f, 
+              result_to_compare.throughput.to_f - temp.throughput.to_f, 
+              result_to_compare.errors.to_i - temp.errors.to_i, 
+              result_to_compare.name, 
+              result_to_compare.description, 
+              "#{result_to_compare.id}+#{temp.id}")
+            temp_list.delete(result_to_compare)
+          else              
+            temp_list << temp
+          end
+
+        end
+        overhead_test_list = overhead_test_list + temp_list
+      ensure
+        store.quit
+      end  
+=begin   
+    end
+ 
+     def test_results(test_list)
       overhead_test_list = []
       group_results(test_list).map do |id, hashes| 
         hashes.reduce do | test_a, test_b|  
@@ -20,6 +71,7 @@ module Results
             test[:throughput], test[:errors], test['name'], test['description'], test[:guid])
       end
       overhead_test_list
+=end
     end
 
     def group_results(list)
@@ -83,21 +135,25 @@ module Results
     def test_results(db, fs_ip, test_list)
       singular_test_list = []
       store = Redis.new(db)
-      test_list.each do |test|
-        meta_results = store.hgetall("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:meta")
-        data_result = store.hget("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:data", "results")
-        
-        test_json = JSON.parse(meta_results['test'])
-        test.merge!(test_json) if test_json
-        runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
-        summary_data = JSON.parse(data_result)['location']
-
-        runner_class.compile_summary_results(test, test[:guid], "http://#{fs_ip}#{summary_data}")
-        singular_test_list << Result.new(
-            test['start'],test[:length],test[:average],
-            test[:throughput], test[:errors], test['name'], test['description'], test[:guid])
-      end
-      singular_test_list
+      begin 
+        test_list.each do |test|
+          meta_results = store.hgetall("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:meta")
+          data_result = store.hget("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:data", "results")
+          
+          test_json = JSON.parse(meta_results['test'])
+          test.merge!(test_json) if test_json
+          runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
+          summary_data = JSON.parse(data_result)['location']
+  
+          runner_class.compile_summary_results(test, test[:guid], "http://#{fs_ip}#{summary_data}")
+          singular_test_list << Result.new(
+              test['start'],test[:length],test[:average],
+              test[:throughput], test[:errors], test['name'], test['description'], test[:guid])
+        end
+        singular_test_list
+      ensure
+        store.quit
+      end      
     end
     
     #get all detailed results for one test

@@ -4,10 +4,10 @@ require_relative 'models.rb'
 
 class Result
 
-  attr_reader :start, :length, :avg, :throughput, :errors, :id, :name, :description 
+  attr_reader :start, :length, :avg, :throughput, :errors, :id, :name, :description, :status 
   attr_accessor :jmx_results, :network_results
 
-  def initialize(start, length, avg, throughput, errors, name, description, id)
+  def initialize(start, length, avg, throughput, errors, name, description, id, status = :completed)
     @start = start
     @avg = avg
     @length = length
@@ -16,6 +16,7 @@ class Result
     @id = id
     @name = name
     @description = description
+    @status = status
   end
 end
 

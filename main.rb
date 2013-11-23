@@ -34,7 +34,21 @@ class PerfApp < Sinatra::Base
   configure do
     set :views, "#{File.dirname(__FILE__)}/views"
     set :public_dir, "#{File.dirname(__FILE__)}/public"
-    enable :show_exceptions
+    enable :show_exceptions if development?
+    set :deployment, environment
+    Apps::Bootstrap.main_config(environment)
+  end
+  
+  configure :development do
+    set :show_exceptions, :after_handler
+  end
+  
+  error ArgumentError do
+    request.env['sinatra.error'].message
+  end
+  
+  error OpenURI::HTTPError do
+    "Unable to gather required data.  There's a misconfiguration to connect to backend services."
   end
 
   get '/' do
@@ -46,7 +60,7 @@ class PerfApp < Sinatra::Base
   get '/:application' do |application|
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app
-      new_app = app[:klass].new
+      new_app = app[:klass].new(settings.deployment)
       erb :app_index, :locals => {
         :data => {
           :name => new_app.config['application']['name'], 
@@ -63,7 +77,7 @@ class PerfApp < Sinatra::Base
   get '/:application/applications' do |application|
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app
-      new_app = app[:klass].new
+      new_app = app[:klass].new(settings.deployment)
       erb :applications, :locals => {
         :application_list => new_app.config['application']['sub_apps'],
         :title => new_app.config['application']['name'],
@@ -77,11 +91,13 @@ class PerfApp < Sinatra::Base
   get '/:application/applications/:name' do |application, name|
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app 
-      new_app = app[:klass].new
+      new_app = app[:klass].new(settings.deployment)
       sub_app = new_app.config['application']['sub_apps'].find do |sa|
         sa['id'] == name
       end
       if sub_app
+        p new_app
+        p new_app.fs_ip
         erb :app_detail, :locals => {
           :application => app[:id],
           :sub_app_id => name.to_sym,
@@ -101,7 +117,7 @@ class PerfApp < Sinatra::Base
   get '/:application/applications/:name/test_download/:file_name' do |application, name, file_name|
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app 
-      new_app = app[:klass].new
+      new_app = app[:klass].new(settings.deployment)
       sub_app = new_app.config['application']['sub_apps'].find do |sa|
         sa['id'] == name
       end
@@ -128,7 +144,7 @@ class PerfApp < Sinatra::Base
   get '/:application/results' do |application|
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app
-      new_app = app[:klass].new
+      new_app = app[:klass].new(settings.deployment)
       erb :results, :locals => {
         :application_list => new_app.config['application']['sub_apps'],
         :title => new_app.config['application']['name'],
@@ -142,7 +158,7 @@ class PerfApp < Sinatra::Base
   get '/:application/results/:name' do |application, name|
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app 
-      new_app = app[:klass].new
+      new_app = app[:klass].new(settings.deployment)
       sub_app = new_app.config['application']['sub_apps'].find do |sa|
         sa['id'] == name
       end
@@ -163,8 +179,8 @@ class PerfApp < Sinatra::Base
 
   get '/:application/results/:name/:test' do |application, name, test|
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-    if app 
-      new_app = app[:klass].new
+    if app and Apps::Bootstrap.test_list.keys.include?(test) 
+      new_app = app[:klass].new(settings.deployment)
       sub_app = new_app.config['application']['sub_apps'].find do |sa|
         sa['id'] == name
       end
@@ -196,31 +212,92 @@ class PerfApp < Sinatra::Base
     end
   end
 
-  post '/results/:name/:test' do |name, test|
-    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
-    if app and load_test_list.keys.include?(test.to_sym)
-      app[:results] = Results::PastSummaryResults.new(name, test.chomp('_test')) 
-      app[:compared_result_set_list] = app[:results].compared_test_results(params[:compare])
-      app[:test_type] = test
-      app[:app_id] = name
-      app[:title] = bootstrap_config['name']
-      erb :results_app_test_compare, :locals => {:app_detail => app }
-    else
-      status 404
-    end
-  end
-
-  get '/:application/results/:name/:test/id/:id/plugin/:plugin/:option' do |name, test, id, plugin, option|
-    #get average results for plugin
-    #get detailed results for plugin to graph
-    #TODO: modify the plugin show summary/detailed/order data to retrieve from specific areas the plugin's allowed to retrieve from (this may be different than the regular data store but is not recommended)
+  get '/:application/results/:name/:test/metric/:metric' do |application, name, test, metric|
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-    if app 
+    if app and Apps::Bootstrap.test_list.keys.include?(test) 
       new_app = app[:klass].new
       sub_app = new_app.config['application']['sub_apps'].find do |sa|
         sa['id'] == name
       end
-      if sub_app and Apps::Bootstrap.test_list.keys.include?(test)
+      if sub_app
+        metric_results = {} unless metric_results
+        metric_results[metric.to_sym] = []
+        if app and Apps::Bootstrap.test_list.keys.include?(test)
+          results = Results::PastSummaryResults.new(application, name, 
+              new_app.config['application']['type'].to_sym, test.chomp('_test'), 
+              new_app.db, new_app.fs_ip, nil, logger)
+          result_set_list = results.past_summary_results.test_results(new_app.db, new_app.fs_ip, results.test_list)
+          if result_set_list[0].respond_to?(metric.to_sym)
+            result_set_list.each { |result| metric_results[metric.to_sym] << [result.start, result.send(metric.to_sym).to_f] }
+          else
+            halt 404, {'Content-Type' => 'application/json'},  {'fail' => 'invalid metric specified'}.to_json
+          end
+        else
+          halt 404, {'Content-Type' => 'application/json'},  {'fail' => 'invalid test specified'}.to_json
+        end
+      else 
+        halt 404, {'Content-Type' => 'application/json'},  {'fail' => 'invalid sub app specified'}.to_json
+      end
+    else
+      halt 404, {'Content-Type' => 'application/json'},  {'fail' => 'invalid application specified'}.to_json
+    end  
+    content_type :json
+    body metric_results.to_json
+  end
+
+  get '/:application/results/:name/:test/id/:id' do |application, name, test, id|
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app and Apps::Bootstrap.test_list.keys.include?(test) 
+      new_app = app[:klass].new
+      sub_app = new_app.config['application']['sub_apps'].find do |sa|
+        sa['id'] == name
+      end
+      if sub_app
+        begin
+          if app
+            results = Results::PastSummaryResults.new(application, name, 
+                new_app.config['application']['type'].to_sym, test.chomp('_test'), 
+                new_app.db, new_app.fs_ip, nil, logger)
+            detailed_results = results.past_summary_results.detailed_results(new_app.db, new_app.fs_ip, results.test_list, id)
+            test_id = id
+            test_type = test
+            erb results.detailed_view, :locals => {
+              :application => app[:id],
+              :sub_app_id => name.to_sym,
+              :title => new_app.config['application']['name'],
+              :result_set_list => detailed_results,
+              :test_id => id,
+              :test_type => test,
+              :request_response_list => Models::Test.new(new_app.db).get_result_requests(application, name, test.chomp('_test'), id),
+              :config_list => Models::Configuration.new(new_app.db, new_app.fs_ip).get_result(application, name, test.chomp('_test'), id),
+              :test_location => Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_result(application, name, test.chomp('_test'), id)
+            }
+          else
+            status 404
+          end
+        rescue RuntimeError => e
+          status 404
+          body e.message
+        end
+      else
+        status 404
+      end
+    else
+      status 404
+    end  
+  end
+  
+  get '/:application/results/:name/:test/id/:id/plugin/:plugin/:option' do |application, name, test, id, plugin, option|
+    #get average results for plugin
+    #get detailed results for plugin to graph
+    #TODO: modify the plugin show summary/detailed/order data to retrieve from specific areas the plugin's allowed to retrieve from (this may be different than the regular data store but is not recommended)
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app and Apps::Bootstrap.test_list.keys.include?(test) 
+      new_app = app[:klass].new
+      sub_app = new_app.config['application']['sub_apps'].find do |sa|
+        sa['id'] == name
+      end
+      if sub_app
         plugin_instance = plugins.find {|p| p.to_s == plugin }
 =begin
   get summary data.  Pass in new_app, application, name, test type, plugin name, option of the plugin (strategy)
@@ -265,7 +342,7 @@ class PerfApp < Sinatra::Base
     end
   end
 
-  get '/results/:name/:test/metric/:metric/compare/:ids' do |name, test, metric, ids|
+  get '/:application/results/:name/:test/metric/:metric/compare/:ids' do |application, name, test, metric, ids|
     #get result files from file under files/apps/:name/results/:test/:date/:metric
     app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
     id_list = ids.split(",")
@@ -291,80 +368,6 @@ class PerfApp < Sinatra::Base
       status 404
       body e.message
     end
-  end
-
-  get '/:application/results/:name/:test/metric/:metric' do |application, name, test, metric|
-    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-    if app 
-      new_app = app[:klass].new
-      sub_app = new_app.config['application']['sub_apps'].find do |sa|
-        sa['id'] == name
-      end
-      if sub_app
-        metric_results = {} unless metric_results
-        metric_results[metric.to_sym] = []
-        if app and Apps::Bootstrap.test_list.keys.include?(test)
-          results = Results::PastSummaryResults.new(application, name, 
-              new_app.config['application']['type'].to_sym, test.chomp('_test'), 
-              new_app.db, new_app.fs_ip, nil, logger)
-          result_set_list = results.past_summary_results.test_results(new_app.db, new_app.fs_ip, results.test_list)
-          if result_set_list[0].respond_to?(metric.to_sym)
-            result_set_list.each { |result| metric_results[metric.to_sym] << [result.start, result.send(metric.to_sym).to_f] }
-          end
-          content_type :json
-        else
-          status 404
-        end
-      else 
-        status 404
-      end
-    else
-      status 404
-    end  
-    
-    body metric_results.to_json
-  end
-
-  get '/:application/results/:name/:test/id/:id' do |application, name, test, id|
-    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-    if app 
-      new_app = app[:klass].new
-      sub_app = new_app.config['application']['sub_apps'].find do |sa|
-        sa['id'] == name
-      end
-      if sub_app
-        begin
-          if app and Apps::Bootstrap.test_list.keys.include?(test)
-            results = Results::PastSummaryResults.new(application, name, 
-                new_app.config['application']['type'].to_sym, test.chomp('_test'), 
-                new_app.db, new_app.fs_ip, nil, logger)
-            detailed_results = results.past_summary_results.detailed_results(new_app.db, new_app.fs_ip, results.test_list, id)
-            test_id = id
-            test_type = test
-            erb results.detailed_view, :locals => {
-              :application => app[:id],
-              :sub_app_id => name.to_sym,
-              :title => new_app.config['application']['name'],
-              :result_set_list => detailed_results,
-              :test_id => id,
-              :test_type => test,
-              :request_response_list => Models::Test.new(new_app.db).get_result_requests(application, name, test.chomp('_test'), id),
-              :config_list => Models::Configuration.new(new_app.db, new_app.fs_ip).get_result(application, name, test.chomp('_test'), id),
-              :test_location => Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_result(application, name, test.chomp('_test'), id)
-            }
-          else
-            status 404
-          end
-        rescue RuntimeError => e
-          status 404
-          body e.message
-        end
-      else
-        status 404
-      end
-    else
-      status 404
-    end  
   end
 
   get '/:application/results/:name/:test/metric/:metric/id/:id' do |application, name, test, metric, id|
@@ -398,7 +401,7 @@ class PerfApp < Sinatra::Base
     end
   end
 
-  get '/results/:name/:test/:id/test_download/:file_name' do |name, test, id,file_name|
+  get '/:application/results/:name/:test/:id/test_download/:file_name' do |name, test, id,file_name|
     app = app_list[name.to_sym]
     begin
       if app
@@ -417,6 +420,20 @@ class PerfApp < Sinatra::Base
     rescue RuntimeError => r
       status 404
       body r.message
+    end
+  end
+
+  post '/results/:name/:test' do |name, test|
+    app = bootstrap_config['applications'].find { |k,v| k['id'] == name }
+    if app and load_test_list.keys.include?(test.to_sym)
+      app[:results] = Results::PastSummaryResults.new(name, test.chomp('_test')) 
+      app[:compared_result_set_list] = app[:results].compared_test_results(params[:compare])
+      app[:test_type] = test
+      app[:app_id] = name
+      app[:title] = bootstrap_config['name']
+      erb :results_app_test_compare, :locals => {:app_detail => app }
+    else
+      status 404
     end
   end
 

@@ -1,0 +1,12 @@
+application:
+  name: Repose
+  description: repose application -- best proxy i the world
+  location: apps/repose/bootstrap.rb
+  type: singular
+  plugins:
+   - location: plugins/mac_perf_mon/plugin.rb
+  sub_apps: 
+   - 
+     id: main
+     name: Main application
+     description: This is the base configuration for Repose

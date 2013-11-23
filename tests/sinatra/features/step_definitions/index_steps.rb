@@ -47,7 +47,15 @@ end
 
 Then(/^there should be "(\d+)" "(.*?)" records in response$/) do |count, type|
   results = JSON.parse(last_response.body)
-  results[type].length.should == count.to_i
+  if count == 0
+    results[type].should == nil
+  end
+  results[type].length.should == count.to_i if results[type]
+end
+
+Then(/^"(.*?)" json record should equal to "(.*?)"$/) do |key, value|
+  results = JSON.parse(last_response.body)
+  results[key] == value
 end
 
 Then(/^there should be "(\d+)" tests in response$/) do |count|

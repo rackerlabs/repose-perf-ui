@@ -33,10 +33,11 @@ module Models
       config_json_list = @store.lrange("#{application}:#{name}:setup:configs", 0, -1)
       config_json_list.each do |config_json_text|
         config_json = JSON.parse(config_json_text)
+        p "http://#{@fs_ip}#{config_json['location']}"
         contents = open("http://#{@fs_ip}#{config_json['location']}") {|f| f.read }
         config = config_json['name'].gsub('.','_').gsub('-','_')
         config_list.merge!({config.to_sym => coder.encode(contents)})
-      end
+      end if config_json_list
       config_list
     end
 

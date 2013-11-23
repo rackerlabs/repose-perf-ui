@@ -1,3 +1,4 @@
+
 class IO
   TAIL_BUF_LENGTH = 1 << 16
 
@@ -8,6 +9,8 @@ class IO
   
     buf = ""
     while buf.count("\n") <= n
+      p n
+      p buf
       buf = read(TAIL_BUF_LENGTH) + buf
       seek 2 * -TAIL_BUF_LENGTH, SEEK_CUR
     end
@@ -19,9 +22,10 @@ end
 module Models
   class JMeterRunner
     def compile_summary_results(test_hash, guid, entry)
+        p entry
       temp_hash = {}
       summary_list = open(entry) do |f|
-        f.tail(5)
+        IO.readlines(f)[-5..-1]
       end
       summary_list.each do |summary|
         summary.scan(/summary =\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/).map do |time_offset,throughput,average,errors| 

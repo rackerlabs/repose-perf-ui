@@ -54,15 +54,20 @@ module Models
       requests_json = JSON.parse(requests) if requests
       responses_json = JSON.parse(responses) if responses
       
-      requests_json.each do |request|
-        request_list << Request.new(request["method"], request["uri"], request["headers"], coder.encode(request["body"]))
+      if requests_json and responses_json
+        requests_json.each do |request|
+          request_list << Request.new(request["method"], request["uri"], request["headers"], coder.encode(request["body"]))
+        end
+        
+        responses_json.each do |response|
+          response_list << Response.new(response["response_code"])        
+        end
+  
+        request_list.zip(response_list)
+      else
+        raise ArgumentError, "required requests and response jsons are not available.  These files are required to let users know what execution happens during a test run."
       end
       
-      responses_json.each do |response|
-        response_list << Response.new(response["response_code"])        
-      end
-
-      request_list.zip(response_list)
     end
 
     def get_runner_by_name_test(name,test)

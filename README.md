@@ -12,6 +12,50 @@ hERmes is an aggregation tool for disparate data for analytical purposes.  It ta
     <code>rackup</code>
 
 <h2>Testing</h2>
+<h3>Setup</h3>
+Install redis and lighttpd and configure your test_config.yaml and test_atom_hopper.yaml
+- Example for test_config.yaml:
+
+```
+redis:
+  host: localhost
+  port: 6379
+  db: 1
+file_store: localhost  
+test_list:
+  load_test:
+    name: Load Test
+    description: Test running for a sample duration at 120% of expected load for the application.
+  duration_test:
+    name: Duration Test
+    description: Test running for a a longer duration than average (optimally 12 to 48 hours at 75% expected load)
+  stress_test:
+    name: Stress Test
+    description: Test running with constant increasing load until application fails
+  adhoc_test:
+    name: Adhoc Test
+    description: Test with custom settings.  A one-time only iteration
+```
+
+- Example for test_atom_hopper.yaml
+
+```
+application:
+  name: Atom Hopper
+  description: atom feed applications that acts as a repository for feeds from other projects
+  location: apps/atom_hopper/bootstrap.rb
+  type: singular
+  plugins:
+   - location: plugins/mac_perf_mon/plugin.rb
+  sub_apps: 
+   - 
+     id: main
+     name: Main application
+     description: This is the base configuration for Atom Hopper
+
+```
+
+<h3>Execution</h3>
 hERmes has extensive testing with Cucumber (<code>cucumber tests/</code>) and unit test (<code>ruby tests/Models/test_helper.rb</code>).  The code coverage is compiled by simplecov.
 
 <h2>Data store configuration</h2>

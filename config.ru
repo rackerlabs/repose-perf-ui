@@ -3,5 +3,8 @@ require 'bundler'
 
 Bundler.require  
 
-require './main.rb' 
+require './main.rb'
+
+set :environment, :test
+ 
 run PerfApp

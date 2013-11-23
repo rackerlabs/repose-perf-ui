@@ -1,0 +1,20 @@
+application:
+  name: Atom Hopper
+  description: atom feed applications that acts as a repository for feeds from other projects
+  location: apps/atom_hopper/bootstrap.rb
+  type: singular
+  plugins:
+    #location: plugins/ubuntu_perf_mon/plugin.rb
+   - location: plugins/mac_perf_mon/plugin.rb
+    #location: plugins/postgres/plugin.rb
+    #location: plugins/atom_feed/plugin.rb
+    #location: plugins/atom_graphite/plugin.rb
+  sub_apps: 
+   - 
+     id: main
+     name: Main application
+     description: This is the base configuration for Atom Hopper
+   - 
+     id: main
+     name: Main application
+     description: This is the base configuration for Atom Hopper
