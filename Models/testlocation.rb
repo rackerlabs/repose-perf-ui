@@ -54,6 +54,16 @@ module Models
       response
     end
     
+    def get_result_by_id(application, name, test_type, id)
+      store = Redis.new(@db)
+      begin
+        response = _get_result(store, application, name, test_type, id)
+      ensure
+        store.quit
+      end
+      response
+    end
+    
     def _get_result(store, application, name, test_type, id)
       response = nil
       script = store.hget("#{application}:#{name}:results:#{test_type}:#{id}:meta", "script")

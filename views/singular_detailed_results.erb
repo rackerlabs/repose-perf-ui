@@ -205,15 +205,15 @@
         };         
 
         $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/metric/avg/id/<%= test_id %>', function(data) {
-          art_option.series[0].data = data;
+          art_option.series[0].data = data['avg'];
           var art_chart = new Highcharts.Chart(art_option);
         }); 
         $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/metric/errors/id/<%= test_id %>', function(data) {
-          cpu_option.series[0].data = data;
+          cpu_option.series[0].data = data['errors'];
           var cpu_chart = new Highcharts.Chart(cpu_option);
         }); 
         $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/metric/throughput/id/<%= test_id %>', function(data) {
-          throughput_option.series[0].data = data;
+          throughput_option.series[0].data = data['throughput'];
           var throughput_chart = new Highcharts.Chart(throughput_option);
         }); 
       });

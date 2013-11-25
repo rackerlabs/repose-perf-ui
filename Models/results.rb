@@ -79,51 +79,17 @@ module Results
       ensure
         store.quit
       end
-
-=begin
-      test_locations = test_list.find_all do |test|
-        id == test['guid']
-      end.sort_by do |hash|
-        hash['start']
-      end.map do |test|
-        test[:folder_name]
-      end
-
-      raise "Both repose and origin results are not yet available" unless test_locations.length == 2
-
-      repose_results = test_locations[0]
-      os_results = test_locations[1]
-      temp_time = 0
-      repose_summary_results = []
-      File.readlines("#{repose_results}/summary.log").each do |line|    
-        time_line = line.scan(/summary \=\s+\d+\s+in\s+(\d+(?:\.\d)?)s/) 
-        t = line.scan(/summary \+\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/)
-        temp_time = time_line[0][0].to_i unless time_line.empty?
-        repose_summary_results << SummaryResult.new(temp_time, t[0][1], t[0][2], t[0][3]) unless t.empty?
-      end if File.exists?("#{repose_results}/summary.log")
-
-      temp_time = 0
-      os_summary_results = []
-      File.readlines("#{os_results}/summary.log").each do |line|     
-        time_line = line.scan(/summary \=\s+\d+\s+in\s+(\d+(?:\.\d)?)s/) 
-        t = line.scan(/summary \+\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/)
-        temp_time = time_line[0][0].to_i unless time_line.empty?
-        os_summary_results << SummaryResult.new(temp_time, t[0][1], t[0][2], t[0][3]) unless t.empty?
-      end  if File.exists?("#{os_results}/summary.log")
-      [repose_summary_results,os_summary_results]
-=end
     end
     
     def metric_results(results, metric)
-      compare_one_results = []
-      compare_two_results = []
-      if results[0][0].respond_to?(metric.to_sym)
-        results[0].each { |result| compare_one_results << [result.start, result.send(metric.to_sym).to_f] }
+      metric_results_hash = {}
+      results.each do |guid, guid_result|
+        if guid_result[0].respond_to?(metric.to_sym)
+          metric_results_hash[guid] = []
+          guid_result.each { |result| metric_results_hash[guid] << [result.start, result.send(metric.to_sym).to_f] }
+        end
       end
-      if results[1][0].respond_to?(metric.to_sym)
-        results[1].each { |result| compare_two_results << [result.start, result.send(metric.to_sym).to_f] }
-      end
-      { :compare_one => compare_one_results, :compare_two => compare_two_results }
+      metric_results_hash
     end
 
   end
@@ -180,7 +146,7 @@ module Results
       metric_data = []
       if results[0].respond_to?(metric.to_sym)
         results.each { |result| metric_data << [result.start, result.send(metric.to_sym).to_f] }
-      end
+      end if results
       metric_data
     end
   end
@@ -212,18 +178,6 @@ module Results
       all_test_guids.each do |guid|
         @test_list << {:guid => guid, :application => application, :name => name, :test_type => test_type}
       end     
-    end
-
-    def detailed_results_file_location(id)
-      test_locations = @test_list.find_all do |test|
-        id == test['id']
-      end.sort_by do |hash|
-        hash['start']
-      end.map do |test|
-        test[:folder_name]
-      end
-      raise 'Id not found' if test_locations.empty?
-      result = (test_locations[0] != nil) ? test_locations[0] : test_locations[1]
     end
 
     def compared_test_results(compare_list)

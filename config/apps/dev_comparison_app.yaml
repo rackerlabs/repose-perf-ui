@@ -1,0 +1,16 @@
+application:
+  name: Comparison App
+  description: test application for comparison scenarios
+  location: apps/comparison_app/bootstrap.rb
+  type: singular
+  plugins:
+    #location: plugins/ubuntu_perf_mon/plugin.rb
+   - location: plugins/mac_perf_mon/plugin.rb
+    #location: plugins/postgres/plugin.rb
+    #location: plugins/atom_feed/plugin.rb
+    #location: plugins/atom_graphite/plugin.rb
+  sub_apps: 
+   - 
+     id: main
+     name: Main application
+     description: This is the base configuration for Atom Hopper

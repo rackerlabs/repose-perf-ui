@@ -171,87 +171,195 @@ Feature: Results Page
 		When I navigate to '/invalid/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19'
 		Then the response should be "404"
 
-	Scenario: STOPPED HERE!!! Load specific dbaas test for jenkins-repose-pt-static-load-146 with avg metric with test ended
-		When I navigate to '/results/dbaas/load_test/metric/avg/id/jenkins-repose-pt-static-load-146/date/1377583327000'
+	Scenario: Load atom hopper (singular) main load test id = e464b1b6-10ab-4332-8b30-8439496c2d19 avg metric
+		When I navigate to '/atom_hopper/results/main/load_test/metric/avg/id/e464b1b6-10ab-4332-8b30-8439496c2d19'
 		Then the response should be "200"
 		And response should be a json
-		And there should be "601" "repose" records in response
-		And there should be "602" "origin" records in response
+		And there should be "620" "avg" records in response
 
-	Scenario: Load specific dbaas test for jenkins-repose-pt-static-adhoc-146 with avg metric with test not ended
-		When I navigate to '/results/dbaas/adhoc_test/metric/avg/id/jenkins-repose-pt-static-adhoc-146/date/1377583327000'
-		Then the response should be "404"
-		And the error page should match the "Both repose and origin results are not yet available"
-
-	Scenario: Load specific dbaas test where id does not exist with avg metric
-		When I navigate to '/results/dbaas/load_test/metric/avg/id/jenkins-repose-pt-static-load-/date/1377583327000'
-		Then the response should be "404"
-		And the error page should match the "Both repose and origin results are not yet available"
-
-	Scenario: Load specific dbaas test for jenkins-repose-pt-static-load-146 with invalid metric
-		When I navigate to '/results/dbaas/load_test/metric/invalid/id/jenkins-repose-pt-static-load-146/date/1377583327000'
+	Scenario: Load atom hopper (singular) main load test id = e464b1b6-10ab-4332-8b30-8439496c2d19 throughput metric
+		When I navigate to '/atom_hopper/results/main/load_test/metric/throughput/id/e464b1b6-10ab-4332-8b30-8439496c2d19'
 		Then the response should be "200"
 		And response should be a json
-		And there should be "0" "repose" records in response
-		And there should be "0" "origin" records in response
+		And there should be "620" "throughput" records in response
 
-	Scenario: Load specific dbaas test for jenkins-repose-pt-static-load-146 with avg metric with invalid date
-		When I navigate to '/results/dbaas/load_test/metric/avg/id/jenkins-repose-pt-static-load-146/date/1'
+	Scenario: Load atom hopper (singular) main load test id = e464b1b6-10ab-4332-8b30-8439496c2d19 errors metric
+		When I navigate to '/atom_hopper/results/main/load_test/metric/errors/id/e464b1b6-10ab-4332-8b30-8439496c2d19'
 		Then the response should be "200"
 		And response should be a json
-		And there should be "601" "repose" records in response
-		And there should be "602" "origin" records in response
+		And there should be "620" "errors" records in response
 
-	Scenario: Load specific dbaas test for jenkins-repose-pt-static-load-146 with avg metric with invalid test type
-		When I navigate to '/results/dbaas/invalid_test/metric/avg/id/jenkins-repose-pt-static-load-146/date/1377583327000'
-		Then the response should be "404"
-
-	Scenario: Load specific invalid app for jenkins-repose-pt-static-load-146 with avg metric
-		When I navigate to '/results/invalid/load_test/metric/avg/id/jenkins-repose-pt-static-load-146/date/1377583327000'
-		Then the response should be "404"
-
-	Scenario: Load specific ddrl test for jenkins-repose-pt-static-load-147 with avg metric with test ended with no origin
-		When I navigate to '/results/ddrl/load_test/metric/avg/id/jenkins-repose-pt-static-load-147/date/1377583327000'
+	Scenario: Load overhead main load test id = some-random-string+some-random2-string avg metric
+		When I navigate to '/overhead/results/main/load_test/metric/avg/id/some-random-string+some-random2-string'
 		Then the response should be "200"
 		And response should be a json
-		And there should be "602" "repose" records in response
-		And there should be "0" "origin" records in response
+		And there should be "382" "avg" "some-random-string" records in response
+		And there should be "620" "avg" "some-random2-string" records in response
 
-	Scenario: Load specific ddrl test for jenkins-repose-pt-static-load-148 with avg metric with test ended with no repose
-		When I navigate to '/results/ddrl/load_test/metric/avg/id/jenkins-repose-pt-static-load-148/date/1377583327000'
+	Scenario: Load overhead main load test id = some-random-string+some-random2-string throughput metric
+		When I navigate to '/overhead/results/main/load_test/metric/throughput/id/some-random-string+some-random2-string'
 		Then the response should be "200"
 		And response should be a json
-		And there should be "0" "repose" records in response
-		And there should be "602" "origin" records in response
+		And there should be "382" "throughput" "some-random-string" records in response
+		And there should be "620" "throughput" "some-random2-string" records in response
 
-	Scenario: Download dbaas test runner file
-		When I click on '/results/dbaas/load_test/jenkins-repose-pt-static-load-146/test_download/test_dbaas.jmx'
+	Scenario: Load overhead main load test id = some-random-string+some-random2-string errors metric
+		When I navigate to '/overhead/results/main/load_test/metric/errors/id/some-random-string+some-random2-string'
 		Then the response should be "200"
-		And the download page should match the "jmeter_dbaas_jenkins-repose-pt-static-load-146" version
+		And response should be a json
+		And there should be "382" "errors" "some-random-string" records in response
+		And there should be "620" "errors" "some-random2-string" records in response
 
-	Scenario: Download invalid test id runner file
-		When I click on '/results/dbaas/load_test/jenkins-repose-pt-static-notfound-146/test_download/test_notfound.jmx'
+	Scenario: Load atom hopper (singular) main load test id = not_found errors metric
+		When I navigate to '/atom_hopper/results/main/load_test/metric/errors/id/not_found'
 		Then the response should be "404"
-		And the error page should match the "Both repose and origin results are not yet available"
+		And response should be a json
+		And there should be "0" "errors" records in response
+		And "fail" json record should equal to "The metric data is empty" 
 
-	Scenario: Download invalid test runner file
-		When I click on '/results/invalid/load_test/jenkins-repose-pt-static-load-146/test_download/test_notfound.jmx'
+	Scenario: Load overhead main load test id = not_found errors metric
+		When I navigate to '/overhead/results/main/load_test/metric/errors/id/not_found'
 		Then the response should be "404"
+		And response should be a json
+		And there should be "0" "errors" records in response
+		And "fail" json record should equal to "The metric data is empty" 
 
-	Scenario: Compare jenkins-repose-pt-static-load-146 and jenkins-repose-pt-static-load-149 for dbaas load test
-		When I post to "/results/dbaas/load_test" with "jenkins-repose-pt-static-load-146,jenkins-repose-pt-static-load-149"
+	Scenario: Load overhead main load test id = some-other-string errors metric
+		When I navigate to '/overhead/results/main/load_test/metric/errors/id/some-other-string'
+		Then the response should be "500"
+		And the error page should match the "Both sets of results are not yet available"
+
+	Scenario: Load overhead main load test id = some-random-string+some-random2-string invalid metric
+		When I navigate to '/overhead/results/main/load_test/metric/invalid/id/some-random-string+some-random2-string'
+		Then the response should be "404"
+		And response should be a json
+		And there should be "0" "invalid" "some-random-string" records in response
+		And there should be "0" "invalid" "some-random2-string" records in response
+		And "fail" json record should equal to "The metric data is empty" 
+
+	Scenario: Load overhead main invalid test id = some-random-string+some-random2-string avg metric
+		When I navigate to '/overhead/results/main/invalid/metric/avg/id/some-random-string+some-random2-string'
+		Then the response should be "404"
+		And response should be a json
+		And there should be "0" "avg" "some-random-string" records in response
+		And there should be "0" "avg" "some-random2-string" records in response
+		And "fail" json record should equal to "The metric data is empty" 
+
+	Scenario: Load overhead invalid load test id = some-random-string+some-random2-string avg metric
+		When I navigate to '/overhead/results/invalid/load_test/metric/avg/id/some-random-string+some-random2-string'
+		Then the response should be "404"
+		And response should be a json
+		And there should be "0" "avg" "some-random-string" records in response
+		And there should be "0" "avg" "some-random2-string" records in response
+		And "fail" json record should equal to "The metric data is empty" 
+
+	Scenario: Load invalid main load test id = some-random-string+some-random2-string avg metric
+		When I navigate to '/invalid/results/main/load_test/metric/avg/id/some-random-string+some-random2-string'
+		Then the response should be "404"
+		And response should be a json
+		And there should be "0" "avg" "some-random-string" records in response
+		And there should be "0" "avg" "some-random2-string" records in response
+		And "fail" json record should equal to "The metric data is empty" 
+
+	Scenario: Download atom hopper main load test e464b1b6-10ab-4332-8b30-8439496c2d19 test runner file
+		When I click on '/atom_hopper/results/main/load_test/e464b1b6-10ab-4332-8b30-8439496c2d19/test_download/jmeter'
 		Then the response should be "200"
-		And the page should match the "compare_dbaas_load" version
+		And the download page should match the "jmeter_main" version
 
-	Scenario: Compare jenkins-repose-pt-static-load-146 and unknown for dbaas load test
-		When I post to "/results/dbaas/load_test" with "jenkins-repose-pt-static-load-146,unknown"
+	Scenario: Download overhead main load test some-random-string test runner file
+		When I click on '/overhead/results/main/load_test/some-random-string/test_download/jmeter'
 		Then the response should be "200"
-		And the page should match the "compare_dbaas_load" version
+		And the download page should match the "jmeter_main" version
 
-	Scenario: Compare jenkins-repose-pt-static-load-146 and jenkins-repose-pt-static-load-149 for dbaas unknown test
-		When I post to "/results/dbaas/unkown" with "jenkins-repose-pt-static-load-146,jenkins-repose-pt-static-load-149"
-		Then the response should be "404"
+	Scenario: Download overhead main load test some-other-string test runner file
+		When I click on '/overhead/results/main/load_test/some-other-string/test_download/jmeter'
+		Then the response should be "200"
+		And the download page should match the "jmeter_main" version
 
-	Scenario: Compare jenkins-repose-pt-static-load-146 and jenkins-repose-pt-static-load-149 for invalid app load test
-		When I post to "/results/unknown/load_test" with "jenkins-repose-pt-static-load-146,jenkins-repose-pt-static-load-149"
+	Scenario: Download overhead main load test not-found test runner file
+		When I click on '/overhead/results/main/load_test/not-found/test_download/jmeter'
 		Then the response should be "404"
+		And the error page should match the "No test script exists for overhead/main/not-found"
+
+	Scenario: Download overhead main invalid test some-other-string test runner file
+		When I click on '/overhead/results/main/invalid/some-other-string/test_download/jmeter'
+		Then the response should be "404"
+		And the error page should match the "No test script exists for overhead/main"
+
+	Scenario: Download overhead invalid load test some-other-string test runner file
+		When I click on '/overhead/results/invalid/load_test/some-other-string/test_download/jmeter'
+		Then the response should be "404"
+		And the error page should match the "No test script exists for overhead/invalid"
+
+	Scenario: Download invalid main load test some-other-string test runner file
+		When I click on '/invalid/results/main/load_test/some-other-string/test_download/jmeter'
+		Then the response should be "404"
+		And the error page should match the "No test script exists for invalid/main"
+
+	Scenario: Compare comparison_app main load test key-one and key-two
+		When I post to "/comparison_app/results/main/load_test" with "key-one+key-two"
+		Then the response should be "200"
+		And the page should match the "compare_app_compare_main_load" version
+
+	Scenario: Compare comparison_app main load test key-one and unknown
+		When I post to "/comparison_app/results/main/load_test" with "key-one+unknown"
+		Then the response should be "200"
+		And the page should match the "compare_app_compare_main_load_unknown" version
+
+	Scenario: Compare comparison_app main invalid test key-one and key-two
+		When I post to "/comparison_app/results/main/invalid" with "key-one+key-two"
+		Then the response should be "404"
+		And the error page should match the "No application by name of comparison_app/invalid found"
+		
+	Scenario: Compare comparison_app invalid load test key-one and key-two
+		When I post to "/comparison_app/results/invalid/load_test" with "key-one+key-two"
+		Then the response should be "404"
+		And the error page should match the "No sub application for invalid found"
+
+	Scenario: Compare invalid main load test key-one and key-two
+		When I post to "/invalid/results/main/load_test" with "key-one+key-two"
+		Then the response should be "404"
+		And the error page should match the "No application by name of invalid/load_test found"
+
+	Scenario: Compare comparison_app main load test key-one and key-two for avg
+		When I navigate to '/comparison_app/results/main/load_test/metric/avg/compare/key-one+key-two'
+		Then the response should be "200"
+		And response should be a json
+		And there should be "382" "avg" "key-one" records in response
+		And there should be "620" "avg" "key-two" records in response
+
+	Scenario: Compare comparison_app main load test key-one and key-two for unknown
+		When I navigate to '/comparison_app/results/main/load_test/metric/unknown/compare/key-one+key-two'
+		Then the response should be "404"
+		And response should be a json
+		And there should be "0" "avg" "key-one" records in response
+		And there should be "0" "avg" "key-two" records in response
+		And "fail" json record should equal to "The metric data is empty" 
+
+	Scenario: Compare comparison_app main invalid test key-one and key-two for avg
+		When I navigate to '/comparison_app/results/main/invalid/metric/avg/compare/key-one+key-two'
+		Then the response should be "404"
+		And response should be a json
+		And there should be "0" "avg" "key-one" records in response
+		And there should be "0" "avg" "key-two" records in response
+		And "fail" json record should equal to "The metric data is empty" 
+		
+	Scenario: Compare comparison_app invalid load test key-one and key-two for avg
+		When I navigate to '/comparison_app/results/invalid/load_test/metric/avg/compare/key-one+key-two'
+		Then the response should be "404"
+		And response should be a json
+		And there should be "0" "avg" "key-one" records in response
+		And there should be "0" "avg" "key-two" records in response
+		And "fail" json record should equal to "The metric data is empty" 
+
+	Scenario: Compare invalid main load test key-one and key-two for avg
+		When I navigate to '/invalid/results/main/load_test/metric/avg/compare/key-one+key-two'
+		Then the response should be "404"
+		And response should be a json
+		And there should be "0" "avg" "key-one" records in response
+		And there should be "0" "avg" "key-two" records in response
+		And "fail" json record should equal to "The metric data is empty" 
+
+
+
+

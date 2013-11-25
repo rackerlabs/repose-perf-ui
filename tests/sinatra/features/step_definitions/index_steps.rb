@@ -45,12 +45,22 @@ Then(/^there should be "(\d+)" records in response$/) do |count|
   results['results'].length.should == count.to_i
 end
 
-Then(/^there should be "(\d+)" "(.*?)" records in response$/) do |count, type|
+Then(/^there should be "(\d+)" "(\w+)" records in response$/) do |count, type|
   results = JSON.parse(last_response.body)
-  if count == 0
+  if count.to_i == 0
     results[type].should == nil
+  else
+    results[type].length.should == count.to_i
   end
-  results[type].length.should == count.to_i if results[type]
+end
+
+Then(/^there should be "(\d+)" "(\w+)" "(.*?)" records in response$/) do |count, type, test_id|
+  results = JSON.parse(last_response.body)
+  if count.to_i == 0
+    results[type].should == nil
+  else
+    results[type][test_id].length.should == count.to_i
+  end
 end
 
 Then(/^"(.*?)" json record should equal to "(.*?)"$/) do |key, value|

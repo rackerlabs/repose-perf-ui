@@ -4564,15 +4564,15 @@
         };         
 
         $.getJSON('/atom_hopper/results/main/load_test/metric/avg/id/e464b1b6-10ab-4332-8b30-8439496c2d19', function(data) {
-          art_option.series[0].data = data;
+          art_option.series[0].data = data['avg'];
           var art_chart = new Highcharts.Chart(art_option);
         }); 
         $.getJSON('/atom_hopper/results/main/load_test/metric/errors/id/e464b1b6-10ab-4332-8b30-8439496c2d19', function(data) {
-          cpu_option.series[0].data = data;
+          cpu_option.series[0].data = data['errors'];
           var cpu_chart = new Highcharts.Chart(cpu_option);
         }); 
         $.getJSON('/atom_hopper/results/main/load_test/metric/throughput/id/e464b1b6-10ab-4332-8b30-8439496c2d19', function(data) {
-          throughput_option.series[0].data = data;
+          throughput_option.series[0].data = data['throughput'];
           var throughput_chart = new Highcharts.Chart(throughput_option);
         }); 
       });

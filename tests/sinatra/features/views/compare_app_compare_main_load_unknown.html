@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= title %> - Results - <%= test_type %> - Compare</title>
+    <title>Comparison App - Results - load_test - Compare</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
     <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
@@ -14,22 +14,22 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/"><%= title %></a>
+      <a class="navbar-brand" href="/">Comparison App</a>
       <div class="nav-collapse collapse bs-navbar-collapse">
         <ul class="nav navbar-nav">
-          <li><a href="/<%= application %>/tests">Running Tests</a></li>
-          <li><a href="/<%= application %>/applications">Applications</a></li>
-          <li class="active"><a href="/<%= application %>/results">Results</a></li>
+          <li><a href="/comparison_app/tests">Running Tests</a></li>
+          <li><a href="/comparison_app/applications">Applications</a></li>
+          <li class="active"><a href="/comparison_app/results">Results</a></li>
         </ul>
       </div>
     </div>
     <div class="container">
       <ul class="breadcrumb">
-        <li><a href="/<%= application %>">Home</a></li>
-        <li><a href="/<%= application %>/results">Results</a></li>
-        <li><a href="/<%= application %>/results/<%= sub_app_id %>"><%= sub_app_id %></a></li>
-        <li><a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>"><%= test_type %></a></li>
-        <li class="active"><%= test_type %></li>
+        <li><a href="/comparison_app">Home</a></li>
+        <li><a href="/comparison_app/results">Results</a></li>
+        <li><a href="/comparison_app/results/main">main</a></li>
+        <li><a href="/comparison_app/results/main/load_test">load_test</a></li>
+        <li class="active">load_test</li>
       </ul>
       <div class="panel panel-summary">
         <div class="panel-heading">
@@ -46,15 +46,13 @@
               </tr>
             </thead>
             <tbody>
-<% result_set_list.each do |result| %>
               <tr>
-                <td><a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/id/<%= result.id %>"><%= result.id  %></a></td>
-                <td><%= result.length %> s</a></td>
-                <td><%= result.avg %> ms</td>
-                <td><%= result.throughput %> rps</td>
-                <td><%= result.errors %> total errors</td>
+                <td><a href="/comparison_app/results/main/load_test/id/key-one">key-one</a></td>
+                <td>2345 s</a></td>
+                <td>45 ms</td>
+                <td>795.9 rps</td>
+                <td>9 total errors</td>
               </tr>
-<% end %>
             </tbody>
           </table>
       </div>
@@ -109,9 +107,7 @@
             }
           },
           series: [
-<% result_set_list.each do |result| %>
-              {name: '<%= result.id %>'},
-<% end %>
+              {name: 'key-one'},
           ]
         };        
         var throughput_option = {
@@ -128,9 +124,7 @@
             }
           },
           series: [
-<% result_set_list.each do |result| %>
-              {name: '<%= result.id %>'},
-<% end %>
+              {name: 'key-one'},
           ]
         };        
         var error_option = {
@@ -147,15 +141,13 @@
             }
           },
           series: [
-<% result_set_list.each do |result| %>
-              {name: '<%= result.id %>'},
-<% end %>
+              {name: 'key-one'},
           ]
         };   
 
-        var results = <%= result_set_list.map {|result| result.id } %>.join("+");     
+        var results = ["key-one"].join("+");     
 
-        $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/metric/avg/compare/' + results, function(data) {
+        $.getJSON('/comparison_app/results/main/load_test/metric/avg/compare/' + results, function(data) {
         	var data_to_compare = data['avg'];
         	var i = 0;
         	for(var prop in data_to_compare){
@@ -164,7 +156,7 @@
         	}
 			var art_chart = new Highcharts.Chart(art_option);
         }); 
-        $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/metric/throughput/compare/' + results, function(data) {
+        $.getJSON('/comparison_app/results/main/load_test/metric/throughput/compare/' + results, function(data) {
         	var data_to_compare = data['throughput'];
         	var i = 0;
         	for(var prop in data_to_compare){
@@ -173,7 +165,7 @@
         	}
 			var throughput_chart = new Highcharts.Chart(throughput_option);
         }); 
-        $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/metric/errors/compare/' + results, function(data) {
+        $.getJSON('/comparison_app/results/main/load_test/metric/errors/compare/' + results, function(data) {
         	var data_to_compare = data['errors'];
         	var i = 0;
         	for(var prop in data_to_compare){
