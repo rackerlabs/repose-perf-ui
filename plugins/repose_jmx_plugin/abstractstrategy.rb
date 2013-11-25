@@ -1,27 +1,27 @@
-require_relative './../../Models/models.rb'
-
 class ReposeAbstractStrategy
-  include ResultModule
 
-  attr_reader :folder_location
+  attr_reader :data_results, :store
 
-  def initialize(name, test_type,id, config_path)
-    config = config(config_path)
-    test_type.chomp!("_test")
-    @folder_location = "#{config['home_dir']}/files/apps/#{name}/results/#{test_type}"
-    Dir.glob("#{folder_location}/tmp_*").each do |entry| 
-      if File.directory?(entry)
-        #get directory
-        #get begin time, end time, tag name in entry meta file
-#needs to take in options to split by repose vs origin
-        json_file = JSON.parse(File.read("#{entry}/meta/#{test_type}_test.json")) if File.exists?("#{entry}/meta/#{test_type}_test.json")
-#TODO: this is a hack for Repose only.  Please abstract to app-specific.
-        if json_file['id'] == id && json_file['tag'].include?("with Repose")
-          populate_metric(entry, id, json_file['start'], json_file['stop'])
-          break
-        end if json_file
+  def initialize(db, fs_ip, application, name, test_type, id)
+    @store = Redis.new(db) 
+    results = {}
+    begin 
+      test_type.chomp!("_test")
+      @data_results = @store.hgetall("#{application}:#{name}:results:#{test_type}:#{id}:data")
+      meta_result = @store.hget("#{application}:#{name}:results:#{test_type}:#{id}:meta", "test")
+      @data_results.each do |key, data_result|
+        if key.start_with?("repose_jmx_plugin")
+          #load the file
+          json_file = JSON.parse(meta_result)
+          entry = JSON.parse(data_result)['location']
+          name = JSON.parse(data_result)['name']
+          results[json_file['name']] = populate_metric("http://#{fs_ip}/#{entry}", name, id, json_file['start'], json_file['stop']) if json_file
+        end
       end
+    ensure
+      @store.quit
     end
+    results
   end
 
   def initialize_metric(list,key, dev)

@@ -37,7 +37,7 @@ module Apps
         :message => :magenta
       )
       logger = Logging.logger(STDOUT)
-      logger.level = :debug
+      logger.level = :info
       logger
     end
 

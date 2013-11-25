@@ -1,5 +1,7 @@
 class Plugin
   @@plugins ||= []
+  
+  attr_reader :db, :fs_ip
 
   def self.os
     (
@@ -25,5 +27,10 @@ class Plugin
 
   def self.inherited(klass)
     @@plugins << klass
+  end
+  
+  def initialize(db, fs_ip)
+    @db = db
+    @fs_ip = fs_ip
   end
 end

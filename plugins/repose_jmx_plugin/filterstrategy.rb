@@ -4,7 +4,7 @@ class FilterStrategy < ReposeAbstractStrategy
 
   attr_accessor :average_metric_list,:detailed_metric_list 
 
-  def initialize(name,test_type,id, config_path = nil)
+  def initialize(db, fs_ip, application, name, test_type, id)
     @average_metric_list = {
       "http-logging:Mean" => [],
       "dist-datastore:Mean" => [],
@@ -46,20 +46,22 @@ class FilterStrategy < ReposeAbstractStrategy
       "ip-identity:Mean" => [],
       "ip-identity:75thPercentile" => []
     }
-    super(name,test_type,id,config_path)
+    super(db, fs_ip, application, name, test_type, id)
   end 
 
-  def populate_metric(entry, id, start, stop)
-    Dir.glob("#{entry}/jmxdata.out*").each do |jmx_file|
-      #execute file and get back io results
-      File.open(jmx_file, 'r') do |file_handle|
-        file_handle.each_line do |result|
-          result.scan(/^localhost.*JmxReporter\$Timer\.(.*)\.(\w+)\s+(\d*\.?\d+?)\s+(\d+)$/).map do |metric,counter,value,timestamp|
-            dev = "#{File.basename(jmx_file)}"
-            initialize_metric(@detailed_metric_list,"#{metric}:#{counter}",dev)
-            @detailed_metric_list["#{metric}:#{counter}"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => timestamp, :value => value}
-          end 
-        end
+  def populate_metric(entry, name, id, start, stop)
+    open(entry).readlines.each do |line|
+      line.scan(/^localhost.*JmxReporter\$Timer\.(.*)\.(\w+)\s+(\d*\.?\d+?)\s+(\d+)$/).map do |metric, counter, value, timestamp|
+        initialize_metric(@detailed_metric_list,"#{metric}:#{counter}", name)
+        @detailed_metric_list["#{metric}:#{counter}"].find {|key_data| key_data[:dev_name] == name}[:results] << {:time => timestamp, :value => value}
+      end
+    end
+    @detailed_metric_list.each do |key, v|
+      initialize_metric(@average_metric_list, key, name)
+      v.each do | dev_name_entry |
+        average_results = dev_name_entry[:results].map {|result| result[:value].to_f}
+        average = average_results.inject(:+).to_f / average_results.length
+        @average_metric_list[key].find {|key_data| key_data[:dev_name] == name}[:results] = average
       end
     end
   end

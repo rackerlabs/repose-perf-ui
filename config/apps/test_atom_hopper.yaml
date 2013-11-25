@@ -4,8 +4,8 @@ application:
   location: apps/atom_hopper/bootstrap.rb
   type: singular
   plugins:
-    #location: plugins/ubuntu_perf_mon/plugin.rb
-   - location: plugins/mac_perf_mon/plugin.rb
+   - location: plugins/repose_jmx_plugin/plugin.rb
+    # location: plugins/mac_perf_mon/plugin.rb
     #location: plugins/postgres/plugin.rb
     #location: plugins/atom_feed/plugin.rb
     #location: plugins/atom_graphite/plugin.rb

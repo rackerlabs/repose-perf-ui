@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= app_detail[:title] %> - Past Results</title>
+    <title><%= title %> - <%= plugin_name %> - <%= option %> - Past Results</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
     <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
@@ -15,29 +15,29 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/"><%= app_detail[:title] %></a>
+      <a class="navbar-brand" href="/<%= application %>"><%= title %></a>
       <div class="nav-collapse collapse bs-navbar-collapse">
         <ul class="nav navbar-nav">
-          <li><a href="/tests">Running Tests</a></li>
-          <li><a href="/applications">Applications</a></li>
-          <li class="active"><a href="/results">Results</a></li>
+          <li><a href="/<%= application %>/tests">Running Tests</a></li>
+          <li><a href="/<%= application %>/applications">Applications</a></li>
+          <li class="active"><a href="/<%= application %>/results">Results</a></li>
         </ul>
       </div>
     </div>
     <div class="container">
       <ul class="breadcrumb">
-        <li><a href="/">Home</a></li>
-        <li><a href="/results">Results</a></li>
-        <li><a href="/results/<%= app_detail[:app_id] %>"><%= app_detail[:app_id] %></a></li>
-        <li><a href="/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>"><%= app_detail[:test_type] %></a></li>
-        <li class="active"><%= app_detail[:plugin_name] %> - <%= app_detail[:option] %></li>
+        <li><a href="/<%= application %>">Home</a></li>
+        <li><a href="/<%= application %>/results">Results</a></li>
+        <li><a href="/<%= application %>/results/<%= sub_app_id %>"><%= sub_app_id %></a></li>
+        <li><a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>"><%= test_type %></a></li>
+        <li class="active"><%= plugin_name %> - <%= option %></li>
       </ul>
       <div class="panel panel-summary">
         <div class="panel-heading">
           <h3 class="panel-title">Summary Test Results</h3>
         </div>
         <table class="table table-hover">
-<% app_detail[:summary_plugin_data].each do |key, value| %>
+<% summary_plugin_data.each do |key, value| %>
           <caption>Repose (Origin only)</caption>
           <thead>
             <tr>
@@ -60,7 +60,7 @@
 <% end %>
         </table>
       </div>
-<% app_detail[:detailed_plugin_data].each do |key, value| %>
+<% detailed_plugin_data.each do |key, value| %>
   <% value[:content].each do |instance, data| %>
       <div class="panel">
         <div class="panel-heading">
@@ -70,7 +70,7 @@
       </div>
   <% end %>
 <% end %>
-<% app_detail[:detailed_plugin_data].each do |key, value| %>
+<% detailed_plugin_data.each do |key, value| %>
   <% value[:content].each do |instance, data| %>
       <div class="panel panel-summary">
         <div class="panel-heading">
@@ -121,7 +121,7 @@
         window.prettyPrint && prettyPrint()
         $(".metric_desc").tooltip()
         $(".accordion-toggle").collapse();
-<% app_detail[:detailed_unordered_plugin_data].each do |key, value| %>
+<% detailed_unordered_plugin_data.each do |key, value| %>
   <% value[:content].each do |instance, data| %>
       var option_<%= key %>_<%= instance.gsub(/[.-]/,'_') %> = {
           chart: {

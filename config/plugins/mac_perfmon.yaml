@@ -1,6 +1,0 @@
-name: 'Mac Performance Metrics'
-type: 'SERVER_PERFMON'
-os: 
-- darwin
-- mac os
-folder_path: 'mac_perf_mon'

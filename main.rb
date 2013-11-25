@@ -306,9 +306,6 @@ class PerfApp < Sinatra::Base
   end
   
   get '/:application/results/:name/:test/id/:id/plugin/:plugin/:option' do |application, name, test, id, plugin, option|
-    #get average results for plugin
-    #get detailed results for plugin to graph
-    #TODO: modify the plugin show summary/detailed/order data to retrieve from specific areas the plugin's allowed to retrieve from (this may be different than the regular data store but is not recommended)
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app and Apps::Bootstrap.test_list.keys.include?(test) 
       new_app = app[:klass].new(settings.deployment)
@@ -316,47 +313,42 @@ class PerfApp < Sinatra::Base
         sa['id'] == name
       end
       if sub_app
-        plugin_instance = plugins.find {|p| p.to_s == plugin }
-=begin
-  get summary data.  Pass in new_app, application, name, test type, plugin name, option of the plugin (strategy)
-=end
-        summary_plugin_data = plugin_instance.new.show_summary_data(new_app, application, name, test, option, id)
-        detailed_plugin_data = plugin_instance.new.show_detailed_data(name, test, option, id)
-        detailed_plugin_result = {}
-        detailed_plugin_data.each do |key, value|
-          detailed_plugin_result[key] = {}
-          detailed_plugin_result[key][:headers] = value[:headers]
-          detailed_plugin_result[key][:content] = {}
-          detailed_plugin_result[key][:description] = value[:description]
-          value[:content].each do |instance, data|
-            detailed_plugin_result[key][:content][instance] = plugin_instance.new.order_by_date(value[:content][instance])
-          end  
+        plugin_instance = new_app.load_plugins.find {|p| p.to_s == plugin } 
+        summary_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_summary_data(application, name, test, option, id)
+        detailed_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_detailed_data(application, name, test, option, id)
+        
+        if summary_plugin_data and detailed_plugin_data
+          detailed_plugin_result = {}
+          detailed_plugin_data.each do |key, value|
+            detailed_plugin_result[key] = {}
+            detailed_plugin_result[key][:headers] = value[:headers]
+            detailed_plugin_result[key][:content] = {}
+            detailed_plugin_result[key][:description] = value[:description]
+            value[:content].each do |instance, data|
+              detailed_plugin_result[key][:content][instance] = plugin_instance.new(new_app.db, new_app.fs_ip).order_by_date(value[:content][instance])
+            end  
+          end
+    
+          erb Apps::Bootstrap.initialize_results[new_app.config['application']['type'].to_sym][:plugin_view], :locals => {
+            :application => app[:id],
+            :sub_app_id => name.to_sym,
+            :title => new_app.config['application']['name'],
+            :summary_plugin_data => summary_plugin_data,
+            :detailed_plugin_data => detailed_plugin_result,
+            :detailed_unordered_plugin_data => detailed_plugin_data,
+            :test_id => id,
+            :test_type => test,
+            :plugin_name => plugin,
+            :option => option
+          }
+        else
+          halt 404, "no metric data found for #{application}/#{name}/#{test}/#{id}/#{plugin}/#{option}"
         end
-  
-        app[:detailed_plugin_data] = detailed_plugin_result
-        app[:detailed_unordered_plugin_data] = detailed_plugin_data
-        app[:test_type] = test
-        app[:app_id] = name
-        app[:title] = bootstrap_config['name']
-        app[:plugin_name] = plugin
-        app[:option] = option
-        #TODO: replace data with valid data
-        erb Apps::Bootstrap.initialize_results[application_type.to_sym][:plugin_view], :locals => {
-          :application => app[:id],
-          :sub_app_id => name.to_sym,
-          :title => new_app.config['application']['name'],
-          :summary_plugin_data => nil,
-          :detailed_plugin_data => nil,
-          :detailed_unordered_plugin_data => nil,
-          :test_type => test,
-          :plugin_name => plugin,
-          :option => option
-        }
       else
-        status 404
+        halt 404, "No sub application for #{name} found"
       end
     else
-      status 404
+      halt 404, "No application by name of #{application}/#{test} found"
     end
   end
 

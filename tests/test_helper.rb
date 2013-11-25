@@ -19,9 +19,8 @@ require './tests/Models/test_tests.rb'
 require './tests/Models/testlocation_tests.rb'
 =end
 
-system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature"
+system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/start_stop.feature"
 =begin
-TODO: load up jmx metric data for repose plugin and finish repose_plugin.feature.
 TODO: start working with the start and stop
 - start will create new guid but will also have name, length, comparison_guid (opt)
 - stop actually saves the data 
@@ -30,7 +29,7 @@ TODO: start working with the start and stop
   - New Relic Adapter
   - Log4J Adapter
   - Postgres Adapter
-system "cucumber tests/sinatra/features/repose_plugin.feature tests/sinatra/features/newrelic_plugin.feature tests/sinatra/features/graphite_plugin.feature"
+system "tests/sinatra/features/newrelic_plugin.feature tests/sinatra/features/graphite_plugin.feature"
 system "cucumber tests/sinatra/features/sysstats_plugin.feature tests/sinatra/features/postgres_plugin.feature tests/sinatra/features/nagios_plugin.feature"
 system "cucumber tests/sinatra/features/log4j_plugin.feature"
 system "cucumber tests/sinatra/features/start_stop.feature"

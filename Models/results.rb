@@ -179,22 +179,6 @@ module Results
         @test_list << {:guid => guid, :application => application, :name => name, :test_type => test_type}
       end     
     end
-
-    def compared_test_results(compare_list)
-      list = @test_list.find_all do |test|
-        compare_list.include? test['id']
-      end if compare_list
-      grouped_results = group_results(list)
-      grouped_results ? grouped_results : {}
-    end
-
-    def group_results(list)
-      list.sort_by do |hash|
-        hash['start']
-      end.group_by do |hash| 
-        hash['id']
-      end if list
-    end
   end
 
   class LiveSummaryResults
