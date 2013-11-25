@@ -96,8 +96,6 @@ class PerfApp < Sinatra::Base
         sa['id'] == name
       end
       if sub_app
-        p new_app
-        p new_app.fs_ip
         erb :app_detail, :locals => {
           :application => app[:id],
           :sub_app_id => name.to_sym,
@@ -215,7 +213,7 @@ class PerfApp < Sinatra::Base
   get '/:application/results/:name/:test/metric/:metric' do |application, name, test, metric|
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app and Apps::Bootstrap.test_list.keys.include?(test) 
-      new_app = app[:klass].new
+      new_app = app[:klass].new(settings.deployment)
       sub_app = new_app.config['application']['sub_apps'].find do |sa|
         sa['id'] == name
       end
@@ -248,36 +246,32 @@ class PerfApp < Sinatra::Base
   get '/:application/results/:name/:test/id/:id' do |application, name, test, id|
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app and Apps::Bootstrap.test_list.keys.include?(test) 
-      new_app = app[:klass].new
+      new_app = app[:klass].new(settings.deployment)
       sub_app = new_app.config['application']['sub_apps'].find do |sa|
         sa['id'] == name
       end
       if sub_app
-        begin
-          if app
-            results = Results::PastSummaryResults.new(application, name, 
-                new_app.config['application']['type'].to_sym, test.chomp('_test'), 
-                new_app.db, new_app.fs_ip, nil, logger)
-            detailed_results = results.past_summary_results.detailed_results(new_app.db, new_app.fs_ip, results.test_list, id)
-            test_id = id
-            test_type = test
-            erb results.detailed_view, :locals => {
-              :application => app[:id],
-              :sub_app_id => name.to_sym,
-              :title => new_app.config['application']['name'],
-              :result_set_list => detailed_results,
-              :test_id => id,
-              :test_type => test,
-              :request_response_list => Models::Test.new(new_app.db).get_result_requests(application, name, test.chomp('_test'), id),
-              :config_list => Models::Configuration.new(new_app.db, new_app.fs_ip).get_result(application, name, test.chomp('_test'), id),
-              :test_location => Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_result(application, name, test.chomp('_test'), id)
-            }
-          else
-            status 404
-          end
-        rescue RuntimeError => e
+        app_type = new_app.config['application']['type'].to_sym        
+        results = Results::PastSummaryResults.new(application, name, 
+            app_type, test.chomp('_test'), 
+            new_app.db, new_app.fs_ip, nil, logger)
+        detailed_results = results.past_summary_results.detailed_results(new_app.db, new_app.fs_ip, results.test_list, id)
+        if detailed_results and detailed_results.length > 0
+          test_id = id
+          test_type = test
+          erb results.detailed_view, :locals => {
+            :application => app[:id],
+            :sub_app_id => name.to_sym,
+            :title => new_app.config['application']['name'],
+            :result_set_list => detailed_results,
+            :test_id => id,
+            :test_type => test,
+            :request_response_list => Models::Test.new(new_app.db).get_result_requests(app_type, application, name, test.chomp('_test'), id),
+            :config_list => Models::Configuration.new(new_app.db, new_app.fs_ip).get_result(app_type, application, name, test.chomp('_test'), id),
+            :test_location => Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_result(app_type, application, name, test.chomp('_test'), id)
+          }
+        else
           status 404
-          body e.message
         end
       else
         status 404
@@ -293,7 +287,7 @@ class PerfApp < Sinatra::Base
     #TODO: modify the plugin show summary/detailed/order data to retrieve from specific areas the plugin's allowed to retrieve from (this may be different than the regular data store but is not recommended)
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app and Apps::Bootstrap.test_list.keys.include?(test) 
-      new_app = app[:klass].new
+      new_app = app[:klass].new(settings.deployment)
       sub_app = new_app.config['application']['sub_apps'].find do |sa|
         sa['id'] == name
       end
@@ -373,7 +367,7 @@ class PerfApp < Sinatra::Base
   get '/:application/results/:name/:test/metric/:metric/id/:id' do |application, name, test, metric, id|
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app 
-      new_app = app[:klass].new
+      new_app = app[:klass].new(settings.deployment)
       sub_app = new_app.config['application']['sub_apps'].find do |sa|
         sa['id'] == name
       end

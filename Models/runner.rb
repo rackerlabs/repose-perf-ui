@@ -22,7 +22,6 @@ end
 module Models
   class JMeterRunner
     def compile_summary_results(test_hash, guid, entry)
-        p entry
       temp_hash = {}
       summary_list = open(entry) do |f|
         IO.readlines(f)[-5..-1]

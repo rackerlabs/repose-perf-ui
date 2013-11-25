@@ -15,7 +15,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/"><%= app_detail[:title] %></a>
+      <a class="navbar-brand" href="/"><%= title %></a>
       <div class="nav-collapse collapse bs-navbar-collapse">
         <ul class="nav navbar-nav">
           <li><a href="/<%= application %>/tests">Running Tests</a></li>
@@ -50,9 +50,10 @@
         </div>
         <div id="cpu" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
       </div>
+      <% request_response_list.each do |key, request_response| %>
       <div class="panel panel-info">
         <div class="panel-heading">
-          <h3 class="panel-title">Requests and responses</h3>
+          <h3 class="panel-title">Requests and responses for <%= key %></h3>
         </div>
         <table class="table table-hover">
           <thead>
@@ -62,28 +63,30 @@
             </tr>
           </thead>
           <tbody>
-            <% app_detail[:request_response_list].each do |test| %>
+            <% request_response.each do |test| %>
             <tr>
               <td><%= test[0].method %> <%= test[0].uri %> <%= test[0].headers.inspect %>
                 <pre class="prettyprint linenums languague-css"><!-- --><%= test[0].body %><!-- --></pre>
               </td>
               <td><%= test[1].response_code %></td>
             </tr>
-            <% end %>
+            <% end  %>
           </tbody>
         </table>
       </div>
+      <% end %>
+      <% config_list.each do |key, configs| %>
       <div class="panel panel-info">
         <div class="panel-heading">
-          <h3 class="panel-title">Configurations</h3>
+          <h3 class="panel-title">Configurations for <%= key %></h3>
         </div>
         <div class="accordion" id="config-accordion">
-          <% app_detail[:config_list].each do |key, config| %>
+          <% configs.each do|config_id, config| %>
           <div class="accordion-group">
             <div class="accordion-heading">
-              <a class="accordion-toggle" data-toggle="collapse" data-parent="#config-accordion" href="#<%= key %>"><%= key %></a>
+              <a class="accordion-toggle" data-toggle="collapse" data-parent="#config-accordion" href="#<%= key %>-<%= config_id %>"><%= config_id %></a>
             </div>
-            <div id="<%= key %>" class="accordion-body collapse in">
+            <div id="<%= key %>-<%= config_id %>" class="accordion-body collapse in">
               <div class="accordion-inner">
                 <pre class="prettyprint linenums languague-css"><!-- --><%= config %><!-- --></pre>
               </div>
@@ -92,23 +95,34 @@
           <% end %>
         </div>
       </div>
+      <% end %>
+      <% test_location.each do |key, test| %>
       <div class="panel panel-info">
         <div class="panel-heading">
-          <h3 class="panel-title">Test Setup</h3>
+          <h3 class="panel-title">Test Setup for <%= key %></h3>
         </div>
         <div class="row">
           <label for="testLocation" class="col-lg-2 control-label">Test Location</label>
           <div class="col-lg-10">
-            <a href="/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/<%= app_detail[:test_id] %>/test_download/<%= app_detail[:test_location].href %>"><%= app_detail[:test_location].type %></a>
+            <a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/<%= test_id %>/test_download/<%= test.type %>"><%= test.type %></a>
           </div>
         </div>
       </div>
+      <% end %>
+      <%
+        results_set = []
+        results_key_list = []
+        result_set_list.each do |key, results|
+        	results_set << results
+        	results_key_list << key
+        end
+      %>
       <div class="panel panel-summary">
         <div class="panel-heading">
           <h3 class="panel-title">Detailed Test Results</h3>
         </div>
         <table class="table table-hover">
-          <caption>Repose (Origin only)</caption>
+          <caption><%= results_key_list[0] %> (<%= results_key_list[1] %>)</caption>
           <thead>
             <tr>
               <th>Time</th>
@@ -118,15 +132,15 @@
             </tr>
           </thead>
           <tbody>
-            <% app_detail[:detailed_results][0].zip(app_detail[:detailed_results][1]).each do |result_array| %>
+          	<% results_set[0].zip(results_set[1]).each do |result_array| %>
             <tr>
-              <td><%= result_array[0].date if result_array[0] %> s</td>
+              <td><%= result_array[0].start if result_array[0] %> s</td>
               <td><%= result_array[0].avg if result_array[0] %> ms (<%= result_array[1].avg if result_array[1]  %> ms)</td>
               <td><%= result_array[0].throughput if result_array[0]  %> rps (<%= result_array[1].throughput if result_array[1]  %> rps)</td>
               <td><%= result_array[0].errors if result_array[0]  %> (<%= result_array[1].errors if result_array[1]  %>)</td>
             </tr>
             <% end %>
-          </tbody>
+		  </tbody>
         </table>
       </div>
     </div>
@@ -204,19 +218,17 @@
           }, { name: 'Origin Average Throughput'}]
         };       
 
-        $.getJSON('/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/metric/avg/id/<%= app_detail[:test_id] %>/date/<%= app_detail[:date] %>', function(data) {
-console.log(data.repose);
-console.log(data.origin);
+        $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/metric/avg/id/<%= test_id %>', function(data) {
           art_option.series[0].data = data.repose;
           art_option.series[1].data = data.origin;
           var art_chart = new Highcharts.Chart(art_option);
         }); 
-        $.getJSON('/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/metric/errors/id/<%= app_detail[:test_id] %>/date/<%= app_detail[:date] %>', function(data) {
+        $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/metric/errors/id/<%= test_id %>', function(data) {
           cpu_option.series[0].data = data.repose;
           cpu_option.series[1].data = data.origin;
           var cpu_chart = new Highcharts.Chart(cpu_option);
         }); 
-        $.getJSON('/results/<%= app_detail[:app_id] %>/<%= app_detail[:test_type] %>/metric/throughput/id/<%= app_detail[:test_id] %>/date/<%= app_detail[:date] %>', function(data) {
+        $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/metric/throughput/id/<%= test_id %>', function(data) {
           network_option.series[0].data = data.repose;
           network_option.series[1].data = data.origin;
           var network_chart = new Highcharts.Chart(network_option);

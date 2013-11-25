@@ -17,7 +17,6 @@ module Results
           meta_results = store.hgetall("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:meta")
           data_result = store.hget("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:data", "results")
           
-          puts test[:guid]
           test_json = JSON.parse(meta_results['test'])
           test.merge!(test_json) if test_json
           runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
@@ -54,35 +53,34 @@ module Results
       ensure
         store.quit
       end  
-=begin   
-    end
- 
-     def test_results(test_list)
-      overhead_test_list = []
-      group_results(test_list).map do |id, hashes| 
-        hashes.reduce do | test_a, test_b|  
-          test_a.merge(test_b) do |key, v1, v2| 
-            ["length","throughput","average","errors"].include?(key.to_s) ? (v1.to_f - v2.to_f) : v1 
-          end
-        end
-      end.each do |test|
-        overhead_test_list << Result.new(
-            test['start'],test[:length],test[:average],
-            test[:throughput], test[:errors], test['name'], test['description'], test[:guid])
-      end
-      overhead_test_list
-=end
-    end
-
-    def group_results(list)
-      list.sort_by do |hash|
-        hash['start']
-      end.group_by do |hash| 
-        hash['id']
-      end if list
     end
     
-    def detailed_results(test_list, id)
+    def detailed_results(db, fs_ip, test_list, id)
+      store = Redis.new(db)
+      overhead_guid_list = id.split('+')
+      results = {}
+      begin
+        overhead_guid_list.each do |guid|
+          test = test_list.find {|t| t[:guid] == guid}
+          if test
+            meta_results = store.hgetall("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:meta")
+            data_result = store.hget("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:data", "results")
+          
+            test_json = JSON.parse(meta_results['test'])
+            test.merge!(test_json) if test_json
+            runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
+            summary_data = JSON.parse(data_result)['location']
+
+            results[guid] = runner_class.compile_detailed_results(guid, "http://#{fs_ip}#{summary_data}")
+          end
+        end
+        raise ArgumentError, "Both sets of results are not yet available" if results.length == 1
+        results
+      ensure
+        store.quit
+      end
+
+=begin
       test_locations = test_list.find_all do |test|
         id == test['guid']
       end.sort_by do |hash|
@@ -113,6 +111,7 @@ module Results
         os_summary_results << SummaryResult.new(temp_time, t[0][1], t[0][2], t[0][3]) unless t.empty?
       end  if File.exists?("#{os_results}/summary.log")
       [repose_summary_results,os_summary_results]
+=end
     end
     
     def metric_results(results, metric)
@@ -160,13 +159,21 @@ module Results
     def detailed_results(db, fs_ip, test_list, id)
       store = Redis.new(db)
       test = test_list.find {|t| t[:guid] == id}
-      meta_results = store.hgetall("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:meta")
-      data_result = store.hget("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:data", "results")
-      test_json = JSON.parse(meta_results['test'])
-      runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
-      entry = JSON.parse(data_result)['location']
-      
-      runner_class.compile_detailed_results(id, "http://#{fs_ip}#{entry}")
+      begin
+        if test
+          meta_results = store.hgetall("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:meta")
+          data_result = store.hget("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:data", "results")
+          if meta_results and data_result
+            test_json = JSON.parse(meta_results['test'])
+            runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
+            entry = JSON.parse(data_result)['location']
+            
+            runner_class.compile_detailed_results(id, "http://#{fs_ip}#{entry}")
+          end
+        end
+      ensure
+        store.quit
+      end
     end
     
     def metric_results(results, metric)
@@ -217,57 +224,6 @@ module Results
       end
       raise 'Id not found' if test_locations.empty?
       result = (test_locations[0] != nil) ? test_locations[0] : test_locations[1]
-    end
-
-    def detailed_results(id)
-      test_locations = @test_list.find_all do |test|
-        id == test['id']
-      end.sort_by do |hash|
-        hash['start']
-      end.map do |test|
-        test[:folder_name]
-      end
-
-      raise "Both repose and origin results are not yet available" unless test_locations.length == 2
-
-      repose_results = test_locations[0]
-      os_results = test_locations[1]
-      temp_time = 0
-      repose_summary_results = []
-      File.readlines("#{repose_results}/summary.log").each do |line|    
-        time_line = line.scan(/summary \=\s+\d+\s+in\s+(\d+(?:\.\d)?)s/) 
-        t = line.scan(/summary \+\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/)
-        temp_time = time_line[0][0].to_i unless time_line.empty?
-        repose_summary_results << SummaryResult.new(temp_time, t[0][1], t[0][2], t[0][3]) unless t.empty?
-      end if File.exists?("#{repose_results}/summary.log")
-
-      temp_time = 0
-      os_summary_results = []
-      File.readlines("#{os_results}/summary.log").each do |line|     
-        time_line = line.scan(/summary \=\s+\d+\s+in\s+(\d+(?:\.\d)?)s/) 
-        t = line.scan(/summary \+\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/)
-        temp_time = time_line[0][0].to_i unless time_line.empty?
-        os_summary_results << SummaryResult.new(temp_time, t[0][1], t[0][2], t[0][3]) unless t.empty?
-      end  if File.exists?("#{os_results}/summary.log")
-      [repose_summary_results,os_summary_results]
-    end
-
-
-=begin
-  [ Result.new('start date','test length','average overhead', 'throughput overhead', 'errors overhead', 'id that matches both tests')]
-=end
-    def overhead_test_results
-      overhead_test_list = []
-      group_results(@test_list).map do |id, hashes| 
-        hashes.reduce do | test_a, test_b|  
-          test_a.merge(test_b) do |key, v1, v2| 
-            ["length","throughput","average","errors"].include?(key.to_s) ? (v1.to_f - v2.to_f) : v1 
-          end
-        end
-      end.each do |test|
-        overhead_test_list << Result.new(test['start'],test['length'],test[:average],test[:throughput], test[:errors], test['id'], test['tag'])
-      end
-      overhead_test_list
     end
 
     def compared_test_results(compare_list)

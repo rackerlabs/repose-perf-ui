@@ -72,7 +72,7 @@ Feature: Results Page
 		When I navigate to '/overhead/results/main/load_test/metric/avg'
 		Then the response should be "200"
 		And response should be a json
-		And there should be "1" "avg" records in response
+		And there should be "2" "avg" records in response
 
 	Scenario: Load atom_hopper main adhoc test average response time metric with test not ended
 		When I navigate to '/atom_hopper/results/main/adhoc_test/metric/avg'
@@ -91,7 +91,7 @@ Feature: Results Page
 		When I navigate to '/overhead/results/main/load_test/metric/throughput'
 		Then the response should be "200"
 		And response should be a json
-		And there should be "1" "throughput" records in response
+		And there should be "2" "throughput" records in response
 
 	Scenario: Load atom_hopper main load test throughput metric with test not ended
 		When I navigate to '/atom_hopper/results/main/adhoc_test/metric/throughput'
@@ -110,7 +110,7 @@ Feature: Results Page
 		When I navigate to '/overhead/results/main/load_test/metric/errors'
 		Then the response should be "200"
 		And response should be a json
-		And there should be "1" "errors" records in response
+		And there should be "2" "errors" records in response
 
 	Scenario: Load atom_hopper main load test invalid metric with test ended
 		When I navigate to '/atom_hopper/results/main/load_test/metric/invalid'
@@ -144,7 +144,6 @@ Feature: Results Page
 	Scenario: Load atom hopper (singular) main load test id = not_found
 		When I navigate to '/atom_hopper/results/main/load_test/id/not_found'
 		Then the response should be "404"
-		And the page should contain the "not_found" version
 
 	Scenario: Load overhead main load test id = some-random-string+some-random2-string
 		When I navigate to '/overhead/results/main/load_test/id/some-random-string+some-random2-string'
@@ -154,27 +153,23 @@ Feature: Results Page
 	Scenario: Load overhead main load test id = not_found
 		When I navigate to '/overhead/results/main/load_test/id/not_found'
 		Then the response should be "404"
-		And the page should contain the "not_found" version
 
 	Scenario: Load overhead main load test id = some-other-string with one part of test not ended
 		When I navigate to '/overhead/results/main/load_test/id/some-other-string'
-		Then the response should be "404"
+		Then the response should be "500"
 		And the error page should match the "Both sets of results are not yet available"
 
 	Scenario: Load atom hopper (singular) main invalid test id = e464b1b6-10ab-4332-8b30-8439496c2d19
 		When I navigate to '/atom_hopper/results/main/invalid/id/e464b1b6-10ab-4332-8b30-8439496c2d19'
 		Then the response should be "404"
-		And the page should contain the "not_found" version
 
 	Scenario: Load atom hopper (singular) invalid load test id = e464b1b6-10ab-4332-8b30-8439496c2d19
 		When I navigate to '/atom_hopper/results/invalid/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19'
 		Then the response should be "404"
-		And the page should contain the "not_found" version
 
 	Scenario: Load invalid main load test id = e464b1b6-10ab-4332-8b30-8439496c2d19
 		When I navigate to '/invalid/results/main/load_test/id/e464b1b6-10ab-4332-8b30-8439496c2d19'
 		Then the response should be "404"
-		And the page should contain the "not_found" version
 
 	Scenario: STOPPED HERE!!! Load specific dbaas test for jenkins-repose-pt-static-load-146 with avg metric with test ended
 		When I navigate to '/results/dbaas/load_test/metric/avg/id/jenkins-repose-pt-static-load-146/date/1377583327000'
