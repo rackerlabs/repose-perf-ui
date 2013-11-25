@@ -55,6 +55,9 @@ application:
 
 ```
 
+Load dump.rdb for redis and lighttpd_store.zip for lighttpd for test data setup
+
+
 <h3>Execution</h3>
 hERmes has extensive testing with Cucumber (<code>cucumber tests/</code>) and unit test (<code>ruby tests/Models/test_helper.rb</code>).  The code coverage is compiled by simplecov.
 
