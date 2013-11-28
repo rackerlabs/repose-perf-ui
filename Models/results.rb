@@ -2,286 +2,180 @@ require 'json'
 require 'yaml'
 require_relative 'result.rb'
 require_relative 'models.rb'
-require_relative 'bootstrap.rb'
 
 
 module Results
-
-  class PastJmxResults  
-    include ResultModule
-    attr_reader :test_list
-
-    def self.jmx_categories
-     {
-        :gc =>  [
-          'GarbageCollectorImpl.PSScavenge.CollectionTime',
-          'GarbageCollectorImpl.PSScavenge.CollectionCount',
-          'GarbageCollectorImpl.PSMarkSweep.CollectionTime',
-          'GarbageCollectorImpl.PSMarkSweep.CollectionCount'],
-        :memoryimpl => [
-          'MemoryPoolImpl.CodeCache.Usage_committed',
-          'MemoryPoolImpl.CodeCache.Usage_init',
-          'MemoryPoolImpl.CodeCache.Usage_max',
-          'MemoryPoolImpl.CodeCache.Usage_used'],
-        :memory => [
-          'MemoryImpl.HeapMemoryUsage_committed',
-          'MemoryImpl.HeapMemoryUsage_init',
-          'MemoryImpl.HeapMemoryUsage_max',
-          'MemoryImpl.HeapMemoryUsage_used',
-          'MemoryImpl.NonHeapMemoryUsage_committed',
-          'MemoryImpl.NonHeapMemoryUsage_init',
-          'MemoryImpl.NonHeapMemoryUsage_max',
-          'MemoryImpl.NonHeapMemoryUsage_used'],
-        :os => [
-          'UnixOperatingSystem.OpenFileDescriptorCount',
-          'UnixOperatingSystem.MaxFileDescriptorCount',
-          'UnixOperatingSystem.CommittedVirtualMemorySize',
-          'UnixOperatingSystem.TotalSwapSpaceSize',
-          'UnixOperatingSystem.FreeSwapSpaceSize',
-          'UnixOperatingSystem.ProcessCpuTime',
-          'UnixOperatingSystem.FreePhysicalMemorySize',
-          'UnixOperatingSystem.TotalPhysicalMemorySize',
-          'UnixOperatingSystem.SystemLoadAverage'],
-        :threading => [
-          'ThreadImpl.PeakThreadCount',
-          'ThreadImpl.DaemonThreadCount',
-          'ThreadImpl.ThreadCount',
-          'ThreadImpl.TotalStartedThreadCount'] 
-      }
-    end
-
-    def initialize(name, test_type, config_path = nil)
-      config = config(config_path)
-      #load all tmp_directories
-      @test_list = []
-      test_type.chomp!("_test")
-      folder_location = "#{config['home_dir']}/files/apps/#{name}/results/#{test_type}"
-      
-
-      Dir.glob("#{folder_location}/tmp_*").each do |entry| 
-        if File.directory?(entry)
-          #get directory
-          #get begin time, end time, tag name in entry meta file
-          #test_type = "load" if test_type == "adhoc"
-          #get jxm data like so
-          @test_list << parse_file(entry)
-        end
-      end
-    end
-
-=begin
- {
-  :os => {
-    'UnixOperatingSystem.OpenFileDescriptorCount' => [
-       {
-         :timestamp => 1234,
-         :value => 5
-       },
-       {
-         :timestamp => 1236,
-         :value => 6
-       },
-     ],
-    'UnixOperatingSystem.MaxFileDescriptorCount' => [ ... ]
-    },
-  :memory => { ... },
-  ...
- }
-   
-=end
-    def parse_file(entry)
-      jmx_list = []
-      Dir.glob("#{entry}/jmxdata*").each do |jmx_file|
-        #jmx files per test
-        test_hash = {:name => File.basename(jmx_file)}
-        File.open(jmx_file).each do |line|
-          #localhost_9999.sun_management_MemoryImpl.HeapMemoryUsage_committed      79364096        1377570793582
-          line.scan(/(\S+)\s+(\d+)\s+(\d+)/).map do |jmx_name, value, timestamp|
-            #find value in jmx categories
-            jmx_category = PastJmxResults.jmx_categories.map do |key, jmx_entry_list| 
-              result = jmx_entry_list.find {|j| 
-                jmx_name.include?(j)
-              } 
-              {key => result} if result  
-            end.compact.first
-            category_key = jmx_category.keys.first
-            jmx_value = jmx_category.values.first
-            #check if temp_hash has this key
-            #check if temp_hash[category_key] has this value
-            #add the following to a list below these values
-            test_hash.merge!({category_key => {}}) unless test_hash.key?(category_key)
-            test_hash[category_key].merge!({jmx_value => []}) unless test_hash[category_key].key?(jmx_value)
-            test_hash[category_key][jmx_value] << {:timestamp => timestamp, :value => value}
-          end           
-        end
-        jmx_list << test_hash
-      end
-      jmx_list
-    end
-  end
-
-  class PastNetworkResults
-    include ResultModule
-    attr_reader :test_list
-
-    def self.format_network(network_results,metric,temp_network_results, header_descriptions={})
-      temp_network_results[metric] = {}
-      temp_network_results[metric][:content] = {}
-      temp_network_results[metric][:headers] = network_results.keys 
-      temp_network_results[metric][:description] = header_descriptions
-      network_results.each do |k,v|
-        v.each do |y|
-          temp_network_results[metric][:content][y[:dev_name]] = []
-          temp_network_results[metric][:description][y[:dev_name]] = y[:description]
-        end
-      end
-      network_results.each do |k,v|
-        v.each do |y|
-          temp_network_results[metric][:content][y[:dev_name]] << y[:results]
-        end
-      end
-      temp_network_results
-    end
-  end 
-
-  class PastSummaryResults
-    include ResultModule
-    attr_reader :test_list
-
-    def initialize(name, test_type, config_path = nil)
-      config = config(config_path)
-      #load all tmp_directories
-      @test_list = []
-      test_type.chomp!("_test")
-      folder_location = "#{config['home_dir']}/files/apps/#{name}/results/#{test_type}"
-
-      Dir.glob("#{folder_location}/tmp_*").each do |entry| 
-        test_hash = {}
-        if File.directory?(entry)
-          #get directory
-          #get begin time, end time, tag name in entry meta file
-          #test_type = "load" if test_type == "adhoc"
-          test_json = JSON.parse(File.read("#{entry}/meta/#{test_type}_test.json")) if File.exists?("#{entry}/meta/#{test_type}_test.json")
-          test_hash.merge!(test_json) if test_json
-
-          #get runner and parse data from runner
-          runner_class = Models::Bootstrap.new.runner_list[test_json['runner'].to_sym] if test_json
-
-          #get summary 
-          @test_list << runner_class.compile_summary_results(test_hash, entry) if runner_class
-        end
-      end
-
-=begin
-  match overhead on id!
-  test_list = {
-    'ah' => [
-       { 
-         'id' => 'ah/2.8.3',
-         'tag' => 'ah/2.8.3 with repose',
-         'start' => start time,
-         'end' => end time,
-         'runner' => 'jmeter',
-         'node_count' => 2,
-         'length' => time_offset,
-         'throughput' => throughput,
-         'average' => average,
-         'errors' => errors
-       },
-       { 
-         'id' => 'ah/2.8.3',
-         'tag' => 'ah/2.8.3 without repose',
-         'start' => start time,
-         'end' => end time,
-         'runner' => 'jmeter',
-         'node_count' => 2,
-         'length' => time_offset,
-         'throughput' => throughput,
-         'average' => average,
-         'errors' => errors
-       }
-     ] 
-  }
-=end        
-    end
-
-    def detailed_results_file_location(id)
-      test_locations = @test_list.find_all do |test|
-        id == test['id']
-      end.sort_by do |hash|
-        hash['start']
-      end.map do |test|
-        test[:folder_name]
-      end
-      raise 'Id not found' if test_locations.empty?
-      result = (test_locations[0] != nil) ? test_locations[0] : test_locations[1]
-    end
-
-    def detailed_results(id)
-      test_locations = @test_list.find_all do |test|
-        id == test['id']
-      end.sort_by do |hash|
-        hash['start']
-      end.map do |test|
-        test[:folder_name]
-      end
-
-      raise "Both repose and origin results are not yet available" unless test_locations.length == 2
-
-      repose_results = test_locations[0]
-      os_results = test_locations[1]
-      temp_time = 0
-      repose_summary_results = []
-      File.readlines("#{repose_results}/summary.log").each do |line|    
-        time_line = line.scan(/summary \=\s+\d+\s+in\s+(\d+(?:\.\d)?)s/) 
-        t = line.scan(/summary \+\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/)
-        temp_time = time_line[0][0].to_i unless time_line.empty?
-        repose_summary_results << SummaryResult.new(temp_time, t[0][1], t[0][2], t[0][3]) unless t.empty?
-      end if File.exists?("#{repose_results}/summary.log")
-
-      temp_time = 0
-      os_summary_results = []
-      File.readlines("#{os_results}/summary.log").each do |line|     
-        time_line = line.scan(/summary \=\s+\d+\s+in\s+(\d+(?:\.\d)?)s/) 
-        t = line.scan(/summary \+\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/)
-        temp_time = time_line[0][0].to_i unless time_line.empty?
-        os_summary_results << SummaryResult.new(temp_time, t[0][1], t[0][2], t[0][3]) unless t.empty?
-      end  if File.exists?("#{os_results}/summary.log")
-      [repose_summary_results,os_summary_results]
-    end
-
-
-=begin
-  [ Result.new('start date','test length','average overhead', 'throughput overhead', 'errors overhead', 'id that matches both tests')]
-=end
-    def overhead_test_results
+  class ComparisonResults
+    def test_results(db, fs_ip, test_list)
+      #compare 2 guids
       overhead_test_list = []
-      group_results(@test_list).map do |id, hashes| 
-        hashes.reduce do | test_a, test_b|  
-          test_a.merge(test_b) do |key, v1, v2| 
-            ["length","throughput","average","errors"].include?(key.to_s) ? (v1.to_f - v2.to_f) : v1 
+      store = Redis.new(db)
+      temp_list = []
+      begin 
+        test_list.each do |test|
+          meta_results = store.hgetall("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:meta")
+          data_result = store.hget("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:data", "results")
+          
+          test_json = JSON.parse(meta_results['test'])
+          test.merge!(test_json) if test_json
+          runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
+          summary_data = JSON.parse(data_result)['location']
+  
+          runner_class.compile_summary_results(test, test[:guid], "http://#{fs_ip}#{summary_data}")
+
+          temp = Result.new(
+              test['start'],test[:length],test[:average],
+              test[:throughput], test[:errors], test['name'], test['description'], test[:guid], :in_progress)
+
+          comparison_guid = test_json['comparison_guid']
+          
+          #if comparison guid exists, join the two values and add to overhead list.  Results to compare will always be the variable call.
+          #comparison_guid will always be on the control test
+          if comparison_guid
+            result_to_compare = temp_list.find {|t| t.id == comparison_guid }
+            overhead_test_list << Result.new( 
+              result_to_compare.start,
+              result_to_compare.length.to_i - temp.length.to_i, 
+              result_to_compare.avg.to_f - temp.avg.to_f, 
+              result_to_compare.throughput.to_f - temp.throughput.to_f, 
+              result_to_compare.errors.to_i - temp.errors.to_i, 
+              result_to_compare.name, 
+              result_to_compare.description, 
+              "#{result_to_compare.id}+#{temp.id}")
+            temp_list.delete(result_to_compare)
+          else              
+            temp_list << temp
+          end
+
+        end
+        overhead_test_list = overhead_test_list + temp_list
+      ensure
+        store.quit
+      end  
+    end
+    
+    def detailed_results(db, fs_ip, test_list, id)
+      store = Redis.new(db)
+      overhead_guid_list = id.split('+')
+      results = {}
+      begin
+        overhead_guid_list.each do |guid|
+          test = test_list.find {|t| t[:guid] == guid}
+          if test
+            meta_results = store.hgetall("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:meta")
+            data_result = store.hget("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:data", "results")
+          
+            test_json = JSON.parse(meta_results['test'])
+            test.merge!(test_json) if test_json
+            runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
+            summary_data = JSON.parse(data_result)['location']
+
+            results[guid] = runner_class.compile_detailed_results(guid, "http://#{fs_ip}#{summary_data}")
           end
         end
-      end.each do |test|
-        overhead_test_list << Result.new(test['start'],test['length'],test[:average],test[:throughput], test[:errors], test['id'], test['tag'])
+        raise ArgumentError, "Both sets of results are not yet available" if results.length == 1
+        results
+      ensure
+        store.quit
       end
-      overhead_test_list
+    end
+    
+    def metric_results(results, metric)
+      metric_results_hash = {}
+      results.each do |guid, guid_result|
+        if guid_result[0].respond_to?(metric.to_sym)
+          metric_results_hash[guid] = []
+          guid_result.each { |result| metric_results_hash[guid] << [result.start, result.send(metric.to_sym).to_f] }
+        end
+      end
+      metric_results_hash
     end
 
-    def compared_test_results(compare_list)
-      list = @test_list.find_all do |test|
-        compare_list.include? test['id']
-      end if compare_list
-      grouped_results = group_results(list)
-      grouped_results ? grouped_results : {}
+  end
+  
+  class SingularResults
+    
+    #get all test results
+    def test_results(db, fs_ip, test_list)
+      singular_test_list = []
+      store = Redis.new(db)
+      begin 
+        test_list.each do |test|
+          meta_results = store.hgetall("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:meta")
+          data_result = store.hget("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:data", "results")
+          test_json = JSON.parse(meta_results['test'])
+          test.merge!(test_json) if test_json
+          runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
+          summary_data = JSON.parse(data_result)['location']
+  
+          runner_class.compile_summary_results(test, test[:guid], "http://#{fs_ip}#{summary_data}")
+          singular_test_list << Result.new(
+              test['start'],test[:length],test[:average],
+              test[:throughput], test[:errors], test['name'], test['description'], test[:guid])
+        end
+        singular_test_list
+      ensure
+        store.quit
+      end      
     end
+    
+    #get all detailed results for one test
+    def detailed_results(db, fs_ip, test_list, id)
+      store = Redis.new(db)
+      test = test_list.find {|t| t[:guid] == id}
+      begin
+        if test
+          meta_results = store.hgetall("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:meta")
+          data_result = store.hget("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:data", "results")
+          if meta_results and data_result
+            test_json = JSON.parse(meta_results['test'])
+            runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
+            entry = JSON.parse(data_result)['location']
+            
+            runner_class.compile_detailed_results(id, "http://#{fs_ip}#{entry}")
+          end
+        end
+      ensure
+        store.quit
+      end
+    end
+    
+    def metric_results(results, metric)
+      metric_data = []
+      if results[0].respond_to?(metric.to_sym)
+        results.each { |result| metric_data << [result.start, result.send(metric.to_sym).to_f] }
+      end if results
+      metric_data
+    end
+  end
+  
+  class PastSummaryResults
+    include ResultModule
+    attr_reader :test_list, :store, :logger, :past_summary_results, :summary_view, :detailed_view    
 
-    def group_results(list)
-      list.sort_by do |hash|
-        hash['start']
-      end.group_by do |hash| 
-        hash['id']
-      end if list
+    def initialize(application, name, application_type, test_type, db, fs_ip, config_path = nil, logger = nil)
+      @logger = logger if logger
+      @logger.debug "application: #{application}" 
+      @logger.debug "name: #{name}" 
+      @logger.debug "application_type: #{application_type}" 
+      @logger.debug "test type: #{test_type}" 
+      @logger.debug "db: #{db}" 
+      @logger.debug "config path: #{config_path}" 
+      initialized_results = Apps::Bootstrap.initialize_results[application_type.to_sym]
+      @past_summary_results = initialized_results[:klass]
+      @summary_view = initialized_results[:summary_view]
+      @detailed_view = initialized_results[:detailed_view]
+      
+      config = config(config_path)
+      @test_list = []
+      test_type.chomp!("_test")
+      @store = Redis.new(db)
+      
+      all_test_guids = @store.lrange("#{application}:#{name}:results:#{test_type}", 0, -1)
+      
+      all_test_guids.each do |guid|
+        @test_list << {:guid => guid, :application => application, :name => name, :test_type => test_type}
+      end     
     end
   end
 

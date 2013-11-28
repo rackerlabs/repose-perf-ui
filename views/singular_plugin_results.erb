@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %> - <%= plugin_name %> - <%= option %> - Past Results</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/css/repose.css" rel="stylesheet" media="screen">
+    <link href="/css/prettify.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/<%= application %>"><%= title %></a>
+      <div class="nav-collapse collapse bs-navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/<%= application %>/tests">Running Tests</a></li>
+          <li><a href="/<%= application %>/applications">Applications</a></li>
+          <li class="active"><a href="/<%= application %>/results">Results</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container">
+      <ul class="breadcrumb">
+        <li><a href="/<%= application %>">Home</a></li>
+        <li><a href="/<%= application %>/results">Results</a></li>
+        <li><a href="/<%= application %>/results/<%= sub_app_id %>"><%= sub_app_id %></a></li>
+        <li><a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>"><%= test_type %></a></li>
+        <li class="active"><%= plugin_name %> - <%= option %></li>
+      </ul>
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Summary Test Results</h3>
+        </div>
+        <table class="table table-hover">
+<% summary_plugin_data.each do |key, value| %>
+          <thead>
+            <tr>
+              <th>instance</th>
+  <% value[:headers].each do |header| %>
+              <th><span class="metric_desc" data-toggle="tooltip" title="<%= value[:description][header] %>" data-placement="bottom"><%= header %></span></th>
+  <% end %>
+            </tr>
+          </thead>
+          <tbody>
+  <% value[:content].each do |instance, data| %>
+            <tr>
+              <td><%= instance %></td>
+     <% data.each do |point| %>
+              <td><%= point %></td>
+     <% end %>
+            </tr>
+  <% end %>
+          </tbody>
+<% end %>
+        </table>
+      </div>
+<% detailed_plugin_data.each do |key, value| %>
+  <% value[:content].each do |instance, data| %>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title"><%= key %> - <%= instance %></h3>
+        </div>        
+        <div id="<%= key %>_<%= instance.gsub(/[.-]/,'_') %>" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+  <% end %>
+<% end %>
+<% detailed_plugin_data.each do |key, value| %>
+  <% value[:content].each do |instance, data| %>
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Detailed Test Results for <%= instance %></h3>
+        </div>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Time</th>
+    <% value[:headers].each do |header| %>
+              <th><%= header %></th>
+    <% end %>
+            </tr>
+          </thead>
+          <tbody>
+    <% data.each do |time, entry| %>
+            <tr>
+              <td><%= time %></td>
+      <% entry.each do |p| %>
+              <td><%= p %></td>
+      <% end %>
+            </tr>
+    <% end %>
+          </tbody>
+        </table>
+      </div>
+  <% end %>
+<% end %>
+    </div>
+    <hr>
+    <footer>
+      <p>&copy; Rackspace Hosting 2013</p>
+    </footer>
+  </div> <!-- /container -->
+    <!-- JavaScript plugins (requires jQuery) -->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+    <script src="/js/respond.js"></script>
+    <script src="/js/repose.min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="/js/prettify.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        window.prettyPrint && prettyPrint()
+        $(".metric_desc").tooltip()
+        $(".accordion-toggle").collapse();
+<% detailed_unordered_plugin_data.each do |key, value| %>
+  <% value[:content].each do |instance, data| %>
+      var option_<%= key %>_<%= instance.gsub(/[.-]/,'_') %> = {
+          chart: {
+            renderTo: '<%= key %>_<%= instance.gsub(/[.-]/,'_') %>',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: '<%= key %> <%= instance %>'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    <% value[:headers].each do |header| %>
+          {
+            name: '<%= header %>'
+          },
+    <% end %>
+          ]
+      }
+    <% data.each_index do |index| %>
+      option_<%= key %>_<%= instance.gsub(/[.-]/,'_') %>.series[<%= index %>].data = <%= data[index].map {|t| [t[:time],t[:value].to_f ]}.to_json %>;
+    <% end %>
+    var <%= key %>_<%= instance.gsub(/[.-]/,'_') %>_chart = new Highcharts.Chart(option_<%= key %>_<%= instance.gsub(/[.-]/,'_') %>);
+  <% end %>
+<% end %>
+      });
+    </script>
+  </body>
+</html>

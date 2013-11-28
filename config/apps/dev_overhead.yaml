@@ -1,0 +1,12 @@
+application:
+  name: Overhead
+  description: Overhead application.  Just an example of how to compare two tests in 1 container
+  location: apps/overhead/bootstrap.rb
+  type: comparison
+  plugins:
+   - location: plugins/mac_perf_mon/plugin.rb
+  sub_apps: 
+   - 
+     id: main
+     name: Main application
+     description: This is the base configuration for Repose

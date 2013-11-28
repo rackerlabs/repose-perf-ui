@@ -1,0 +1,12 @@
+application:
+  name: No Store
+  description: just a test app
+  location: apps/no-store/bootstrap.rb
+  type: singular
+  plugins:
+   - location: plugins/mac_perf_mon/plugin.rb
+  sub_apps: 
+   - 
+     id: main
+     name: Main application
+     description: This is the base configuration for Repose

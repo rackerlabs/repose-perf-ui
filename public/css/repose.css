@@ -28,3 +28,23 @@ body {
     padding: 0;
   }
 }
+
+th.tablesorter-headerDesc { 
+    background-image: url(http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.13.3/css/images/black-desc.gif); 
+    cursor: pointer; 
+    font-weight: bold; 
+    background-repeat: no-repeat; 
+    background-position: center left; 
+} 
+
+th.tablesorter-headerAsc { 
+    background-image: url(http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.13.3/css/images/black-asc.gif); 
+    cursor: pointer; 
+    font-weight: bold; 
+    background-repeat: no-repeat; 
+    background-position: center left; 
+} 
+
+th.tablesorter-header {
+    cursor: pointer; 
+}

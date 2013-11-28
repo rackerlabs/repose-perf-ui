@@ -1,3 +1,4 @@
+atom_hopper.yaml
 jmeter.log
 *tmp
 tmp*
@@ -7,8 +8,10 @@ nohup.out
 config.yaml
 */results/*
 results/*
-files/apps/passthrough/results/*
-coverage/*
+coverage/
+Gemfile.lock
 *.png
+*.log
 *.db
-*.lock
+hERmes_viewer/
+.metadata
