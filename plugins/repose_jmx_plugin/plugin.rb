@@ -83,7 +83,7 @@ class ReposeJmxPlugin < Plugin
     result
   end
   
-  def store_data(db, start_time, end_time)
+  def store_data(application, sub_app, type, guid, store, start_time, end_time)
     
   end
 

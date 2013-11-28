@@ -1,3 +1,4 @@
+require 'net/scp'
 
 class IO
   TAIL_BUF_LENGTH = 1 << 16
@@ -49,6 +50,26 @@ module Models
       end
       detailed_results
     end 
+    
+    def store_results(application, sub_app, type, guid, source_result_info, storage_info, store)
+=begin
+ 1. get file remotely (specified by configs whether it's an scp or wget)
+ 2. load file in specific directory via scp
+=end
+      Net::SCP.download!(
+        source_result_info['server'], 
+        source_result_info['user'], 
+        source_result_info['path'], 
+        "/tmp/#{guid}/data/summary.log")      
+        
+        result_data = {}
+        result_data['location'] = "/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/#{guid}/data/summary.log"
+        result_data['name'] = 'summary.log'
+        
+        result = result_data.to_json
+        
+        store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:data", "results", result)
+    end
   end
 
 	class PravegaRunner

@@ -25,7 +25,6 @@ module Models
     
     def _get_result_requests(store, application, name, test_type, id)
       response = []
-      puts "#{application}:#{name}:results:#{test_type}:#{id}:meta"
       requests = store.hget("#{application}:#{name}:results:#{test_type}:#{id}:meta", "request")
       responses = store.hget("#{application}:#{name}:results:#{test_type}:#{id}:meta", "response")
       request_list = []

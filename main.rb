@@ -545,12 +545,61 @@ class PerfApp < Sinatra::Base
 =begin
   POST /atom_hopper/applications/main/load/start -d '{"length":60, "description": "this is a description of the test", "flavor_type": "performance", "release": 1.6}'
 =end    
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app and Apps::Bootstrap.test_list.keys.include?(test) 
+      new_app = app[:klass].new(settings.deployment)
+      sub_app = new_app.config['application']['sub_apps'].find do |sa|
+        sa['id'] == name
+      end
+      if sub_app
+        request.body.rewind
+        json_data = JSON.parse(request.body.read)
+        content_type :json
+        halt 400, { "fail" => "required keys are missing"}.to_json unless json_data.has_key?("name") and json_data.has_key?("length") and json_data.has_key?("runner")
+        guid_response = new_app.start_test_recording(application, name, test.chomp('_test'), json_data)
+        halt 400, {'Content-Type' => 'application/json'}, guid_response if JSON.parse(guid_response).has_key?("fail")
+        body guid_response
+      end
+    end
   end
   
-  get '/:application/applications/:name/:test/stop' do |application, name, test|
+  post '/:application/applications/:name/:test/stop' do |application, name, test|
 =begin
-  GET /atom_hopper/application/main/load/stop/id
+  post /atom_hopper/application/main/load/stop
+  {
+    'guid':'1234-6382-2938-2938-2933',
+    'servers':{
+      'config':{
+        'server':'<server>',
+        'path':'<file path>'
+      },
+      'results':{
+        'server':'<server>',
+        'path':'<file path>'
+      }        
+    }
+  }
 =end    
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app and Apps::Bootstrap.test_list.keys.include?(test) 
+      new_app = app[:klass].new(settings.deployment)
+      sub_app = new_app.config['application']['sub_apps'].find do |sa|
+        sa['id'] == name
+      end
+      if sub_app
+        request.body.rewind
+        json_data = JSON.parse(request.body.read)
+        content_type :json
+        halt 400, { "fail" => "required keys are missing"}.to_json unless json_data.has_key?("guid")
+        stop_response = new_app.stop_test_recording(application, name, test.chomp('_test'), json_data)
+        halt 400, {'Content-Type' => 'application/json'}, stop_response.to_json if stop_response.has_key?("fail")
+        body stop_response.to_json
+      else 
+        halt 404, {'Content-Type' => 'application/json'},  {'fail' => 'invalid sub app specified'}.to_json
+      end
+    else
+      halt 404, {'Content-Type' => 'application/json'},  {'fail' => 'invalid application specified'}.to_json
+    end  
   end
 end
 

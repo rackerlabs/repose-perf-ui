@@ -297,27 +297,27 @@ Feature: Results Page
 		And the error page should match the "No test script exists for invalid/main"
 
 	Scenario: Compare comparison_app main load test key-one and key-two
-		When I post to "/comparison_app/results/main/load_test" with "key-one+key-two"
+		When I post to "/comparison_app/results/main/load_test" with '{"compare":"key-one+key-two"}'
 		Then the response should be "200"
 		And the page should match the "compare_app_compare_main_load" version
 
 	Scenario: Compare comparison_app main load test key-one and unknown
-		When I post to "/comparison_app/results/main/load_test" with "key-one+unknown"
+		When I post to "/comparison_app/results/main/load_test" with '{"compare":"key-one+unknown"}'
 		Then the response should be "200"
 		And the page should match the "compare_app_compare_main_load_unknown" version
 
 	Scenario: Compare comparison_app main invalid test key-one and key-two
-		When I post to "/comparison_app/results/main/invalid" with "key-one+key-two"
+		When I post to "/comparison_app/results/main/invalid" with '{"compare":"key-one+key-two"}'
 		Then the response should be "404"
 		And the error page should match the "No application by name of comparison_app/invalid found"
 		
 	Scenario: Compare comparison_app invalid load test key-one and key-two
-		When I post to "/comparison_app/results/invalid/load_test" with "key-one+key-two"
+		When I post to "/comparison_app/results/invalid/load_test" with '{"compare":"key-one+key-two"}'
 		Then the response should be "404"
 		And the error page should match the "No sub application for invalid found"
 
 	Scenario: Compare invalid main load test key-one and key-two
-		When I post to "/invalid/results/main/load_test" with "key-one+key-two"
+		When I post to "/invalid/results/main/load_test" with '{"compare":"key-one+key-two"}'
 		Then the response should be "404"
 		And the error page should match the "No application by name of invalid/load_test found"
 

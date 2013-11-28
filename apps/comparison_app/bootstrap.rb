@@ -18,13 +18,5 @@ module Apps
 
       super(redis_info, logger)      
     end
-
-    def start_test_recording(id, timestamp = nil)
-      super("comparison_app:test:#{id}:start", timestamp)
-    end
-
-    def stop_test_recording(id, timestamp = nil)
-      super("comparison_app:test:#{id}:start", timestamp)
-    end
   end
 end

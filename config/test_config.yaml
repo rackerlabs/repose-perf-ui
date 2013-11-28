@@ -3,6 +3,11 @@ redis:
   port: 6379
   db: 1
 file_store: localhost:3000  
+storage_info:
+  destination: localhost
+  user: dimi5963
+  path: /Users/dimi5963/projects/lighttpd/data
+  prefix: files
 test_list:
   load_test:
     name: Load Test

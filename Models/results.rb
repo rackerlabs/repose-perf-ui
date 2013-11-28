@@ -8,7 +8,6 @@ module Results
   class ComparisonResults
     def test_results(db, fs_ip, test_list)
       #compare 2 guids
-      puts "test_list :#{test_list}"
       overhead_test_list = []
       store = Redis.new(db)
       temp_list = []
@@ -104,7 +103,6 @@ module Results
         test_list.each do |test|
           meta_results = store.hgetall("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:meta")
           data_result = store.hget("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:data", "results")
-          
           test_json = JSON.parse(meta_results['test'])
           test.merge!(test_json) if test_json
           runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json

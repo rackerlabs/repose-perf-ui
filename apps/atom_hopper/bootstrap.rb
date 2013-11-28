@@ -1,6 +1,8 @@
+require 'fileutils'
 require 'yaml'
 require 'logging'
 require 'redis'
+require 'open-uri'
 require File.expand_path("apps/bootstrap.rb", Dir.pwd)
 
 module Apps
@@ -17,14 +19,6 @@ module Apps
       end
 
       super(redis_info, logger)      
-    end
-
-    def start_test_recording(id, timestamp = nil)
-      super("atom_hopper:test:#{id}:start", timestamp)
-    end
-
-    def stop_test_recording(id, timestamp = nil)
-      super("atom_hopper:test:#{id}:start", timestamp)
     end
   end
 end
