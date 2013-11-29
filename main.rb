@@ -6,7 +6,6 @@ require 'open-uri'
 
 require_relative './apps/bootstrap.rb'
 require_relative './Models/models.rb'
-require_relative './Models/perftest.rb'
 require_relative './Models/test.rb'
 require_relative './Models/configuration.rb'
 require_relative './Models/testlocation.rb'
@@ -557,6 +556,7 @@ class PerfApp < Sinatra::Base
         content_type :json
         halt 400, { "fail" => "required keys are missing"}.to_json unless json_data.has_key?("name") and json_data.has_key?("length") and json_data.has_key?("runner")
         guid_response = new_app.start_test_recording(application, name, test.chomp('_test'), json_data)
+        halt 400, {'Content-Type' => 'application/json'}, {'fail' => 'test for atom_hopper/main/load_test already started'}.to_json if guid_response.length == 0
         halt 400, {'Content-Type' => 'application/json'}, guid_response if JSON.parse(guid_response).has_key?("fail")
         body guid_response
       end
@@ -592,6 +592,7 @@ class PerfApp < Sinatra::Base
         content_type :json
         halt 400, { "fail" => "required keys are missing"}.to_json unless json_data.has_key?("guid")
         stop_response = new_app.stop_test_recording(application, name, test.chomp('_test'), json_data)
+        puts stop_response
         halt 400, {'Content-Type' => 'application/json'}, stop_response.to_json if stop_response.has_key?("fail")
         body stop_response.to_json
       else 

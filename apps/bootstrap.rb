@@ -173,6 +173,7 @@ module Apps
     def stop_test_recording(application, sub_app = 'main', type = 'load', json_data = nil, timestamp = nil)
       id = "#{application}:test:#{sub_app}:#{type}:start"
       store = Redis.new(@db)
+      plugin_result_list = []
       begin
         raise ArgumentError, "start time for this test was not found.  Did you forget to start the test?" unless store.get(id)
         start_test = JSON.parse(store.get(id))
@@ -182,10 +183,13 @@ module Apps
         #load data for plugins here (from base class)
         plugins = load_plugins
         plugins.each do |plugin|
-          plugin.new(@db, @fs_ip).store_data(application, sub_app, type, json_data['guid'], store, start_test['time'], end_time)
+          plugin_result = plugin.new(@db, @fs_ip).store_data(application, sub_app, type, json_data, store, start_test, end_time, storage_info)
+          plugin_result_list << plugin_result if plugin_result
         end 
         store.del(id)
-        return {"result" => "OK"}
+        result = {"result" => "OK"}
+        result["with_errors"] = plugin_result_list if plugin_result_list.length > 0
+        return result
       rescue => e
         return {"fail" => e.message}
       ensure
@@ -209,7 +213,7 @@ module Apps
       store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:meta", "response", response)
 
       script_info = store.hgetall("#{application}:#{sub_app}:tests:setup:script")
-      raise ArgumentError, "no test script is available for #{application}-#{sub_app}" unless script_info
+      raise ArgumentError, "no test script is available for #{application}-#{sub_app}" unless script_info and script_info['test']
       script_json_info = JSON.parse(script_info['test'])
       script_result_json = {}
       script_result_json['name'] = script_json_info['name']
@@ -278,6 +282,8 @@ module Apps
       
       source_config_info = json_data['servers']['config']
       copy_configs(application, sub_app, type, json_data['guid'], source_config_info, storage_info, store) if source_config_info
+      
+      FileUtils.mkpath "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}" unless File.exists?("#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}")
       
       Net::SCP.upload!(
         storage_info['destination'], 

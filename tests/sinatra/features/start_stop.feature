@@ -59,7 +59,7 @@ Feature: Start and Stop Page
 		When I post to '/atom_hopper/applications/main/load_test/start' with:
 		"""
 		  {
-			"length":60, "description": "this is a description of the test", "flavor_type": "performance", "release": "1.6", "name":"this is my name"
+			"length":60, "description": "this is a description of the test", "flavor_type": "performance", "release": "1.6", "name":"this is my name","runner":"jmeter"
 		  }
 		""" 
 		Then the response should be "400"
@@ -103,7 +103,7 @@ Feature: Start and Stop Page
 		"""
 		Then the response should be "400"
 		And response should be a json
-		And "result" json record should equal to "not found"
+		And "fail" json record should equal to "invalid guid"
 		And the "data" key in redis should not exist
 		And the "meta" key in redis should not exist
 		And the "configs" key in redis should not exist
@@ -232,7 +232,7 @@ Feature: Start and Stop Page
 		Then the response should be "400"
 		And response should be a json
 		And there should be "0" "guid" records in response
-		And "fail" json record should equal to "test for atom_hopper/main/load_test already started" 
+		And "fail" json record should equal to "invalid comparison guid" 
 
 	Scenario: Stop overhead main load test with invalid guid - primary test
 		Given Test is started for "overhead" "main" "load"
@@ -258,7 +258,7 @@ Feature: Start and Stop Page
 		"""
 		Then the response should be "400"
 		And response should be a json
-		And "result" json record should equal to "not found"
+		And "fail" json record should equal to "invalid guid"
 		And the "data" key in redis should not exist
 		And the "meta" key in redis should not exist
 		And the "configs" key in redis should not exist
@@ -283,7 +283,7 @@ Feature: Start and Stop Page
 		"""
 		Then the response should be "400"
 		And response should be a json
-		And "result" json record should equal to "not found"
+		And "fail" json record should equal to "invalid guid"
 		And the "data" key in redis should not exist
 		And the "meta" key in redis should not exist
 		And the "configs" key in redis should not exist

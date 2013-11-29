@@ -172,7 +172,20 @@ end
 
 Then(/^"(.*?)" json record should equal to "(.*?)"$/) do |key, value|
   results = JSON.parse(last_response.body)
-  results[key] == value
+  results[key].should == value
+end
+
+Then(/^"(.*?)" list has "(.*?)" record, which should equal to "(.*?)"$/) do |list, key, value|
+  result = nil
+  results = JSON.parse(last_response.body)
+  result = results[list].find{|l| l.has_key?(key)}
+  result[key].should == value
+  result.should_not be_nil
+end
+
+Then(/^"([\w_]+)" "([\w_]+)" json should equal to "(.*?)"$/) do |key_one, key_two, value|
+  results = JSON.parse(last_response.body)
+  results[key_one][key_two].should == value
 end
 
 Then(/^"(.*?)" json record should exist$/) do |key|
@@ -264,6 +277,17 @@ Then(/^the "(.*?)" json entry for "(.*?)" hash key in redis should exist$/) do |
     result = Redis.new(new_app.db).hget("#{set_app}:#{set_name}:results:#{set_test}:#{guid}:#{key}", entry)
   end  
   result.should_not be_nil
+end
+
+Then(/^the "(.*?)" json entry for "(.*?)" hash key in redis should not exist$/) do |entry, key|
+  result = nil
+  main_config = Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  app = Apps::Bootstrap.application_list.find {|a| a[:id] == set_app}
+  if app 
+    new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
+    result = Redis.new(new_app.db).hget("#{set_app}:#{set_name}:results:#{set_test}:#{guid}:#{key}", entry)
+  end  
+  result.should be_nil
 end
 
 Then(/^the "(.*?)" list key in redis should exist and contain "(\d+)" entries$/) do |key, entry_count|

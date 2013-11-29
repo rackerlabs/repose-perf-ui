@@ -79,7 +79,7 @@ Feature: Results Page
 		Then the response should be "404"
 		And response should be a json
 		And there should be "0" "avg" records in response
-		And "fail" json record should equal to "empty metric specified" 
+		And "fail" json record should equal to "invalid metric specified" 
 
 	Scenario: Load atom_hopper (singular) main load test throughput metric with test ended
 		When I navigate to '/atom_hopper/results/main/load_test/metric/throughput'
@@ -98,7 +98,7 @@ Feature: Results Page
 		Then the response should be "404"
 		And response should be a json
 		And there should be "0" "throughput" records in response
-		And "fail" json record should equal to "empty metric specified" 
+		And "fail" json record should equal to "invalid metric specified" 
 
 	Scenario: Load atom_hopper (singular) main load test errors metric with test ended
 		When I navigate to '/atom_hopper/results/main/load_test/metric/errors'
@@ -116,13 +116,13 @@ Feature: Results Page
 		When I navigate to '/atom_hopper/results/main/load_test/metric/invalid'
 		Then the response should be "404"
 		And response should be a json
-		And "fail" json record should equal to "empty metric specified" 
+		And "fail" json record should equal to "invalid metric specified" 
 
 	Scenario: Load atom_hopper main invalid test throughput metric with test ended
 		When I navigate to '/atom_hopper/results/main/invalid/metric/errors'
 		Then the response should be "404"
 		And response should be a json
-		And "fail" json record should equal to "invalid test specified"
+		And "fail" json record should equal to "invalid application specified"
 
 	Scenario: Load atom_hopper invalid load test throughput metric with test ended
 		When I navigate to '/atom_hopper/results/invalid/load_test/metric/errors'
@@ -243,7 +243,7 @@ Feature: Results Page
 		And response should be a json
 		And there should be "0" "avg" "some-random-string" records in response
 		And there should be "0" "avg" "some-random2-string" records in response
-		And "fail" json record should equal to "The metric data is empty" 
+		And "fail" json record should equal to "invalid application specified" 
 
 	Scenario: Load overhead invalid load test id = some-random-string+some-random2-string avg metric
 		When I navigate to '/overhead/results/invalid/load_test/metric/avg/id/some-random-string+some-random2-string'
@@ -251,7 +251,7 @@ Feature: Results Page
 		And response should be a json
 		And there should be "0" "avg" "some-random-string" records in response
 		And there should be "0" "avg" "some-random2-string" records in response
-		And "fail" json record should equal to "The metric data is empty" 
+		And "fail" json record should equal to "invalid sub app specified" 
 
 	Scenario: Load invalid main load test id = some-random-string+some-random2-string avg metric
 		When I navigate to '/invalid/results/main/load_test/metric/avg/id/some-random-string+some-random2-string'
@@ -259,7 +259,7 @@ Feature: Results Page
 		And response should be a json
 		And there should be "0" "avg" "some-random-string" records in response
 		And there should be "0" "avg" "some-random2-string" records in response
-		And "fail" json record should equal to "The metric data is empty" 
+		And "fail" json record should equal to "invalid application specified" 
 
 	Scenario: Download atom hopper main load test e464b1b6-10ab-4332-8b30-8439496c2d19 test runner file
 		When I click on '/atom_hopper/results/main/load_test/e464b1b6-10ab-4332-8b30-8439496c2d19/test_download/jmeter'
@@ -342,7 +342,7 @@ Feature: Results Page
 		And response should be a json
 		And there should be "0" "avg" "key-one" records in response
 		And there should be "0" "avg" "key-two" records in response
-		And "fail" json record should equal to "The metric data is empty" 
+		And "fail" json record should equal to "invalid application specified" 
 		
 	Scenario: Compare comparison_app invalid load test key-one and key-two for avg
 		When I navigate to '/comparison_app/results/invalid/load_test/metric/avg/compare/key-one+key-two'
@@ -350,7 +350,7 @@ Feature: Results Page
 		And response should be a json
 		And there should be "0" "avg" "key-one" records in response
 		And there should be "0" "avg" "key-two" records in response
-		And "fail" json record should equal to "The metric data is empty" 
+		And "fail" json record should equal to "invalid sub app specified" 
 
 	Scenario: Compare invalid main load test key-one and key-two for avg
 		When I navigate to '/invalid/results/main/load_test/metric/avg/compare/key-one+key-two'
@@ -358,7 +358,7 @@ Feature: Results Page
 		And response should be a json
 		And there should be "0" "avg" "key-one" records in response
 		And there should be "0" "avg" "key-two" records in response
-		And "fail" json record should equal to "The metric data is empty" 
+		And "fail" json record should equal to "invalid application specified" 
 
 
 

@@ -27,7 +27,7 @@ Feature: Application Page
 		Then the response should be "404"
 
 	Scenario: Navigate to main sub application of repose application, which doesn't have requests and responses
-		When I navigate to '/repose/applications/main'
+		When I navigate to '/overhead/applications/main'
 		Then the page should match the "response_and_requests_not_found" version
 
 	Scenario: Navigate to main sub application of no_store application, which has a misconfigured file store

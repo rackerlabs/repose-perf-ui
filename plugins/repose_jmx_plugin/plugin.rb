@@ -83,8 +83,27 @@ class ReposeJmxPlugin < Plugin
     result
   end
   
-  def store_data(application, sub_app, type, guid, store, start_time, end_time)
-    
+  def store_data(application, sub_app, type, json_data, store, start_test_data, end_time, storage_info)
+    begin
+      if json_data.has_key?('plugins')
+        plugin_data = json_data['plugins'].find {|p| p['id'] == 'repose_jmx_plugin'}
+        if plugin_data
+          servers = plugin_data['servers']
+          if servers
+            servers.each do |server|
+              PluginModule::RemoteServerAdapter.new(store, 'repose_jmx_plugin', server, storage_info).load(json_data['guid'], 'ALL', application, sub_app, type)
+            end
+          else
+            raise ArgumentError, "no server list specified"
+          end
+        else
+          raise ArgumentError, "repose_jmx_plugin id not found"  
+        end
+      end
+      return nil
+    rescue => e
+      return {'repose_jmx_plugin' => e.message}
+    end
   end
 
 end
