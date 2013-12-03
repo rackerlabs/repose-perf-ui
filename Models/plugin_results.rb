@@ -78,15 +78,12 @@ module PluginModule
       )
       
       #third, add to redis
-      
       Dir.glob("#{tmp_dir}/**/*") do |entry|
         entry_basename = File.basename(entry)
         plugin = {
            "name" => entry_basename, 
            "location" => "/#{@local_prefix}/#{application}/#{sub_app}/results/#{type}/#{guid}/data/#{@plugin_id}/#{entry_basename}"
         }.to_json
-        puts "#{application}:#{sub_app}:results:#{type}:#{guid}:data"
-        puts "#{@plugin_id}|#{prefix}|#{entry_basename}"
         @store.hset(
           "#{application}:#{sub_app}:results:#{type}:#{guid}:data", "#{@plugin_id}|#{prefix}|#{entry_basename}", plugin) 
       end

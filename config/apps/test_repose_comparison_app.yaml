@@ -1,0 +1,12 @@
+application:
+  name: Repose Comparison App
+  description: Repose Comparison App application.  Just an example of how to compare two plugin tests in 1 container
+  location: apps/repose_comparison_app/bootstrap.rb
+  type: comparison
+  plugins:
+   - location: plugins/repose_jmx_plugin/plugin.rb
+  sub_apps: 
+   - 
+     id: main
+     name: Main application
+     description: This is the base configuration for Repose

@@ -29,7 +29,7 @@
         <li><a href="/<%= application %>/results">Results</a></li>
         <li><a href="/<%= application %>/results/<%= sub_app_id %>"><%= sub_app_id %></a></li>
         <li><a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>"><%= test_type %></a></li>
-        <li class="active"><%= test_type %></li>
+        <li class="active">Comparison</li>
       </ul>
       <div class="panel panel-summary">
         <div class="panel-heading">
@@ -56,6 +56,53 @@
               </tr>
 <% end %>
             </tbody>
+            <tfoot>
+            	<tr>
+            		<td colspan="5">
+            			<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#pluginModal">
+						  Compare plugin data for these tests
+						</button>
+						<div class="modal fade" id="pluginModal" tabindex="-1" role="dialog" aria-labelledby="pluginModalLabel" aria-hidden="true">
+						  <div class="modal-dialog">
+						    <div class="modal-content">
+						      <div class="modal-header">
+						        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						        <h4 class="modal-title" id="pluginModalLabel">Plugin comparison</h4>
+						      </div>
+						      <div class="modal-body">
+						      	<ul class="nav nav-tabs">
+<% plugin_list.each do |plugin| %>
+								  <li><a href="#<%= plugin[:id] %>" data-toggle="tab"><%= plugin[:id] %></a></li>
+<% end %>
+								</ul>
+						        <form method="POST" action="<%= test_type %>/compare-plugin">
+						        	<input type="hidden" name="compare" value="<%= compare_guids.join("+") %>"/>
+									<div class="tab-content">
+<% plugin_list.each_with_index do |plugin, index| %>
+									  <div class="tab-pane <%= "active" if index == 0 %>" id="<%= plugin[:id] %>">
+<% plugin[:data].each do |option| %>
+										<div class="radio">
+										  <label>
+										    <input type="radio" name="plugin_id" value="<%= plugin[:id]%>|||<%= option[:id]%>"/><%= plugin[:id] %>-<%= option[:name] %>
+										  </label>
+										</div>
+<% end %>
+									  	
+									  </div>
+<% end %>
+									</div>
+			            			<input type="submit" class="btn btn-primary" value="Compare Tests for plugin"/>
+		            			</form>
+						      </div>
+						      <div class="modal-footer">
+						        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+						      </div>
+						    </div><!-- /.modal-content -->
+						  </div><!-- /.modal-dialog -->
+						</div>
+            		</td>
+            	</tr>
+        	</tfoot>
           </table>
       </div>
       <div class="panel">
@@ -109,8 +156,10 @@
             }
           },
           series: [
-<% result_set_list.each do |result| %>
-              {name: '<%= result.id %>'},
+<% result_set_list.each do |result_id_list| %>
+  <% result_id_list.id.split('+').each do |result| %>
+              {name: '<%= result %>'},
+  <% end %>
 <% end %>
           ]
         };        
@@ -128,8 +177,10 @@
             }
           },
           series: [
-<% result_set_list.each do |result| %>
-              {name: '<%= result.id %>'},
+<% result_set_list.each do |result_id_list| %>
+  <% result_id_list.id.split('+').each do |result| %>
+              {name: '<%= result %>'},
+  <% end %>
 <% end %>
           ]
         };        
@@ -147,8 +198,10 @@
             }
           },
           series: [
-<% result_set_list.each do |result| %>
-              {name: '<%= result.id %>'},
+<% result_set_list.each do |result_id_list| %>
+  <% result_id_list.id.split('+').each do |result| %>
+              {name: '<%= result %>'},
+  <% end %>
 <% end %>
           ]
         };   

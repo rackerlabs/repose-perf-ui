@@ -92,7 +92,7 @@ class MacOsxPlugin < Plugin
     end
 
     def show_summary_data(name, test, id, test_id, options=nil)
-      network = UbuntuPerfmonPlugin.show_plugin_names.find {|i| i[:id] == id }
+      network = MacOsxPlugin.show_plugin_names.find {|i| i[:id] == id }
       result = Results::PastNetworkResults.format_network(NetworkResult.new(network[:klass].new(name,test.chomp('_test'), test_id)).retrieve_average_results,network[:id].to_sym,{},network[:klass].metric_description)
       puts result
       result
@@ -102,7 +102,7 @@ class MacOsxPlugin < Plugin
   show all data and return in a list of hashes
 =end
     def show_detailed_data(name, test, id, test_id, options=nil)
-      network = UbuntuPerfmonPlugin.show_plugin_names.find {|i| i[:id] == id }
+      network = MacOsxPlugin.show_plugin_names.find {|i| i[:id] == id }
       Results::PastNetworkResults.format_network(NetworkResult.new(network[:klass].new(name,test.chomp('_test'), test_id)).retrieve_detailed_results,network[:id].to_sym,{})
     end
 

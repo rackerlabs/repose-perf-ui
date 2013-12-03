@@ -19,7 +19,8 @@ require './tests/Models/test_tests.rb'
 require './tests/Models/testlocation_tests.rb'
 =end
 
-system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/load_repose_plugin_results.feature"
+system "cucumber tests/sinatra/features/compare_repose_plugin_results.feature"
+#system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/load_repose_plugin_results.feature"
 =begin
 
 - stop actually saves the data 
@@ -28,13 +29,17 @@ system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/app
   - New Relic Adapter
   - Log4J Adapter
   - Postgres Adapter
-tests/sinatra/features/load_repose_plugin_results.feature  
-tests/sinatra/features/compare_repose_plugin_results.feature  
+tests/sinatra/features/compare_repose_plugin_results.feature
+  - this allows the user to compare 2 tests for repose plugins
+      - button to go to repose
+      - data for repose data (all added in one)  
 tests/sinatra/features/sysstats_plugin.feature
 tests/sinatra/features/load_sysstats_plugin.feature
 tests/sinatra/features/compare_sysstats_plugin.feature
 tests/sinatra/features/jmeter.feature
 tests/sinatra/features/autobench.feature
+tests/sinatra/features/trends.feature
+tests/sinatra/features/email.feature
 tests/sinatra/features/newrelic_plugin.feature
 tests/sinatra/features/load_newrelic_plugin.feature
 tests/sinatra/features/compare_newrelic_plugin.feature

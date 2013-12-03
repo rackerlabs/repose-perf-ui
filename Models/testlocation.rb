@@ -17,6 +17,7 @@ module Models
         test_values = store.hgetall("#{app_name}:#{name}:tests:setup:script")
         raise ArgumentError, "No test file exists for #{app_name} and #{name}" unless test_values
         href, type = ''
+        
         test_values.each do |key, value|
           if key.include?("type")
             case value
@@ -31,7 +32,7 @@ module Models
             href = open("http://#{@fs_ip}#{location['location']}") {|f| f.read }
           end 
         end
-
+        
         response = TestLocation.new(href, type)
       ensure
         store.quit

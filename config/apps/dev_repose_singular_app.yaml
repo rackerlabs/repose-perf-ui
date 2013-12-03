@@ -1,0 +1,12 @@
+application:
+  name: Repose Singular App
+  description: Repose Singular App application.  Just an example of how to compare two plugin tests in 1 container
+  location: apps/repose_singular_app/bootstrap.rb
+  type: singular
+  plugins:
+   - location: plugins/repose_jmx_plugin/plugin.rb
+  sub_apps: 
+   - 
+     id: main
+     name: Main application
+     description: This is the base configuration for Repose Singular app

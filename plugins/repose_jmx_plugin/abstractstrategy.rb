@@ -25,6 +25,11 @@ class ReposeAbstractStrategy
   end
 
   def initialize_metric(list,key, dev)
+=begin 
+    unless list[key][:data].find{|key_data| key_data.has_key?(:dev_name) and key_data[:dev_name] == dev}
+      list[key][:data] << {:dev_name  => dev, :results => []}
+    end
+=end
     unless list[key].find{|key_data| key_data.has_key?(:dev_name) and key_data[:dev_name] == dev}
       list[key] << {:dev_name  => dev, :results => []}
     end

@@ -315,7 +315,6 @@ class PerfApp < Sinatra::Base
         plugin_instance = new_app.load_plugins.find {|p| p.to_s == plugin } 
         summary_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_summary_data(application, name, test, option, id)
         detailed_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_detailed_data(application, name, test, option, id)
-        
         if summary_plugin_data and detailed_plugin_data
           detailed_plugin_result = {}
           detailed_plugin_data.each do |key, value|
@@ -433,8 +432,95 @@ class PerfApp < Sinatra::Base
           :title => new_app.config['application']['name'],
           :result_set_list => result_set_list.find_all {|result| comparison_id_list.include?(result.id) },
           :plugin_list => plugins,
-          :test_type => test
+          :test_type => test,
+          :compare_guids => params[:compare]
         }
+      else
+        halt 404, "No sub application for #{name} found"
+      end
+    else
+      halt 404, "No application by name of #{application}/#{test} found"
+    end
+  end
+  
+  post '/:application/results/:name/:test/compare-plugin/metric' do |application, name, test|
+    halt 400, "No tests were specified for comparison" unless params[:compare]
+    halt 400, "No plugin was specified for comparison" unless params[:plugin]
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app and Apps::Bootstrap.test_list.keys.include?(test) 
+      new_app = app[:klass].new(settings.deployment)
+      sub_app = new_app.config['application']['sub_apps'].find do |sa|
+        sa['id'] == name
+      end
+      if sub_app
+        comparison_id_list = params[:compare].split(',')
+        plugin_id = params[:plugin]
+        plugin_id_data = plugin_id.split('|||')
+        plugin = plugin_id_data[0]
+        option = plugin_id_data[1]
+        plugin_instance = new_app.load_plugins.find {|p| p.to_s == plugin } 
+        detailed_plugin_data_list = [] 
+        comparison_id_list.each do |id| 
+          detailed_plugin_data_list << {
+            :id => id, 
+            :data => plugin_instance.new(new_app.db, new_app.fs_ip).show_detailed_data(application, name, test, option, id)
+          }
+        end
+        if detailed_plugin_data_list
+          content_type :json
+          body detailed_plugin_data_list.to_json    
+        else
+          halt 404, "no metric data found for #{application}/#{name}/#{test}/#{id}/#{plugin}/#{option}"
+        end
+      else
+        halt 404, "No sub application for #{name} found"
+      end
+    else
+      halt 404, "No application by name of #{application}/#{test} found"
+    end    
+    
+  end
+  
+  post '/:application/results/:name/:test/compare-plugin' do |application, name, test|
+    halt 400, "No tests were specified for comparison" unless params[:compare]
+    halt 400, "No plugin was specified for comparison" unless params[:plugin_id]
+    comparison_id_list = params[:compare].split('+')
+    plugin_id = params[:plugin_id]
+
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app and Apps::Bootstrap.test_list.keys.include?(test) 
+      new_app = app[:klass].new(settings.deployment)
+      sub_app = new_app.config['application']['sub_apps'].find do |sa|
+        sa['id'] == name
+      end
+      if sub_app
+        #get plugin_summary_results for each data set
+        plugin_id_data = plugin_id.split('|||')
+        plugin = plugin_id_data[0]
+        option = plugin_id_data[1]
+        plugin_instance = new_app.load_plugins.find {|p| p.to_s == plugin }
+        halt 404, "No plugin by name of #{plugin} found" unless plugin_instance
+        summary_plugin_data_list = [] 
+        comparison_id_list.each do |id| 
+          summary_plugin_data_list << {
+            :id => id, 
+            :data => plugin_instance.new(new_app.db, new_app.fs_ip).show_summary_data(application, name, test, option, id)
+          }
+        end
+        #detailed_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_detailed_data(application, name, test, option, id)
+        if summary_plugin_data_list
+          erb :results_plugin_test_compare, :locals => {
+            :application => app[:id],
+            :sub_app_id => name.to_sym,
+            :title => new_app.config['application']['name'],
+            :summary_plugin_data_list => summary_plugin_data_list,
+            :test_type => test,
+            :compare_guids => comparison_id_list,
+            :plugin_name => plugin,
+            :plugin_id => plugin_id,
+            :option => option
+          }
+        end
       else
         halt 404, "No sub application for #{name} found"
       end
@@ -592,7 +678,6 @@ class PerfApp < Sinatra::Base
         content_type :json
         halt 400, { "fail" => "required keys are missing"}.to_json unless json_data.has_key?("guid")
         stop_response = new_app.stop_test_recording(application, name, test.chomp('_test'), json_data)
-        puts stop_response
         halt 400, {'Content-Type' => 'application/json'}, stop_response.to_json if stop_response.has_key?("fail")
         body stop_response.to_json
       else 

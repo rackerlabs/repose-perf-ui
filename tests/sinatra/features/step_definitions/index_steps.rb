@@ -107,6 +107,10 @@ When(/^I post to '([^\"]*)' with:$/) do |path, post_data|
     post(path, post_data)
 end
 
+When(/^I post to "([^\"]*)" with:$/) do |path, post_data|
+    post(path, JSON.parse(post_data))
+end
+
 When /^I navigate to '([^\"]*)'$/ do |path|
   	get path
 end
@@ -135,6 +139,7 @@ When(/^I post to '([^\"]*)' with non\-existing guid$/) do |path, post_data|
 end
 
 Then /^the response should be "([^\"]*)"$/ do |status|
+puts last_response.body
 	last_response.status.should == status.to_i
 end
 

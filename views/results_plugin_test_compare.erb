@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %> - Results - <%= test_type %> - Compare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/css/repose.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/<%= application %>"><%= title %></a>
+      <div class="nav-collapse collapse bs-navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/<%= application %>/tests">Running Tests</a></li>
+          <li><a href="/<%= application %>/applications">Applications</a></li>
+          <li class="active"><a href="/<%= application %>/results">Results</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container">
+      <ul class="breadcrumb">
+        <li><a href="/<%= application %>">Home</a></li>
+        <li><a href="/<%= application %>/results">Results</a></li>
+        <li><a href="/<%= application %>/results/<%= sub_app_id %>"><%= sub_app_id %></a></li>
+        <li><a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>"><%= test_type %></a></li>
+        <li class="active"><%= plugin_name %> - <%= option %> - Comparison</li>
+      </ul>
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Test Results</h3>
+        </div>
+        <div class="span11" style="overflow: auto;">
+	        <table class="table table-hover" id="comparisonTable" style="max-width: none;">
+<% 
+    entry = summary_plugin_data_list.first
+    if entry 
+		id = entry[:id]
+		summary_plugin_data = entry[:data]
+    %>
+          <thead>
+            <tr>
+              <th>key</th>
+              <th>instance</th>
+  <% summary_plugin_data.each do |k, value|
+  	value[:headers].each do |header| %>
+              <th><span class="metric_desc" data-toggle="tooltip" title="<%= value[:description][header] %>" data-placement="bottom"><%= header %></span></th>
+  <%
+    end 
+  end %>
+            </tr>
+          </thead>
+<%
+end %>          
+          <tbody>
+<% summary_plugin_data_list.each do |entry| 
+	id = entry[:id]
+	summary_plugin_data = entry[:data]
+    summary_plugin_data.each do |key, value|
+        value[:content].each do |instance, data| %>
+            <tr>
+              <td><%= id %></td>
+              <td><%= instance %></td>
+     <% data.each do |point| %>
+              <td><%= point %></td>
+     <% end %>
+            </tr>
+  <% end 
+  end
+  end
+  %>
+          </tbody>
+        </table>
+		</div>
+      </div>
+<%
+  if summary_plugin_data_list.length > 0
+  	summary_plugin_data = summary_plugin_data_list.first[:data]
+  	summary_plugin_data.each do |key, value|
+  		value[:headers].each do |header|
+%>
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title"><%= header %></h3>
+        </div>        
+        <div id="<%= header.gsub(/[:.-]/,'_') %>" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+<%
+		end
+	end
+  end 
+%>
+    </div>
+    <hr>
+    <footer>
+      <p>&copy; Rackspace Hosting 2013</p>
+    </footer>
+  </div> <!-- /container -->
+    <!-- JavaScript plugins (requires jQuery) -->
+    <!-- <script src="http://code.jquery.com/jquery.js"></script>-->
+    <script src="/js/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+    <script src="/js/respond.js"></script>
+    <script src="/js/repose.min.js"></script>
+    <!-- <script src="http://code.highcharts.com/highcharts.js"></script>-->
+    <script src="/js/highcharts.js"></script>
+    <!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.13.3/jquery.tablesorter.min.js"></script>-->
+    <script src="/js/tablesorter.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+      	$("table#comparisonTable").tablesorter({ sortList: [[1,0]] });
+        var results = <%=compare_guids %>
+
+<%
+  if summary_plugin_data_list.length > 0
+  	summary_plugin_data = summary_plugin_data_list.first[:data]
+  	summary_plugin_data.each do |key, value|
+  		value[:headers].each do |header|
+%>
+      var option_<%= header.gsub(/[:.-]/,'_') %> = {
+          chart: {
+            renderTo: '<%= header.gsub(/[:.-]/,'_') %>',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: '<%= header %>'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    <% 
+    summary_plugin_data_list.each do |entry|
+    	id = entry[:id]
+    	data = entry[:data]
+    	data.each do |data_key, data_value|
+    		value[:content].each do |k, instance|
+	 %>
+          {
+            name: '<%= id %> <%= k %>'
+          },
+    <% 
+            end
+        end
+    end 
+    %>
+          ]
+      }
+
+<%
+		end
+	end
+  end 
+%>
+      
+      $.ajax({
+      	url: '/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/compare-plugin/metric', 
+      	type: 'POST',
+      	data: 'compare=' + results + '&plugin=<%= plugin_id %>',
+      	success: function(data) {
+      		var i =0;
+      		for(var i = 0, max = data.length; i < max; i++){
+      			var id = data[i].id;
+      			var content = data[i].data.<%= option %>.content;
+      			var headers = data[i].data.<%= option %>.headers;
+<%
+  if summary_plugin_data_list.length > 0
+  	summary_plugin_data = summary_plugin_data_list.first[:data]
+  	summary_plugin_data.each do |key, value|
+  		value[:headers].each do |header|
+%>
+      			var index = get_index(headers, '<%= header %>');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_<%= header.gsub(/[:.-]/,'_') %>.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_<%= header.gsub(/[:.-]/,'_') %>.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_<%= header.gsub(/[:.-]/,'_') %>.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var <%= header.gsub(/[:.-]/,'_') %>_chart = new Highcharts.Chart(option_<%= header.gsub(/[:.-]/,'_') %>);
+	      		}
+<%
+		end
+	end
+  end 
+%>
+      			
+      		}
+		}
+     }); 
+     
+     function get_index(array, value){
+     	for(var i =0, max = array.length; i < max; i ++){
+     		if(value == array[i]){
+     			return i;
+     		}
+     	}
+     	return -1;
+     }
+
+      });
+    </script>
+  </body>
+</html>
