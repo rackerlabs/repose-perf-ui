@@ -137,15 +137,18 @@ module Apps
       raise NotImplementedError, 'Your configuration has not yet been instantiated.  The reason for that is most likely because you are calling load_plugins from Bootstrap itself instead of calling it from an application\'s bootstrap.' unless @config
       plugin_list = @config['application']['plugins']
       @logger.debug "plugin_list: #{plugin_list}"
+      plugin_key_list = []
       plugin_list.each do |plugin|
         plugin.each do |key, entry|
+          #File.dirname(full_path)[File.dirname(full_path).rindex('/')+1..-1]
+          plugin_key_list << entry.split('/')[entry.split('/').length - 2]
           @logger.debug "entry: #{entry}"
           plugin = File.expand_path(entry, Dir.pwd) 
           @logger.debug "plugin: #{plugin}" 
           require plugin unless File.directory?(plugin)
         end
       end
-      Plugin.plugin_list 
+      plugin_key_list.map {|p| Plugin.plugin_list[p.to_sym]} 
     end
 
     def start_test_recording(application, sub_app = 'main', type = 'load', json_data = {}, timestamp = nil)

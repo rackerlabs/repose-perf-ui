@@ -5,6 +5,7 @@ application:
   type: comparison
   plugins:
    - location: plugins/mac_perf_mon/plugin.rb
+   - location: plugins/repose_jmx_plugin/plugin.rb
   sub_apps: 
    - 
      id: main

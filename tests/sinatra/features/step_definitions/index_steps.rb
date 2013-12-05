@@ -96,6 +96,10 @@ When(/^I post to "([^\"]*)" with '(.*?)'$/) do |path, post_data|
   	post(path, JSON.parse(post_data))
 end
 
+When(/^I post to "([^\"]*)" with checkbox name "(.*?)" and values "(.*?)"$/) do |path, name, list|
+    post(path, {name => list.split(',')})
+end
+
 When(/^I post to '([^\"]*)' with existing guid:$/) do |path, post_data|
     test = JSON.parse(post_data)
     test['guid'] = guid
@@ -139,7 +143,6 @@ When(/^I post to '([^\"]*)' with non\-existing guid$/) do |path, post_data|
 end
 
 Then /^the response should be "([^\"]*)"$/ do |status|
-puts last_response.body
 	last_response.status.should == status.to_i
 end
 
@@ -154,7 +157,7 @@ end
 
 Then(/^there should be "(\d+)" records in response$/) do |count|
   results = JSON.parse(last_response.body)
-  results['results'].length.should == count.to_i
+  results.length.should == count.to_i
 end
 
 Then(/^there should be "(\d+)" "(\w+)" records in response$/) do |count, type|

@@ -458,25 +458,31 @@ class PerfApp < Sinatra::Base
         plugin_id_data = plugin_id.split('|||')
         plugin = plugin_id_data[0]
         option = plugin_id_data[1]
-        plugin_instance = new_app.load_plugins.find {|p| p.to_s == plugin } 
+        plugin_instance = new_app.load_plugins.find {|p| p.to_s == plugin }
+        halt 404, {'Content-Type' => 'application/json'},  {'fail' => "No plugin by name of #{plugin} found"}.to_json unless plugin_instance 
         detailed_plugin_data_list = [] 
+        valid_comparison_id_list = []
         comparison_id_list.each do |id| 
-          detailed_plugin_data_list << {
-            :id => id, 
-            :data => plugin_instance.new(new_app.db, new_app.fs_ip).show_detailed_data(application, name, test, option, id)
-          }
+          detailed_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_detailed_data(application, name, test, option, id)
+          if detailed_plugin_data and detailed_plugin_data[option.to_sym][:content].length > 0   
+            detailed_plugin_data_list << {
+              :id => id, 
+              :data => detailed_plugin_data
+            }
+            valid_comparison_id_list << id
+          end
         end
-        if detailed_plugin_data_list
+        if detailed_plugin_data_list and valid_comparison_id_list.length > 0
           content_type :json
           body detailed_plugin_data_list.to_json    
         else
-          halt 404, "no metric data found for #{application}/#{name}/#{test}/#{id}/#{plugin}/#{option}"
+          halt 404, {'Content-Type' => 'application/json'},  {'fail' => "no data for #{plugin_id} found"}.to_json
         end
       else
-        halt 404, "No sub application for #{name} found"
+        halt 404, {'Content-Type' => 'application/json'},  {'fail' => "No sub application for #{name} found"}.to_json
       end
     else
-      halt 404, "No application by name of #{application}/#{test} found"
+      halt 404, {'Content-Type' => 'application/json'},  {'fail' => "No application by name of #{application}/#{test} found"}.to_json
     end    
     
   end
@@ -501,25 +507,33 @@ class PerfApp < Sinatra::Base
         plugin_instance = new_app.load_plugins.find {|p| p.to_s == plugin }
         halt 404, "No plugin by name of #{plugin} found" unless plugin_instance
         summary_plugin_data_list = [] 
+        valid_comparison_id_list = []
         comparison_id_list.each do |id| 
-          summary_plugin_data_list << {
-            :id => id, 
-            :data => plugin_instance.new(new_app.db, new_app.fs_ip).show_summary_data(application, name, test, option, id)
-          }
+          summary_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_summary_data(application, name, test, option, id)
+          if summary_plugin_data and summary_plugin_data[option.to_sym][:content].length > 0   
+            summary_plugin_data_list << {
+              :id => id, 
+              :data => summary_plugin_data
+            }
+            valid_comparison_id_list << id
+          end
         end
+        
         #detailed_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_detailed_data(application, name, test, option, id)
-        if summary_plugin_data_list
+        if summary_plugin_data_list and valid_comparison_id_list.length > 0
           erb :results_plugin_test_compare, :locals => {
             :application => app[:id],
             :sub_app_id => name.to_sym,
             :title => new_app.config['application']['name'],
             :summary_plugin_data_list => summary_plugin_data_list,
             :test_type => test,
-            :compare_guids => comparison_id_list,
+            :compare_guids => valid_comparison_id_list,
             :plugin_name => plugin,
             :plugin_id => plugin_id,
             :option => option
           }
+        else
+          halt 404, "No data for #{plugin_id} found"
         end
       else
         halt 404, "No sub application for #{name} found"

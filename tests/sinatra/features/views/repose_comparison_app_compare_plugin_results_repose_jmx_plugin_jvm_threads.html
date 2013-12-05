@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Repose comparison app - Results - load_test - Compare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/css/repose.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/repose_comparison_app">Repose comparison app</a>
+      <div class="nav-collapse collapse bs-navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/repose_comparison_app/tests">Running Tests</a></li>
+          <li><a href="/repose_comparison_app/applications">Applications</a></li>
+          <li class="active"><a href="/repose_comparison_app/results">Results</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container">
+      <ul class="breadcrumb">
+        <li><a href="/repose_comparison_app">Home</a></li>
+        <li><a href="/repose_comparison_app/results">Results</a></li>
+        <li><a href="/repose_comparison_app/results/main">main</a></li>
+        <li><a href="/repose_comparison_app/results/main/load_test">load_test</a></li>
+        <li class="active">ReposeJmxPlugin - jvm_threads - Comparison</li>
+      </ul>
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Test Results</h3>
+        </div>
+        <div class="span11" style="overflow: auto;">
+	        <table class="table table-hover" id="comparisonTable" style="max-width: none;">
+
+          <thead>
+            <tr>
+              <th>key</th>
+              <th>instance</th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">PeakThreadCount</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">DaemonThreadCount</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">ThreadCount</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">TotalStartedThreadCount</span></th>
+  
+            </tr>
+          </thead>
+          
+          <tbody>
+
+            <tr>
+              <td>key-one</td>
+              <td>jmxdata.out_162.209.124.167</td>
+     
+              <td>41.75</td>
+     
+              <td>17.5</td>
+     
+              <td>41.0</td>
+     
+              <td>44.25</td>
+     
+            </tr>
+  
+            <tr>
+              <td>key-one</td>
+              <td>jmxdata.out_162.209.124.158</td>
+     
+              <td>41.875</td>
+     
+              <td>17.5</td>
+     
+              <td>41.125</td>
+     
+              <td>44.875</td>
+     
+            </tr>
+  
+            <tr>
+              <td>key-four</td>
+              <td>jmxdata.out_162.209.124.167</td>
+     
+              <td>41.75</td>
+     
+              <td>17.5</td>
+     
+              <td>41.0</td>
+     
+              <td>44.25</td>
+     
+            </tr>
+  
+            <tr>
+              <td>key-two</td>
+              <td>jmxdata.out_162.209.124.167</td>
+     
+              <td>41.75</td>
+     
+              <td>17.5</td>
+     
+              <td>41.0</td>
+     
+              <td>44.25</td>
+     
+            </tr>
+  
+            <tr>
+              <td>key-two</td>
+              <td>jmxdata.out_162.209.124.158</td>
+     
+              <td>41.875</td>
+     
+              <td>17.5</td>
+     
+              <td>41.125</td>
+     
+              <td>44.875</td>
+     
+            </tr>
+  
+            <tr>
+              <td>key-five</td>
+              <td>jmxdata.out_162.209.124.167</td>
+     
+              <td>41.75</td>
+     
+              <td>17.5</td>
+     
+              <td>41.0</td>
+     
+              <td>44.25</td>
+     
+            </tr>
+  
+            <tr>
+              <td>key-five</td>
+              <td>jmxdata.out_162.209.124.158</td>
+     
+              <td>41.875</td>
+     
+              <td>17.5</td>
+     
+              <td>41.125</td>
+     
+              <td>44.875</td>
+     
+            </tr>
+  
+          </tbody>
+        </table>
+		</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">PeakThreadCount</h3>
+        </div>        
+        <div id="PeakThreadCount" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">DaemonThreadCount</h3>
+        </div>        
+        <div id="DaemonThreadCount" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">ThreadCount</h3>
+        </div>        
+        <div id="ThreadCount" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">TotalStartedThreadCount</h3>
+        </div>        
+        <div id="TotalStartedThreadCount" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+    </div>
+    <hr>
+    <footer>
+      <p>&copy; Rackspace Hosting 2013</p>
+    </footer>
+  </div> <!-- /container -->
+    <!-- JavaScript plugins (requires jQuery) -->
+    <!-- <script src="http://code.jquery.com/jquery.js"></script>-->
+    <script src="/js/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+    <script src="/js/respond.js"></script>
+    <script src="/js/repose.min.js"></script>
+    <!-- <script src="http://code.highcharts.com/highcharts.js"></script>-->
+    <script src="/js/highcharts.js"></script>
+    <!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.13.3/jquery.tablesorter.min.js"></script>-->
+    <script src="/js/tablesorter.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+      	$("table#comparisonTable").tablesorter({ sortList: [[1,0]] });
+        var results = ["key-one", "key-four", "key-two", "key-five"]
+
+
+      var option_PeakThreadCount = {
+          chart: {
+            renderTo: 'PeakThreadCount',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'PeakThreadCount'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.158'
+          },
+    
+          {
+            name: 'key-four jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-four jmxdata.out_162.209.124.158'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.158'
+          },
+    
+          {
+            name: 'key-five jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-five jmxdata.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_DaemonThreadCount = {
+          chart: {
+            renderTo: 'DaemonThreadCount',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'DaemonThreadCount'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.158'
+          },
+    
+          {
+            name: 'key-four jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-four jmxdata.out_162.209.124.158'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.158'
+          },
+    
+          {
+            name: 'key-five jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-five jmxdata.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_ThreadCount = {
+          chart: {
+            renderTo: 'ThreadCount',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'ThreadCount'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.158'
+          },
+    
+          {
+            name: 'key-four jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-four jmxdata.out_162.209.124.158'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.158'
+          },
+    
+          {
+            name: 'key-five jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-five jmxdata.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_TotalStartedThreadCount = {
+          chart: {
+            renderTo: 'TotalStartedThreadCount',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'TotalStartedThreadCount'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.158'
+          },
+    
+          {
+            name: 'key-four jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-four jmxdata.out_162.209.124.158'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.158'
+          },
+    
+          {
+            name: 'key-five jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-five jmxdata.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      
+      $.ajax({
+      	url: '/repose_comparison_app/results/main/load_test/compare-plugin/metric', 
+      	type: 'POST',
+      	data: 'compare=' + results + '&plugin=ReposeJmxPlugin|||jvm_threads',
+      	success: function(data) {
+      		var i =0;
+      		for(var i = 0, max = data.length; i < max; i++){
+      			var id = data[i].id;
+      			var content = data[i].data.jvm_threads.content;
+      			var headers = data[i].data.jvm_threads.headers;
+
+      			var index = get_index(headers, 'PeakThreadCount');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_PeakThreadCount.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_PeakThreadCount.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_PeakThreadCount.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var PeakThreadCount_chart = new Highcharts.Chart(option_PeakThreadCount);
+	      		}
+
+      			var index = get_index(headers, 'DaemonThreadCount');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_DaemonThreadCount.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_DaemonThreadCount.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_DaemonThreadCount.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var DaemonThreadCount_chart = new Highcharts.Chart(option_DaemonThreadCount);
+	      		}
+
+      			var index = get_index(headers, 'ThreadCount');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_ThreadCount.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_ThreadCount.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_ThreadCount.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var ThreadCount_chart = new Highcharts.Chart(option_ThreadCount);
+	      		}
+
+      			var index = get_index(headers, 'TotalStartedThreadCount');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_TotalStartedThreadCount.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_TotalStartedThreadCount.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_TotalStartedThreadCount.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var TotalStartedThreadCount_chart = new Highcharts.Chart(option_TotalStartedThreadCount);
+	      		}
+
+      			
+      		}
+		}
+     }); 
+     
+     function get_index(array, value){
+     	for(var i =0, max = array.length; i < max; i ++){
+     		if(value == array[i]){
+     			return i;
+     		}
+     	}
+     	return -1;
+     }
+
+      });
+    </script>
+  </body>
+</html>

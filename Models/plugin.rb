@@ -1,5 +1,5 @@
 class Plugin
-  @@plugins ||= []
+  @@plugins ||= {}
   
   attr_reader :db, :fs_ip
 
@@ -22,11 +22,18 @@ class Plugin
   end 
 
   def self.plugin_list
-    @@plugins = @@plugins.find_all {|p| p.supported_os_list.include?(os)}
+    return @@plugins
+    #return @@plugins.find_all {|p| p.supported_os_list.include?(os)}
   end
 
+=begin
+ add plugins with :id => class 
+=end
   def self.inherited(klass)
-    @@plugins << klass
+    full_path = caller[0].partition(":")[0]
+    dir_name =  File.dirname(full_path)[File.dirname(full_path).rindex('/')+1..-1]
+    @@plugins[dir_name.to_sym] = [] unless @@plugins.has_key?(dir_name.to_sym)
+    @@plugins[dir_name.to_sym] = klass
   end
   
   def initialize(db, fs_ip)

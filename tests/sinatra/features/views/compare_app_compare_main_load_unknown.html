@@ -29,7 +29,7 @@
         <li><a href="/comparison_app/results">Results</a></li>
         <li><a href="/comparison_app/results/main">main</a></li>
         <li><a href="/comparison_app/results/main/load_test">load_test</a></li>
-        <li class="active">load_test</li>
+        <li class="active">Comparison</li>
       </ul>
       <div class="panel panel-summary">
         <div class="panel-heading">
@@ -54,6 +54,102 @@
                 <td>9 total errors</td>
               </tr>
             </tbody>
+            <tfoot>
+            	<tr>
+            		<td colspan="5">
+            			<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#pluginModal">
+						  Compare plugin data for these tests
+						</button>
+						<div class="modal fade" id="pluginModal" tabindex="-1" role="dialog" aria-labelledby="pluginModalLabel" aria-hidden="true">
+						  <div class="modal-dialog">
+						    <div class="modal-content">
+						      <div class="modal-header">
+						        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						        <h4 class="modal-title" id="pluginModalLabel">Plugin comparison</h4>
+						      </div>
+						      <div class="modal-body">
+						      	<ul class="nav nav-tabs">
+								  <li><a href="#MacOsxPlugin" data-toggle="tab">MacOsxPlugin</a></li>
+								</ul>
+						        <form method="POST" action="load_test/compare-plugin">
+						        	<input type="hidden" name="compare" value="key-one+unknown"/>
+									<div class="tab-content">
+									  <div class="tab-pane active" id="MacOsxPlugin">
+										<div class="radio">
+										  <label>
+										    <input type="radio" name="plugin_id" value="MacOsxPlugin|||cpu"/>MacOsxPlugin-CPU metrics
+										  </label>
+										</div>
+										<div class="radio">
+										  <label>
+										    <input type="radio" name="plugin_id" value="MacOsxPlugin|||kernel"/>MacOsxPlugin-Kernel metrics
+										  </label>
+										</div>
+										<div class="radio">
+										  <label>
+										    <input type="radio" name="plugin_id" value="MacOsxPlugin|||memory_swap"/>MacOsxPlugin-Memory Swap metrics
+										  </label>
+										</div>
+										<div class="radio">
+										  <label>
+										    <input type="radio" name="plugin_id" value="MacOsxPlugin|||memory_page"/>MacOsxPlugin-Memory page metrics
+										  </label>
+										</div>
+										<div class="radio">
+										  <label>
+										    <input type="radio" name="plugin_id" value="MacOsxPlugin|||memory_utilization"/>MacOsxPlugin-Memory utilization metrics
+										  </label>
+										</div>
+										<div class="radio">
+										  <label>
+										    <input type="radio" name="plugin_id" value="MacOsxPlugin|||tcp_failure_network"/>MacOsxPlugin-TCP Failure metrics
+										  </label>
+										</div>
+										<div class="radio">
+										  <label>
+										    <input type="radio" name="plugin_id" value="MacOsxPlugin|||tcp_network"/>MacOsxPlugin-TCP
+										  </label>
+										</div>
+										<div class="radio">
+										  <label>
+										    <input type="radio" name="plugin_id" value="MacOsxPlugin|||ip_failure_network"/>MacOsxPlugin-IP Failure metrics
+										  </label>
+										</div>
+										<div class="radio">
+										  <label>
+										    <input type="radio" name="plugin_id" value="MacOsxPlugin|||ip_network"/>MacOsxPlugin-IP metrics
+										  </label>
+										</div>
+										<div class="radio">
+										  <label>
+										    <input type="radio" name="plugin_id" value="MacOsxPlugin|||device_network"/>MacOsxPlugin-Device Network metrics
+										  </label>
+										</div>
+										<div class="radio">
+										  <label>
+										    <input type="radio" name="plugin_id" value="MacOsxPlugin|||device_disk"/>MacOsxPlugin-Device Disk metrics
+										  </label>
+										</div>
+										<div class="radio">
+										  <label>
+										    <input type="radio" name="plugin_id" value="MacOsxPlugin|||device_failure"/>MacOsxPlugin-Device Network Failure metrics
+										  </label>
+										</div>
+									  	
+									  </div>
+									</div>
+			            			<input type="submit" class="btn btn-primary" value="Compare Tests for plugin"/>
+		            			</form>
+						      </div>
+						      <div class="modal-footer">
+						        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+						      </div>
+						    </div><!-- /.modal-content -->
+						  </div><!-- /.modal-dialog -->
+						</div>
+            		</td>
+            	</tr>
+        	</tfoot>
           </table>
       </div>
       <div class="panel">
@@ -107,7 +203,9 @@
             }
           },
           series: [
+  
               {name: 'key-one'},
+  
           ]
         };        
         var throughput_option = {
@@ -124,7 +222,9 @@
             }
           },
           series: [
+  
               {name: 'key-one'},
+  
           ]
         };        
         var error_option = {
@@ -141,7 +241,9 @@
             }
           },
           series: [
+  
               {name: 'key-one'},
+  
           ]
         };   
 

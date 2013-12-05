@@ -7,6 +7,7 @@ require_relative 'garbagecollectionstrategy.rb'
 require_relative 'reposelogstrategy.rb'
 
 class ReposeJmxPlugin < Plugin
+  
   def self.supported_os_list
     [:linux,:macosx,:windows]
   end

@@ -94,7 +94,6 @@ class MacOsxPlugin < Plugin
     def show_summary_data(name, test, id, test_id, options=nil)
       network = MacOsxPlugin.show_plugin_names.find {|i| i[:id] == id }
       result = Results::PastNetworkResults.format_network(NetworkResult.new(network[:klass].new(name,test.chomp('_test'), test_id)).retrieve_average_results,network[:id].to_sym,{},network[:klass].metric_description)
-      puts result
       result
     end
 

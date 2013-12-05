@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Repose Singular App - Results - load_test - Compare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/css/repose.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/repose_singular_app">Repose Singular App</a>
+      <div class="nav-collapse collapse bs-navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/repose_singular_app/tests">Running Tests</a></li>
+          <li><a href="/repose_singular_app/applications">Applications</a></li>
+          <li class="active"><a href="/repose_singular_app/results">Results</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container">
+      <ul class="breadcrumb">
+        <li><a href="/repose_singular_app">Home</a></li>
+        <li><a href="/repose_singular_app/results">Results</a></li>
+        <li><a href="/repose_singular_app/results/main">main</a></li>
+        <li><a href="/repose_singular_app/results/main/load_test">load_test</a></li>
+        <li class="active">ReposeJmxPlugin - filters - Comparison</li>
+      </ul>
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Test Results</h3>
+        </div>
+        <div class="span11" style="overflow: auto;">
+	        <table class="table table-hover" id="comparisonTable" style="max-width: none;">
+
+          <thead>
+            <tr>
+              <th>key</th>
+              <th>instance</th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">http-logging:Mean</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">dist-datastore:Mean</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">rate-limiting:Mean</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">http-logging:75thPercentile</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">dist-datastore:75thPercentile</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">rate-limiting:75thPercentile</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">route:75thPercentile</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">route:Mean</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">api-validator:75thPercentile</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">api-validator:Mean</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">client-auth:75thPercentile</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">client-auth:Mean</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">translation:75thPercentile</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">translation:Mean</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">content-normalization:Mean</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">content-normalization:75thPercentile</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">ip-identity:Mean</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">ip-identity:75thPercentile</span></th>
+  
+            </tr>
+          </thead>
+          
+          <tbody>
+
+            <tr>
+              <td>key-one</td>
+              <td>jmxdata.out_162.209.124.167</td>
+     
+              <td>2.2863381843067287</td>
+     
+              <td>1.6917195328155799</td>
+     
+              <td>2.222388633250659</td>
+     
+              <td>2.2857142857142856</td>
+     
+              <td>2.142857142857143</td>
+     
+              <td>2.142857142857143</td>
+     
+              <td>2.0</td>
+     
+              <td>1.8919048569190642</td>
+     
+              <td>2.142857142857143</td>
+     
+              <td>1.9248077648949138</td>
+     
+              <td>2.142857142857143</td>
+     
+              <td>2.231449679381293</td>
+     
+              <td>2.142857142857143</td>
+     
+              <td>1.9592534090788967</td>
+     
+              <td>[]</td>
+     
+              <td>[]</td>
+     
+              <td>[]</td>
+     
+              <td>[]</td>
+     
+            </tr>
+  
+            <tr>
+              <td>key-two</td>
+              <td>jmxdata.out_162.209.124.167</td>
+     
+              <td>2.2863381843067287</td>
+     
+              <td>1.6917195328155799</td>
+     
+              <td>2.222388633250659</td>
+     
+              <td>2.2857142857142856</td>
+     
+              <td>2.142857142857143</td>
+     
+              <td>2.142857142857143</td>
+     
+              <td>2.0</td>
+     
+              <td>1.8919048569190642</td>
+     
+              <td>2.142857142857143</td>
+     
+              <td>1.9248077648949138</td>
+     
+              <td>2.142857142857143</td>
+     
+              <td>2.231449679381293</td>
+     
+              <td>2.142857142857143</td>
+     
+              <td>1.9592534090788967</td>
+     
+              <td>[]</td>
+     
+              <td>[]</td>
+     
+              <td>[]</td>
+     
+              <td>[]</td>
+     
+            </tr>
+  
+            <tr>
+              <td>key-three</td>
+              <td>jmxdata.out_162.209.124.167</td>
+     
+              <td>2.2863381843067287</td>
+     
+              <td>1.6917195328155799</td>
+     
+              <td>2.222388633250659</td>
+     
+              <td>2.2857142857142856</td>
+     
+              <td>2.142857142857143</td>
+     
+              <td>2.142857142857143</td>
+     
+              <td>2.0</td>
+     
+              <td>1.8919048569190642</td>
+     
+              <td>2.142857142857143</td>
+     
+              <td>1.9248077648949138</td>
+     
+              <td>2.142857142857143</td>
+     
+              <td>2.231449679381293</td>
+     
+              <td>2.142857142857143</td>
+     
+              <td>1.9592534090788967</td>
+     
+              <td>[]</td>
+     
+              <td>[]</td>
+     
+              <td>[]</td>
+     
+              <td>[]</td>
+     
+            </tr>
+  
+          </tbody>
+        </table>
+		</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">http-logging:Mean</h3>
+        </div>        
+        <div id="http_logging_Mean" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">dist-datastore:Mean</h3>
+        </div>        
+        <div id="dist_datastore_Mean" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">rate-limiting:Mean</h3>
+        </div>        
+        <div id="rate_limiting_Mean" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">http-logging:75thPercentile</h3>
+        </div>        
+        <div id="http_logging_75thPercentile" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">dist-datastore:75thPercentile</h3>
+        </div>        
+        <div id="dist_datastore_75thPercentile" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">rate-limiting:75thPercentile</h3>
+        </div>        
+        <div id="rate_limiting_75thPercentile" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">route:75thPercentile</h3>
+        </div>        
+        <div id="route_75thPercentile" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">route:Mean</h3>
+        </div>        
+        <div id="route_Mean" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">api-validator:75thPercentile</h3>
+        </div>        
+        <div id="api_validator_75thPercentile" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">api-validator:Mean</h3>
+        </div>        
+        <div id="api_validator_Mean" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">client-auth:75thPercentile</h3>
+        </div>        
+        <div id="client_auth_75thPercentile" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">client-auth:Mean</h3>
+        </div>        
+        <div id="client_auth_Mean" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">translation:75thPercentile</h3>
+        </div>        
+        <div id="translation_75thPercentile" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">translation:Mean</h3>
+        </div>        
+        <div id="translation_Mean" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">content-normalization:Mean</h3>
+        </div>        
+        <div id="content_normalization_Mean" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">content-normalization:75thPercentile</h3>
+        </div>        
+        <div id="content_normalization_75thPercentile" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">ip-identity:Mean</h3>
+        </div>        
+        <div id="ip_identity_Mean" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">ip-identity:75thPercentile</h3>
+        </div>        
+        <div id="ip_identity_75thPercentile" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+    </div>
+    <hr>
+    <footer>
+      <p>&copy; Rackspace Hosting 2013</p>
+    </footer>
+  </div> <!-- /container -->
+    <!-- JavaScript plugins (requires jQuery) -->
+    <!-- <script src="http://code.jquery.com/jquery.js"></script>-->
+    <script src="/js/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+    <script src="/js/respond.js"></script>
+    <script src="/js/repose.min.js"></script>
+    <!-- <script src="http://code.highcharts.com/highcharts.js"></script>-->
+    <script src="/js/highcharts.js"></script>
+    <!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.13.3/jquery.tablesorter.min.js"></script>-->
+    <script src="/js/tablesorter.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+      	$("table#comparisonTable").tablesorter({ sortList: [[1,0]] });
+        var results = ["key-one", "key-two", "key-three"]
+
+
+      var option_http_logging_Mean = {
+          chart: {
+            renderTo: 'http_logging_Mean',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'http-logging:Mean'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_dist_datastore_Mean = {
+          chart: {
+            renderTo: 'dist_datastore_Mean',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'dist-datastore:Mean'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_rate_limiting_Mean = {
+          chart: {
+            renderTo: 'rate_limiting_Mean',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'rate-limiting:Mean'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_http_logging_75thPercentile = {
+          chart: {
+            renderTo: 'http_logging_75thPercentile',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'http-logging:75thPercentile'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_dist_datastore_75thPercentile = {
+          chart: {
+            renderTo: 'dist_datastore_75thPercentile',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'dist-datastore:75thPercentile'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_rate_limiting_75thPercentile = {
+          chart: {
+            renderTo: 'rate_limiting_75thPercentile',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'rate-limiting:75thPercentile'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_route_75thPercentile = {
+          chart: {
+            renderTo: 'route_75thPercentile',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'route:75thPercentile'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_route_Mean = {
+          chart: {
+            renderTo: 'route_Mean',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'route:Mean'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_api_validator_75thPercentile = {
+          chart: {
+            renderTo: 'api_validator_75thPercentile',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'api-validator:75thPercentile'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_api_validator_Mean = {
+          chart: {
+            renderTo: 'api_validator_Mean',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'api-validator:Mean'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_client_auth_75thPercentile = {
+          chart: {
+            renderTo: 'client_auth_75thPercentile',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'client-auth:75thPercentile'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_client_auth_Mean = {
+          chart: {
+            renderTo: 'client_auth_Mean',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'client-auth:Mean'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_translation_75thPercentile = {
+          chart: {
+            renderTo: 'translation_75thPercentile',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'translation:75thPercentile'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_translation_Mean = {
+          chart: {
+            renderTo: 'translation_Mean',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'translation:Mean'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_content_normalization_Mean = {
+          chart: {
+            renderTo: 'content_normalization_Mean',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'content-normalization:Mean'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_content_normalization_75thPercentile = {
+          chart: {
+            renderTo: 'content_normalization_75thPercentile',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'content-normalization:75thPercentile'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_ip_identity_Mean = {
+          chart: {
+            renderTo: 'ip_identity_Mean',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'ip-identity:Mean'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      var option_ip_identity_75thPercentile = {
+          chart: {
+            renderTo: 'ip_identity_75thPercentile',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'ip-identity:75thPercentile'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'key-one jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-two jmxdata.out_162.209.124.167'
+          },
+    
+          {
+            name: 'key-three jmxdata.out_162.209.124.167'
+          },
+    
+          ]
+      }
+
+
+      
+      $.ajax({
+      	url: '/repose_singular_app/results/main/load_test/compare-plugin/metric', 
+      	type: 'POST',
+      	data: 'compare=' + results + '&plugin=ReposeJmxPlugin|||filters',
+      	success: function(data) {
+      		var i =0;
+      		for(var i = 0, max = data.length; i < max; i++){
+      			var id = data[i].id;
+      			var content = data[i].data.filters.content;
+      			var headers = data[i].data.filters.headers;
+
+      			var index = get_index(headers, 'http-logging:Mean');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_http_logging_Mean.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_http_logging_Mean.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_http_logging_Mean.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var http_logging_Mean_chart = new Highcharts.Chart(option_http_logging_Mean);
+	      		}
+
+      			var index = get_index(headers, 'dist-datastore:Mean');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_dist_datastore_Mean.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_dist_datastore_Mean.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_dist_datastore_Mean.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var dist_datastore_Mean_chart = new Highcharts.Chart(option_dist_datastore_Mean);
+	      		}
+
+      			var index = get_index(headers, 'rate-limiting:Mean');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_rate_limiting_Mean.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_rate_limiting_Mean.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_rate_limiting_Mean.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var rate_limiting_Mean_chart = new Highcharts.Chart(option_rate_limiting_Mean);
+	      		}
+
+      			var index = get_index(headers, 'http-logging:75thPercentile');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_http_logging_75thPercentile.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_http_logging_75thPercentile.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_http_logging_75thPercentile.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var http_logging_75thPercentile_chart = new Highcharts.Chart(option_http_logging_75thPercentile);
+	      		}
+
+      			var index = get_index(headers, 'dist-datastore:75thPercentile');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_dist_datastore_75thPercentile.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_dist_datastore_75thPercentile.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_dist_datastore_75thPercentile.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var dist_datastore_75thPercentile_chart = new Highcharts.Chart(option_dist_datastore_75thPercentile);
+	      		}
+
+      			var index = get_index(headers, 'rate-limiting:75thPercentile');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_rate_limiting_75thPercentile.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_rate_limiting_75thPercentile.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_rate_limiting_75thPercentile.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var rate_limiting_75thPercentile_chart = new Highcharts.Chart(option_rate_limiting_75thPercentile);
+	      		}
+
+      			var index = get_index(headers, 'route:75thPercentile');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_route_75thPercentile.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_route_75thPercentile.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_route_75thPercentile.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var route_75thPercentile_chart = new Highcharts.Chart(option_route_75thPercentile);
+	      		}
+
+      			var index = get_index(headers, 'route:Mean');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_route_Mean.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_route_Mean.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_route_Mean.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var route_Mean_chart = new Highcharts.Chart(option_route_Mean);
+	      		}
+
+      			var index = get_index(headers, 'api-validator:75thPercentile');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_api_validator_75thPercentile.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_api_validator_75thPercentile.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_api_validator_75thPercentile.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var api_validator_75thPercentile_chart = new Highcharts.Chart(option_api_validator_75thPercentile);
+	      		}
+
+      			var index = get_index(headers, 'api-validator:Mean');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_api_validator_Mean.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_api_validator_Mean.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_api_validator_Mean.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var api_validator_Mean_chart = new Highcharts.Chart(option_api_validator_Mean);
+	      		}
+
+      			var index = get_index(headers, 'client-auth:75thPercentile');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_client_auth_75thPercentile.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_client_auth_75thPercentile.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_client_auth_75thPercentile.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var client_auth_75thPercentile_chart = new Highcharts.Chart(option_client_auth_75thPercentile);
+	      		}
+
+      			var index = get_index(headers, 'client-auth:Mean');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_client_auth_Mean.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_client_auth_Mean.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_client_auth_Mean.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var client_auth_Mean_chart = new Highcharts.Chart(option_client_auth_Mean);
+	      		}
+
+      			var index = get_index(headers, 'translation:75thPercentile');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_translation_75thPercentile.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_translation_75thPercentile.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_translation_75thPercentile.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var translation_75thPercentile_chart = new Highcharts.Chart(option_translation_75thPercentile);
+	      		}
+
+      			var index = get_index(headers, 'translation:Mean');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_translation_Mean.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_translation_Mean.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_translation_Mean.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var translation_Mean_chart = new Highcharts.Chart(option_translation_Mean);
+	      		}
+
+      			var index = get_index(headers, 'content-normalization:Mean');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_content_normalization_Mean.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_content_normalization_Mean.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_content_normalization_Mean.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var content_normalization_Mean_chart = new Highcharts.Chart(option_content_normalization_Mean);
+	      		}
+
+      			var index = get_index(headers, 'content-normalization:75thPercentile');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_content_normalization_75thPercentile.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_content_normalization_75thPercentile.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_content_normalization_75thPercentile.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var content_normalization_75thPercentile_chart = new Highcharts.Chart(option_content_normalization_75thPercentile);
+	      		}
+
+      			var index = get_index(headers, 'ip-identity:Mean');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_ip_identity_Mean.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_ip_identity_Mean.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_ip_identity_Mean.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var ip_identity_Mean_chart = new Highcharts.Chart(option_ip_identity_Mean);
+	      		}
+
+      			var index = get_index(headers, 'ip-identity:75thPercentile');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_ip_identity_75thPercentile.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_ip_identity_75thPercentile.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_ip_identity_75thPercentile.series[j].data = data_content; 
+				      				break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var ip_identity_75thPercentile_chart = new Highcharts.Chart(option_ip_identity_75thPercentile);
+	      		}
+
+      			
+      		}
+		}
+     }); 
+     
+     function get_index(array, value){
+     	for(var i =0, max = array.length; i < max; i ++){
+     		if(value == array[i]){
+     			return i;
+     		}
+     	}
+     	return -1;
+     }
+
+      });
+    </script>
+  </body>
+</html>
