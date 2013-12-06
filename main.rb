@@ -312,7 +312,8 @@ class PerfApp < Sinatra::Base
         sa['id'] == name
       end
       if sub_app
-        plugin_instance = new_app.load_plugins.find {|p| p.to_s == plugin } 
+        plugin_instance = new_app.load_plugins.find {|p| p.to_s == plugin }
+        halt 404, "no plugin #{plugin} found" unless plugin_instance 
         summary_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_summary_data(application, name, test, option, id)
         detailed_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_detailed_data(application, name, test, option, id)
         if summary_plugin_data and detailed_plugin_data

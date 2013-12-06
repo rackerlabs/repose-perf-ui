@@ -19,7 +19,7 @@ require './tests/Models/test_tests.rb'
 require './tests/Models/testlocation_tests.rb'
 =end
 
-system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/load_repose_plugin_results.feature tests/sinatra/features/compare_repose_plugin_results.feature"
+system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/load_repose_plugin_results.feature tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/load_sysstats_plugin_results.feature"
 =begin
 
 - stop actually saves the data 
@@ -28,10 +28,6 @@ system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/app
   - New Relic Adapter
   - Log4J Adapter
   - Postgres Adapter
-tests/sinatra/features/compare_repose_plugin_results.feature
-  - this allows the user to compare 2 tests for repose plugins
-      - button to go to repose
-      - data for repose data (all added in one)  
 tests/sinatra/features/sysstats_plugin.feature
 tests/sinatra/features/load_sysstats_plugin.feature
 tests/sinatra/features/compare_sysstats_plugin.feature
@@ -60,6 +56,7 @@ tests/sinatra/features/start_stop_view.feature
   - if plugin does not expose the 'read_live_data' method, then the main plugin method will return empty (no error) and will let user know that this plugin is not able to read live data
 tests/sinatra/features/flood.feature
 
+- add ability to upload new configs, new test, update request/response info
 - add ability to view results table on click and don't show it on page right away
 - add ability to specify server size 
 

@@ -5,6 +5,7 @@ application:
   type: singular
   plugins:
    - location: plugins/repose_jmx_plugin/plugin.rb
+   - location: plugins/sysstats_plugin/plugin.rb
     # location: plugins/mac_perf_mon/plugin.rb
     #location: plugins/postgres/plugin.rb
     #location: plugins/atom_feed/plugin.rb

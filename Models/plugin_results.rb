@@ -56,6 +56,7 @@ module PluginModule
     end
     
     def load(guid, prefix, application, sub_app, type)
+      yield if block_given?
       #first, download from remote
       tmp_dir = "/tmp/#{guid}/data/#{@plugin_id}/"
       FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
@@ -86,11 +87,6 @@ module PluginModule
         }.to_json
         @store.hset(
           "#{application}:#{sub_app}:results:#{type}:#{guid}:data", "#{@plugin_id}|#{prefix}|#{entry_basename}", plugin) 
-      end
-      
-      Dir.glob("#{@local_path}/#{application}/#{sub_app}/results/#{type}/#{guid}/data/#{@plugin_id}/**/*") do |entry|
-        
-        puts "lighttpd entry: #{entry}"
       end
       
       FileUtils.rm_rf("/tmp/#{guid}")
