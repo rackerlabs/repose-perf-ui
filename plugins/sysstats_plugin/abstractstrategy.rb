@@ -10,7 +10,7 @@ class AbstractStrategy
       @data_results = @store.hgetall("#{application}:#{name}:results:#{test_type}:#{id}:data")
       meta_result = @store.hget("#{application}:#{name}:results:#{test_type}:#{id}:meta", "test")
       @data_results.each do |key, data_result|
-        if key.start_with?("repose_jmx_plugin")
+        if key.start_with?("sysstats_plugin")
           #load the file
           json_file = JSON.parse(meta_result)
           entry = JSON.parse(data_result)['location']

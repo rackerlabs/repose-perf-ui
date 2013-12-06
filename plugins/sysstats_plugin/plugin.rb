@@ -132,11 +132,10 @@ class SysstatsPlugin < Plugin
 
     def order_by_date(content_instance_list)
       result = {}
-      content_instance_list.each do |metric_entry_list| 
+      content_instance_list.each do |metric_entry_list|
         metric_entry_list.each do |entry|
-          time = DateTime.strptime(entry[:time].chop.chop.chop,'%s') 
-          result[time] = [] unless result[time]
-          result[time] << entry[:value] 
+          result[entry[:time]] = [] unless result[entry[:time]]
+          result[entry[:time]] << entry[:value]
         end
       end if content_instance_list
       result
