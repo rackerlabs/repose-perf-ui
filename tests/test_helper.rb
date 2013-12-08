@@ -28,8 +28,6 @@ system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/app
   - New Relic Adapter
   - Log4J Adapter
   - Postgres Adapter
-tests/sinatra/features/sysstats_plugin.feature
-tests/sinatra/features/load_sysstats_plugin.feature
 tests/sinatra/features/compare_sysstats_plugin.feature
 tests/sinatra/features/jmeter.feature
 tests/sinatra/features/autobench.feature
@@ -51,6 +49,7 @@ tests/sinatra/features/log4j_plugin.feature
 tests/sinatra/features/load_log4j_plugin.feature
 tests/sinatra/features/compare_log4j_plugin.feature
 tests/sinatra/features/start_stop_view.feature
+tests/sinatra/features/update_app_view.feature
 - add ability to start test running from inside the server 
 - add ability to view tests on the fly but hooking directly into disparate sources (not collected though until the test is over)
   - if plugin does not expose the 'read_live_data' method, then the main plugin method will return empty (no error) and will let user know that this plugin is not able to read live data

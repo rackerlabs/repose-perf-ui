@@ -36,117 +36,121 @@
         <div class="panel-heading">
           <h3 class="panel-title">Summary Test Results</h3>
         </div>
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>instance</th>
-  
-              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">tps</span></th>
-  
-              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">rd_sec/s</span></th>
-  
-              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">wr_sec/s</span></th>
-  
-              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">avgrq-sz</span></th>
-  
-              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">avgqu-sz</span></th>
-  
-              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">await</span></th>
-  
-              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">svctm</span></th>
-  
-              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">%util</span></th>
-  
-            </tr>
-          </thead>
-          <tbody>
-  
-            <tr>
-              <td>sysstats_memory_utilization.out_162.209.124.158-13868284</td>
-     
-              <td>1473420</td>
-     
-              <td>9.60</td>
-     
-              <td>246389</td>
-     
-              <td>852018</td>
-     
-              <td>646447</td>
-     
-              <td>646447</td>
-     
-              <td>646447</td>
-     
-              <td>646447</td>
-     
-            </tr>
-  
-            <tr>
-              <td>sysstats_memory_utilization.out_162.209.124.158-14089593</td>
-     
-              <td>1252111</td>
-     
-              <td>8.16</td>
-     
-              <td>229703</td>
-     
-              <td>680411</td>
-     
-              <td>678254</td>
-     
-              <td>678254</td>
-     
-              <td>678254</td>
-     
-              <td>678254</td>
-     
-            </tr>
-  
-            <tr>
-              <td>sysstats_device_disk.out_162.209.124.158-dev202-64</td>
-     
-              <td>0.00</td>
-     
-              <td>0.00</td>
-     
-              <td>0.00</td>
-     
-              <td>0.00</td>
-     
-              <td>0.00</td>
-     
-              <td>0.00</td>
-     
-              <td>0.00</td>
-     
-              <td>0.00</td>
-     
-            </tr>
-  
-            <tr>
-              <td>sysstats_device_disk.out_162.209.124.158-dev202-0</td>
-     
-              <td>0.47</td>
-     
-              <td>0.00</td>
-     
-              <td>15.55</td>
-     
-              <td>33.13</td>
-     
-              <td>0.00</td>
-     
-              <td>0.00</td>
-     
-              <td>0.00</td>
-     
-              <td>0.00</td>
-     
-            </tr>
-  
-          </tbody>
-        </table>
+        <div class="span11" style="overflow: auto;">
+	        <table class="table table-hover" style="max-width: none;">
+	
+	          <thead>
+	            <tr>
+	              <th>instance</th>
+	  
+	              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">tps</span></th>
+	  
+	              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">rd_sec/s</span></th>
+	  
+	              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">wr_sec/s</span></th>
+	  
+	              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">avgrq-sz</span></th>
+	  
+	              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">avgqu-sz</span></th>
+	  
+	              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">await</span></th>
+	  
+	              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">svctm</span></th>
+	  
+	              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">%util</span></th>
+	  
+	            </tr>
+	          </thead>
+	          <tbody>
+	  
+	            <tr>
+	              <td>sysstats_memory_utilization.out_162.209.124.158-13868284</td>
+	     
+	              <td>1473420</td>
+	     
+	              <td>9.60</td>
+	     
+	              <td>246389</td>
+	     
+	              <td>852018</td>
+	     
+	              <td>646447</td>
+	     
+	              <td>646447</td>
+	     
+	              <td>646447</td>
+	     
+	              <td>646447</td>
+	     
+	            </tr>
+	  
+	            <tr>
+	              <td>sysstats_memory_utilization.out_162.209.124.158-14089593</td>
+	     
+	              <td>1252111</td>
+	     
+	              <td>8.16</td>
+	     
+	              <td>229703</td>
+	     
+	              <td>680411</td>
+	     
+	              <td>678254</td>
+	     
+	              <td>678254</td>
+	     
+	              <td>678254</td>
+	     
+	              <td>678254</td>
+	     
+	            </tr>
+	  
+	            <tr>
+	              <td>sysstats_device_disk.out_162.209.124.158-dev202-64</td>
+	     
+	              <td>0.00</td>
+	     
+	              <td>0.00</td>
+	     
+	              <td>0.00</td>
+	     
+	              <td>0.00</td>
+	     
+	              <td>0.00</td>
+	     
+	              <td>0.00</td>
+	     
+	              <td>0.00</td>
+	     
+	              <td>0.00</td>
+	     
+	            </tr>
+	  
+	            <tr>
+	              <td>sysstats_device_disk.out_162.209.124.158-dev202-0</td>
+	     
+	              <td>0.47</td>
+	     
+	              <td>0.00</td>
+	     
+	              <td>15.55</td>
+	     
+	              <td>33.13</td>
+	     
+	              <td>0.00</td>
+	     
+	              <td>0.00</td>
+	     
+	              <td>0.00</td>
+	     
+	              <td>0.00</td>
+	     
+	            </tr>
+	  
+	          </tbody>
+	
+	        </table>
+	    </div>
       </div>
   
       <div class="panel">

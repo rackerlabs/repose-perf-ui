@@ -363,6 +363,7 @@ After do |scenario|
       Redis.new(new_app.db).del("#{set_app}:#{set_name}:results:#{set_test}:#{guid}:meta")
       Redis.new(new_app.db).del("#{set_app}:#{set_name}:results:#{set_test}:#{guid}:configs")
       Redis.new(new_app.db).lrem("#{set_app}:#{set_name}:results:#{set_test}", -1, guid)
+      Redis.new(new_app.db).del("#{set_app}:test:#{set_name}:#{set_test}:start")
     end
   end   
 end

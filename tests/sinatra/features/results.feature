@@ -160,19 +160,19 @@ Feature: Results Page
 		When I navigate to '/atom_hopper/results/main/load_test/metric/avg/id/e464b1b6-10ab-4332-8b30-8439496c2d19'
 		Then the response should be "200"
 		And response should be a json
-		And there should be "620" "avg" records in response
+		And there should be "52" "avg" records in response
 
 	Scenario: Load atom hopper (singular) main load test id = e464b1b6-10ab-4332-8b30-8439496c2d19 throughput metric
 		When I navigate to '/atom_hopper/results/main/load_test/metric/throughput/id/e464b1b6-10ab-4332-8b30-8439496c2d19'
 		Then the response should be "200"
 		And response should be a json
-		And there should be "620" "throughput" records in response
+		And there should be "52" "throughput" records in response
 
 	Scenario: Load atom hopper (singular) main load test id = e464b1b6-10ab-4332-8b30-8439496c2d19 errors metric
 		When I navigate to '/atom_hopper/results/main/load_test/metric/errors/id/e464b1b6-10ab-4332-8b30-8439496c2d19'
 		Then the response should be "200"
 		And response should be a json
-		And there should be "620" "errors" records in response
+		And there should be "52" "errors" records in response
 
 	Scenario: Load overhead main load test id = some-random-string+some-random2-string avg metric
 		When I navigate to '/overhead/results/main/load_test/metric/avg/id/some-random-string+some-random2-string'

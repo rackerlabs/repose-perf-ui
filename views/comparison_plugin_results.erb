@@ -36,29 +36,31 @@
         <div class="panel-heading">
           <h3 class="panel-title">Summary Test Results</h3>
         </div>
-        <table class="table table-hover">
-<% summary_plugin_data.each do |key, value| %>
-          <caption>Repose (Origin only)</caption>
-          <thead>
-            <tr>
-              <th>instance</th>
-  <% value[:headers].each do |header| %>
-              <th><span class="metric_desc" data-toggle="tooltip" title="<%= value[:description][header] %>" data-placement="bottom"><%= header %></span></th>
-  <% end %>
-            </tr>
-          </thead>
-          <tbody>
-  <% value[:content].each do |instance, data| %>
-            <tr>
-              <td><%= instance %></td>
-     <% data.each do |point| %>
-              <td><%= point %></td>
-     <% end %>
-            </tr>
-  <% end %>
-          </tbody>
-<% end %>
-        </table>
+        <div class="span11" style="overflow: auto;">
+	        <table class="table table-hover" style="max-width: none;">
+	<% summary_plugin_data.each do |key, value| %>
+	          <caption>Repose (Origin only)</caption>
+	          <thead>
+	            <tr>
+	              <th>instance</th>
+	  <% value[:headers].each do |header| %>
+	              <th><span class="metric_desc" data-toggle="tooltip" title="<%= value[:description][header] %>" data-placement="bottom"><%= header %></span></th>
+	  <% end %>
+	            </tr>
+	          </thead>
+	          <tbody>
+	  <% value[:content].each do |instance, data| %>
+	            <tr>
+	              <td><%= instance %></td>
+	     <% data.each do |point| %>
+	              <td><%= point %></td>
+	     <% end %>
+	            </tr>
+	  <% end %>
+	          </tbody>
+	<% end %>
+	        </table>
+	     </div>
       </div>
 <% detailed_plugin_data.each do |key, value| %>
   <% value[:content].each do |instance, data| %>

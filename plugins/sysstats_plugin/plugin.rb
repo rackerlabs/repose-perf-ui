@@ -32,73 +32,73 @@ class SysstatsPlugin < Plugin
         {
           :id => 'cpu',
           :name => 'CPU metrics',
-          :klass => CpuResultStrategy,
+          :klass => SysstatsPluginModule::CpuResultStrategy,
           :execution => 'sar -u'
         },
         {
           :id => 'kernel',
           :name => 'Kernel metrics',
-          :klass => KernelResultStrategy,
+          :klass => SysstatsPluginModule::KernelResultStrategy,
           :execution => 'sar -v'
         },
         {
           :id => 'memory_swap',
           :name => 'Memory Swap metrics',
-          :klass => MemorySwapResultStrategy,
+          :klass => SysstatsPluginModule::MemorySwapResultStrategy,
           :execution => 'sar -S'
         },
         {
           :id => 'memory_page',
           :name => 'Memory page metrics',
-          :klass => MemoryPageResultStrategy,
+          :klass => SysstatsPluginModule::MemoryPageResultStrategy,
           :execution => 'sar -R'
         },
         {
           :id => 'memory_utilization',
           :name => 'Memory utilization metrics',
-          :klass => MemoryUtilizationResultStrategy,
+          :klass => SysstatsPluginModule::MemoryUtilizationResultStrategy,
           :execution => 'sar -r'
         },
         {
           :id => 'tcp_failure_network',
           :name => 'TCP Failure metrics',
-          :klass => TcpFailureNetworkResultStrategy,
+          :klass => SysstatsPluginModule::TcpFailureNetworkResultStrategy,
           :execution => 'sar -n ETCP'
         },
         {
           :id => 'tcp_network',
           :name => 'TCP',
-          :klass => TcpNetworkResultStrategy,
+          :klass => SysstatsPluginModule::TcpNetworkResultStrategy,
           :execution => 'sar -n TCP'
         },
         {
           :id => 'ip_failure_network',
           :name => 'IP Failure metrics',
-          :klass => IpFailureNetworkResultStrategy,
+          :klass => SysstatsPluginModule::IpFailureNetworkResultStrategy,
           :execution => 'sar -n EIP'
         },
         {
           :id => 'ip_network',
           :name => 'IP metrics',
-          :klass => IpNetworkResultStrategy,
+          :klass => SysstatsPluginModule::IpNetworkResultStrategy,
           :execution => 'sar -n IP'
         },
         {
           :id => 'device_network',
           :name => 'Device Network metrics',
-          :klass => DeviceNetworkResultStrategy,
+          :klass => SysstatsPluginModule::DeviceNetworkResultStrategy,
           :execution => 'sar -n DEV'
         },
         {
           :id => 'device_disk',
           :name => 'Device Disk metrics',
-          :klass => DeviceDiskResultStrategy,
+          :klass => SysstatsPluginModule::DeviceDiskResultStrategy,
           :execution => 'sar -d'
         },
         {
           :id => 'device_failure',
           :name => 'Device Network Failure metrics',
-          :klass => DeviceFailureNetworkResultStrategy,
+          :klass => SysstatsPluginModule::DeviceFailureNetworkResultStrategy,
           :execution => 'sar -n EDEV'
         }
       ]
@@ -109,7 +109,7 @@ class SysstatsPlugin < Plugin
       PluginModule::PastPluginResults.format_results(
         PluginModule::PluginResult.new(
           metric[:klass].new(
-            @db, @fs_ip, application, name,test.chomp('_test'), test_id
+            @db, @fs_ip, application, name, test.chomp('_test'), test_id
           )
         ).retrieve_average_results, metric[:id].to_sym, {}
       ) if metric
