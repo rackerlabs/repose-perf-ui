@@ -19,7 +19,7 @@ require './tests/Models/test_tests.rb'
 require './tests/Models/testlocation_tests.rb'
 =end
 
-system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/sysstats_plugin_results.feature"
+system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/sysstats_plugin_results.feature tests/sinatra/features/compare_sysstats_plugin_results.feature"
 
 #system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/load_repose_plugin_results.feature tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/load_sysstats_plugin_results.feature tests/sinatra/features/sysstats_plugin_results.feature"
 =begin

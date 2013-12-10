@@ -33,7 +33,7 @@ class PerfApp < Sinatra::Base
   configure do
     set :views, "#{File.dirname(__FILE__)}/views"
     set :public_dir, "#{File.dirname(__FILE__)}/public"
-    enable :show_exceptions if development? or #test?
+    enable :show_exceptions if development? #or test?
     set :deployment, environment
     Apps::Bootstrap.main_config(environment)
   end
