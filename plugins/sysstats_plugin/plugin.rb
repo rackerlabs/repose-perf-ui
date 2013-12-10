@@ -109,7 +109,7 @@ class SysstatsPlugin < Plugin
       PluginModule::PastPluginResults.format_results(
         PluginModule::PluginResult.new(
           metric[:klass].new(
-            @db, @fs_ip, application, name, test.chomp('_test'), test_id
+            @db, @fs_ip, application, name, test.chomp('_test'), test_id, metric[:id]
           )
         ).retrieve_average_results, metric[:id].to_sym, {}
       ) if metric
@@ -124,7 +124,7 @@ class SysstatsPlugin < Plugin
       PluginModule::PastPluginResults.format_results(
         PluginModule::PluginResult.new(
           metric[:klass].new(
-            @db, @fs_ip, application, name, test.chomp('_test'), test_id
+            @db, @fs_ip, application, name, test.chomp('_test'), test_id, metric[:id]
           )
         ).retrieve_detailed_results, metric[:id].to_sym, {}
       ) if metric

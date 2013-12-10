@@ -1,0 +1,12 @@
+application:
+  name: Sysstats
+  description: sysstats application -- best proxy i the world
+  location: apps/sysstats/bootstrap.rb
+  type: singular
+  plugins:
+   - location: plugins/sysstats_plugin/plugin.rb
+  sub_apps: 
+   - 
+     id: main
+     name: Main application
+     description: This is the base configuration for Sysstats

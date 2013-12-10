@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sysstats - Results - load_test - Compare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/css/repose.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/sysstats">Sysstats</a>
+      <div class="nav-collapse collapse bs-navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/sysstats/tests">Running Tests</a></li>
+          <li><a href="/sysstats/applications">Applications</a></li>
+          <li class="active"><a href="/sysstats/results">Results</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container">
+      <ul class="breadcrumb">
+        <li><a href="/sysstats">Home</a></li>
+        <li><a href="/sysstats/results">Results</a></li>
+        <li><a href="/sysstats/results/main">main</a></li>
+        <li><a href="/sysstats/results/main/load_test">load_test</a></li>
+        <li class="active">SysstatsPlugin - device_disk - Comparison</li>
+      </ul>
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Test Results</h3>
+        </div>
+        <div class="span11" style="overflow: auto;">
+	        <table class="table table-hover" id="comparisonTable" style="max-width: none;">
+
+          <thead>
+            <tr>
+              <th>key</th>
+              <th>instance</th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">tps</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">rd_sec/s</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">wr_sec/s</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">avgrq-sz</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">avgqu-sz</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">await</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">svctm</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">%util</span></th>
+  
+            </tr>
+          </thead>
+          
+          <tbody>
+
+            <tr>
+              <td>a4f791ae-1a10-446b-9055-e1130cc53bec</td>
+              <td>sysstats_device_disk.out_10.23.246.101-dev202-64</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+            </tr>
+  
+            <tr>
+              <td>a4f791ae-1a10-446b-9055-e1130cc53bec</td>
+              <td>sysstats_device_disk.out_10.23.246.101-dev202-0</td>
+     
+              <td>0.49</td>
+     
+              <td>0.00</td>
+     
+              <td>9.05</td>
+     
+              <td>18.36</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+            </tr>
+  
+            <tr>
+              <td>compare-key</td>
+              <td>sysstats_device_disk.out_162.209.124.158-dev202-64</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+            </tr>
+  
+            <tr>
+              <td>compare-key</td>
+              <td>sysstats_device_disk.out_162.209.124.158-dev202-0</td>
+     
+              <td>0.47</td>
+     
+              <td>0.00</td>
+     
+              <td>15.55</td>
+     
+              <td>33.13</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+            </tr>
+  
+          </tbody>
+        </table>
+		</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">tps</h3>
+        </div>        
+        <div id="tps" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">rd_sec/s</h3>
+        </div>        
+        <div id="rd_sec_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">wr_sec/s</h3>
+        </div>        
+        <div id="wr_sec_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">avgrq-sz</h3>
+        </div>        
+        <div id="avgrq_sz" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">avgqu-sz</h3>
+        </div>        
+        <div id="avgqu_sz" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">await</h3>
+        </div>        
+        <div id="await" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">svctm</h3>
+        </div>        
+        <div id="svctm" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">%util</h3>
+        </div>        
+        <div id="_util" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+    </div>
+    <hr>
+    <footer>
+      <p>&copy; Rackspace Hosting 2013</p>
+    </footer>
+  </div> <!-- /container -->
+    <!-- JavaScript plugins (requires jQuery) -->
+    <!-- <script src="http://code.jquery.com/jquery.js"></script>-->
+    <script src="/js/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+    <script src="/js/respond.js"></script>
+    <script src="/js/repose.min.js"></script>
+    <!-- <script src="http://code.highcharts.com/highcharts.js"></script>-->
+    <script src="/js/highcharts.js"></script>
+    <!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.13.3/jquery.tablesorter.min.js"></script>-->
+    <script src="/js/tablesorter.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+      	$("table#comparisonTable").tablesorter({ sortList: [[1,0]] });
+        var results = ["a4f791ae-1a10-446b-9055-e1130cc53bec", "compare-key"]
+
+
+      var option_tps = {
+          chart: {
+            renderTo: 'tps',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'tps'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-64'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-0'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-64'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-0'
+          },
+    
+          ]
+      }
+
+
+      var option_rd_sec_s = {
+          chart: {
+            renderTo: 'rd_sec_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'rd_sec/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-64'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-0'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-64'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-0'
+          },
+    
+          ]
+      }
+
+
+      var option_wr_sec_s = {
+          chart: {
+            renderTo: 'wr_sec_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'wr_sec/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-64'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-0'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-64'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-0'
+          },
+    
+          ]
+      }
+
+
+      var option_avgrq_sz = {
+          chart: {
+            renderTo: 'avgrq_sz',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'avgrq-sz'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-64'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-0'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-64'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-0'
+          },
+    
+          ]
+      }
+
+
+      var option_avgqu_sz = {
+          chart: {
+            renderTo: 'avgqu_sz',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'avgqu-sz'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-64'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-0'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-64'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-0'
+          },
+    
+          ]
+      }
+
+
+      var option_await = {
+          chart: {
+            renderTo: 'await',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'await'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-64'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-0'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-64'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-0'
+          },
+    
+          ]
+      }
+
+
+      var option_svctm = {
+          chart: {
+            renderTo: 'svctm',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'svctm'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-64'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-0'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-64'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-0'
+          },
+    
+          ]
+      }
+
+
+      var option__util = {
+          chart: {
+            renderTo: '_util',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: '%util'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-64'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_disk.out_10.23.246.101-dev202-0'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-64'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_disk.out_162.209.124.158-dev202-0'
+          },
+    
+          ]
+      }
+
+
+      
+      $.ajax({
+      	url: '/sysstats/results/main/load_test/compare-plugin/metric', 
+      	type: 'POST',
+      	data: 'compare=' + results + '&plugin=SysstatsPlugin|||device_disk',
+      	success: function(data) {
+      		var i =0;
+      		for(var i = 0, max = data.length; i < max; i++){
+      			var id = data[i].id;
+      			var content = data[i].data.device_disk.content;
+      			var headers = data[i].data.device_disk.headers;
+
+      			var index = get_index(headers, 'tps');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_tps.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_tps.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_tps.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var tps_chart = new Highcharts.Chart(option_tps);
+	      		}
+
+      			var index = get_index(headers, 'rd_sec/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_rd_sec_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_rd_sec_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_rd_sec_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var rd_sec_s_chart = new Highcharts.Chart(option_rd_sec_s);
+	      		}
+
+      			var index = get_index(headers, 'wr_sec/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_wr_sec_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_wr_sec_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_wr_sec_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var wr_sec_s_chart = new Highcharts.Chart(option_wr_sec_s);
+	      		}
+
+      			var index = get_index(headers, 'avgrq-sz');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_avgrq_sz.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_avgrq_sz.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_avgrq_sz.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var avgrq_sz_chart = new Highcharts.Chart(option_avgrq_sz);
+	      		}
+
+      			var index = get_index(headers, 'avgqu-sz');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_avgqu_sz.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_avgqu_sz.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_avgqu_sz.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var avgqu_sz_chart = new Highcharts.Chart(option_avgqu_sz);
+	      		}
+
+      			var index = get_index(headers, 'await');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_await.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_await.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_await.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var await_chart = new Highcharts.Chart(option_await);
+	      		}
+
+      			var index = get_index(headers, 'svctm');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_svctm.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_svctm.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_svctm.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var svctm_chart = new Highcharts.Chart(option_svctm);
+	      		}
+
+      			var index = get_index(headers, '%util');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option__util.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option__util.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option__util.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var _util_chart = new Highcharts.Chart(option__util);
+	      		}
+
+      			
+      		}
+		}
+     }); 
+     
+     function get_index(array, value){
+     	for(var i =0, max = array.length; i < max; i ++){
+     		if(value == array[i]){
+     			return i;
+     		}
+     	}
+     	return -1;
+     }
+
+      });
+    </script>
+  </body>
+</html>

@@ -31,12 +31,12 @@ Feature: Load Repose Plugin Page
   			      {
 		            "server":"10.23.246.101",
 		            "user":"root",
-		            "path":"/root/repose/dist/files/apps/ah/results/adhoc/tmp_20131115T050930/sysstats.log_162.209.124.158"
+		            "path":"/root/repose/dist/files/apps/ah/results/adhoc/tmp_20131114T183805/sysstats.log_162.209.124.158"
 				  },		            
   				  {
 		            "server":"10.23.246.101",
 		            "user":"root",
-		            "path":"/root/repose/dist/files/apps/ah/results/adhoc/tmp_20131115T050930/sysstats.log_162.209.124.167"
+		            "path":"/root/repose/dist/files/apps/ah/results/adhoc/tmp_20131114T183805/sysstats.log_162.209.124.167"
 				  }		            
 		        ]
 		      }

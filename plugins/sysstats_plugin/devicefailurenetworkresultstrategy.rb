@@ -18,7 +18,7 @@ module SysstatsPluginModule
       }
     end
   
-    def initialize(db, fs_ip, application, name, test_type, id)
+    def initialize(db, fs_ip, application, name, test_type, id, metric_id)
       @average_metric_list = {
         "rxerr/s" => [],
         "txerr/s" => [],
@@ -42,7 +42,7 @@ module SysstatsPluginModule
         "txfifo/s" => [],
         "rxfram/s" => []
       }
-      super(db, fs_ip, application, name, test_type, id)
+      super(db, fs_ip, application, name, test_type, id, metric_id)
     end 
   
     def populate_metric(entry, name, id, start, stop)
@@ -69,6 +69,27 @@ module SysstatsPluginModule
           @average_metric_list["rxfifo/s"].find {|key_data| key_data[:dev_name] == dev}[:results] = rxfifos
           initialize_metric(@average_metric_list,"txfifo/s",dev)
           @average_metric_list["txfifo/s"].find {|key_data| key_data[:dev_name] == dev}[:results] = txfifos
+        end
+        result.scan(/(\d+:\d+:\d+ \S+)\s+(\S+)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)$/).map do |time,iface,rxerrs,txerrs,colls,rxdrops,txdrops,txcarrs,rxframs,rxfifos,txfifos|
+          dev = "#{File.basename(entry)}-#{iface}"
+          initialize_metric(@detailed_metric_list,"rxerr/s",dev)
+          @detailed_metric_list["rxerr/s"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => rxerrs}
+          initialize_metric(@detailed_metric_list,"txerr/s",dev)
+          @detailed_metric_list["txerr/s"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value =>  txerrs}
+          initialize_metric(@detailed_metric_list,"coll/s",dev)
+          @detailed_metric_list["coll/s"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value =>  colls}
+          initialize_metric(@detailed_metric_list,"rxdrop/s",dev)
+          @detailed_metric_list["rxdrop/s"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value =>  rxdrops}
+          initialize_metric(@detailed_metric_list,"txdrop/s",dev)
+          @detailed_metric_list["txdrop/s"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value =>  txdrops}
+          initialize_metric(@detailed_metric_list,"txcarr/s",dev)
+          @detailed_metric_list["txcarr/s"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value =>  txcarrs}
+          initialize_metric(@detailed_metric_list,"rxfram/s",dev)
+          @detailed_metric_list["rxfram/s"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value =>  rxframs}
+          initialize_metric(@detailed_metric_list,"rxfifo/s",dev)
+          @detailed_metric_list["rxfifo/s"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value =>  rxfifos}
+          initialize_metric(@detailed_metric_list,"txfifo/s",dev)
+          @detailed_metric_list["txfifo/s"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value =>  txfifos}
         end
       end
     end

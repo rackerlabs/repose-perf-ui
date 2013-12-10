@@ -2,7 +2,7 @@ class ReposeAbstractStrategy
 
   attr_reader :data_results, :store
 
-  def initialize(db, fs_ip, application, name, test_type, id)
+  def initialize(db, fs_ip, application, name, test_type, id, metric_id)
     @store = Redis.new(db) 
     results = {}
     begin 

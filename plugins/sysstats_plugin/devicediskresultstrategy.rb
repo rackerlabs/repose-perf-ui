@@ -17,7 +17,7 @@ module SysstatsPluginModule
       }
     end
   
-    def initialize(db, fs_ip, application, name, test_type, id)
+    def initialize(db, fs_ip, application, name, test_type, id, metric_id)
     
       @average_metric_list = {
         "tps" => [],
@@ -41,7 +41,7 @@ module SysstatsPluginModule
         "%util" => []
       }
   
-      super(db, fs_ip, application, name, test_type, id)
+      super(db, fs_ip, application, name, test_type, id, metric_id)
     end 
   
     def populate_metric(entry, name, id, start, stop)
@@ -67,7 +67,7 @@ module SysstatsPluginModule
           initialize_metric(@average_metric_list,"svctm",dev)
           @average_metric_list["svctm"].find {|key_data| key_data[:dev_name] == dev}[:results] = avgqusz
         end
-        result.scan(/(\d+:\d+:\d+ \S+)\s+(\S+)\s+(\S+)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)$/).map do |time,device,tps,rd_secs,wr_secs,avgrqsz,avgqusz,await,svctm,util|
+        result.scan(/(\d+:\d+:\d+ \S+)\s+(\S+)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)\s+(\d+\.?\d+?)$/).map do |time,device,tps,rd_secs,wr_secs,avgrqsz,avgqusz,await,svctm,util|
           #get device name and then time
           #only use time that's between start and end (in the 24 hour period the time has to be between those 2)
           dev = "#{File.basename(entry)}-#{device}"

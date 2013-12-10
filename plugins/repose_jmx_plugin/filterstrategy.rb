@@ -4,7 +4,7 @@ class FilterStrategy < ReposeAbstractStrategy
 
   attr_accessor :average_metric_list,:detailed_metric_list 
 
-  def initialize(db, fs_ip, application, name, test_type, id)
+  def initialize(db, fs_ip, application, name, test_type, id, metric_id)
     @average_metric_list = {
       "http-logging:Mean" => [],
       "dist-datastore:Mean" => [],
@@ -46,7 +46,7 @@ class FilterStrategy < ReposeAbstractStrategy
       "ip-identity:Mean" => [],
       "ip-identity:75thPercentile" => []
     }
-    super(db, fs_ip, application, name, test_type, id)
+    super(db, fs_ip, application, name, test_type, id, metric_id)
   end 
 
   def populate_metric(entry, name, id, start, stop)

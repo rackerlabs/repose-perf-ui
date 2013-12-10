@@ -12,7 +12,7 @@ module SysstatsPluginModule
       }
     end
   
-    def initialize(db, fs_ip, application, name, test_type, id)
+    def initialize(db, fs_ip, application, name, test_type, id, metric_id)
       @average_metric_list = {
         "frmpg/s" => [],
         "bufpg/s" => [],
@@ -24,7 +24,7 @@ module SysstatsPluginModule
         "bufpg/s" => [],
         "campg/s" => []
       }
-      super(db, fs_ip, application, name, test_type, id)
+      super(db, fs_ip, application, name, test_type, id, metric_id)
     end 
   
     def populate_metric(entry, name, id, start, stop)
@@ -38,7 +38,7 @@ module SysstatsPluginModule
           initialize_metric(@average_metric_list,"campg/s",dev)
           @average_metric_list["campg/s"].find {|key_data| key_data[:dev_name] == dev}[:results] = campgs
         end
-        result.scan(/(\d+:\d+:\d+ \S+)\s+(\S+)\s+(-?\d+\.?\d*?)\s+(\d+\.?\d*?)\s+(\d+\.?\d*?)$/).map do |time, frmpgs, bufpgs, campgs|
+        result.scan(/(\d+:\d+:\d+ \S+)\s+(-?\d+\.?\d*?)\s+(\d+\.?\d*?)\s+(\d+\.?\d*?)$/).map do |time, frmpgs, bufpgs, campgs|
           dev = File.basename(entry)
           initialize_metric(@detailed_metric_list,"frmpg/s",dev)
           @detailed_metric_list["frmpg/s"].find {|key_data| key_data[:dev_name] == dev}[:results] << {:time => time, :value => frmpgs}

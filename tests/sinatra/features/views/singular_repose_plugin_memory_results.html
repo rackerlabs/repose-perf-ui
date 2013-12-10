@@ -36,58 +36,55 @@
         <div class="panel-heading">
           <h3 class="panel-title">Summary Test Results</h3>
         </div>
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>instance</th>
-  
-              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">HeapMemoryUsage.committed</span></th>
-  
-              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">HeapMemoryUsage.used</span></th>
-  
-              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">HeapMemoryUsage.max</span></th>
-  
-              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">HeapMemoryUsage.init</span></th>
-  
-            </tr>
-          </thead>
-          <tbody>
-  
-            <tr>
-              <td>jmxdata.out_162.209.124.158</td>
-     
-              <td>388587520.0</td>
-     
-              <td>192118440.0</td>
-     
-              <td>3491561472.0</td>
-     
-              <td>245467264.0</td>
-     
-            </tr>
-  
-            <tr>
-              <td>jmxdata.out_162.209.124.167</td>
-     
-              <td>386301952.0</td>
-     
-              <td>231901507.0</td>
-     
-              <td>3491561472.0</td>
-     
-              <td>245467264.0</td>
-     
-            </tr>
-  
-          </tbody>
-        </table>
-      </div>
-  
-      <div class="panel">
-        <div class="panel-heading">
-          <h3 class="panel-title">jvm_memory - jmxdata.out_162.209.124.158</h3>
-        </div>        
-        <div id="jvm_memory_jmxdata_out_162_209_124_158" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+        <div class="span11" style="overflow: auto;">
+	        <table class="table table-hover" style="max-width: none;">
+	
+	          <thead>
+	            <tr>
+	              <th>instance</th>
+	  
+	              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">HeapMemoryUsage.committed</span></th>
+	  
+	              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">HeapMemoryUsage.used</span></th>
+	  
+	              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">HeapMemoryUsage.max</span></th>
+	  
+	              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">HeapMemoryUsage.init</span></th>
+	  
+	            </tr>
+	          </thead>
+	          <tbody>
+	  
+	            <tr>
+	              <td>jmxdata.out_162.209.124.167</td>
+	     
+	              <td>386301952.0</td>
+	     
+	              <td>231901507.0</td>
+	     
+	              <td>3491561472.0</td>
+	     
+	              <td>245467264.0</td>
+	     
+	            </tr>
+	  
+	            <tr>
+	              <td>jmxdata.out_162.209.124.158</td>
+	     
+	              <td>388587520.0</td>
+	     
+	              <td>192118440.0</td>
+	     
+	              <td>3491561472.0</td>
+	     
+	              <td>245467264.0</td>
+	     
+	            </tr>
+	  
+	          </tbody>
+	
+	        </table>
+	    </div>
       </div>
   
       <div class="panel">
@@ -97,135 +94,13 @@
         <div id="jvm_memory_jmxdata_out_162_209_124_167" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
       </div>
   
-  
-      <div class="panel panel-summary">
+      <div class="panel">
         <div class="panel-heading">
-          <h3 class="panel-title">Detailed Test Results for jmxdata.out_162.209.124.158</h3>
-        </div>
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>Time</th>
-    
-              <th>HeapMemoryUsage.committed</th>
-    
-              <th>HeapMemoryUsage.used</th>
-    
-              <th>HeapMemoryUsage.max</th>
-    
-              <th>HeapMemoryUsage.init</th>
-    
-            </tr>
-          </thead>
-          <tbody>
-    
-            <tr>
-              <td>2013-11-14T22:54:47+00:00</td>
-      
-              <td>235274240</td>
-      
-              <td>52860056</td>
-      
-              <td>3491561472</td>
-      
-              <td>245467264</td>
-      
-            </tr>
-    
-            <tr>
-              <td>2013-11-14T22:55:47+00:00</td>
-      
-              <td>866189312</td>
-      
-              <td>168426904</td>
-      
-              <td>3491561472</td>
-      
-              <td>245467264</td>
-      
-            </tr>
-    
-            <tr>
-              <td>2013-11-14T22:56:47+00:00</td>
-      
-              <td>355401728</td>
-      
-              <td>211675344</td>
-      
-              <td>3491561472</td>
-      
-              <td>245467264</td>
-      
-            </tr>
-    
-            <tr>
-              <td>2013-11-14T22:57:47+00:00</td>
-      
-              <td>211746816</td>
-      
-              <td>155839360</td>
-      
-              <td>3491561472</td>
-      
-              <td>245467264</td>
-      
-            </tr>
-    
-            <tr>
-              <td>2013-11-14T22:58:47+00:00</td>
-      
-              <td>505413632</td>
-      
-              <td>347705920</td>
-      
-              <td>3491561472</td>
-      
-              <td>245467264</td>
-      
-            </tr>
-    
-            <tr>
-              <td>2013-11-14T22:59:47+00:00</td>
-      
-              <td>317587456</td>
-      
-              <td>235047992</td>
-      
-              <td>3491561472</td>
-      
-              <td>245467264</td>
-      
-            </tr>
-    
-            <tr>
-              <td>2013-11-14T23:00:47+00:00</td>
-      
-              <td>308543488</td>
-      
-              <td>178787728</td>
-      
-              <td>3491561472</td>
-      
-              <td>245467264</td>
-      
-            </tr>
-    
-            <tr>
-              <td>2013-11-14T23:01:47+00:00</td>
-      
-              <td>308543488</td>
-      
-              <td>186604216</td>
-      
-              <td>3491561472</td>
-      
-              <td>245467264</td>
-      
-            </tr>
-    
-          </tbody>
-        </table>
+          <h3 class="panel-title">jvm_memory - jmxdata.out_162.209.124.158</h3>
+        </div>        
+        <div id="jvm_memory_jmxdata_out_162_209_124_158" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
       </div>
+  
   
       <div class="panel panel-summary">
         <div class="panel-heading">
@@ -356,6 +231,135 @@
         </table>
       </div>
   
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Detailed Test Results for jmxdata.out_162.209.124.158</h3>
+        </div>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Time</th>
+    
+              <th>HeapMemoryUsage.committed</th>
+    
+              <th>HeapMemoryUsage.used</th>
+    
+              <th>HeapMemoryUsage.max</th>
+    
+              <th>HeapMemoryUsage.init</th>
+    
+            </tr>
+          </thead>
+          <tbody>
+    
+            <tr>
+              <td>2013-11-14T22:54:47+00:00</td>
+      
+              <td>235274240</td>
+      
+              <td>52860056</td>
+      
+              <td>3491561472</td>
+      
+              <td>245467264</td>
+      
+            </tr>
+    
+            <tr>
+              <td>2013-11-14T22:55:47+00:00</td>
+      
+              <td>866189312</td>
+      
+              <td>168426904</td>
+      
+              <td>3491561472</td>
+      
+              <td>245467264</td>
+      
+            </tr>
+    
+            <tr>
+              <td>2013-11-14T22:56:47+00:00</td>
+      
+              <td>355401728</td>
+      
+              <td>211675344</td>
+      
+              <td>3491561472</td>
+      
+              <td>245467264</td>
+      
+            </tr>
+    
+            <tr>
+              <td>2013-11-14T22:57:47+00:00</td>
+      
+              <td>211746816</td>
+      
+              <td>155839360</td>
+      
+              <td>3491561472</td>
+      
+              <td>245467264</td>
+      
+            </tr>
+    
+            <tr>
+              <td>2013-11-14T22:58:47+00:00</td>
+      
+              <td>505413632</td>
+      
+              <td>347705920</td>
+      
+              <td>3491561472</td>
+      
+              <td>245467264</td>
+      
+            </tr>
+    
+            <tr>
+              <td>2013-11-14T22:59:47+00:00</td>
+      
+              <td>317587456</td>
+      
+              <td>235047992</td>
+      
+              <td>3491561472</td>
+      
+              <td>245467264</td>
+      
+            </tr>
+    
+            <tr>
+              <td>2013-11-14T23:00:47+00:00</td>
+      
+              <td>308543488</td>
+      
+              <td>178787728</td>
+      
+              <td>3491561472</td>
+      
+              <td>245467264</td>
+      
+            </tr>
+    
+            <tr>
+              <td>2013-11-14T23:01:47+00:00</td>
+      
+              <td>308543488</td>
+      
+              <td>186604216</td>
+      
+              <td>3491561472</td>
+      
+              <td>245467264</td>
+      
+            </tr>
+    
+          </tbody>
+        </table>
+      </div>
+  
     </div>
     <hr>
     <footer>
@@ -377,52 +381,6 @@
         window.prettyPrint && prettyPrint()
         $(".metric_desc").tooltip()
         $(".accordion-toggle").collapse();
-  
-      var option_jvm_memory_jmxdata_out_162_209_124_158 = {
-          chart: {
-            renderTo: 'jvm_memory_jmxdata_out_162_209_124_158',
-            type: 'area',
-            zoomType: 'x'
-          },
-          title: {
-            text: 'jvm_memory jmxdata.out_162.209.124.158'
-          },
-          yAxis:{
-            title: {
-              text: 'measurement here'
-            },
-            min: 0
-          },
-          series: [
-    
-          {
-            name: 'HeapMemoryUsage.committed'
-          },
-    
-          {
-            name: 'HeapMemoryUsage.used'
-          },
-    
-          {
-            name: 'HeapMemoryUsage.max'
-          },
-    
-          {
-            name: 'HeapMemoryUsage.init'
-          },
-    
-          ]
-      }
-    
-      option_jvm_memory_jmxdata_out_162_209_124_158.series[0].data = [["1384469687953",235274240.0],["1384469747793",866189312.0],["1384469807782",355401728.0],["1384469867780",211746816.0],["1384469927795",505413632.0],["1384469987790",317587456.0],["1384470047779",308543488.0],["1384470107778",308543488.0]];
-    
-      option_jvm_memory_jmxdata_out_162_209_124_158.series[1].data = [["1384469687953",52860056.0],["1384469747793",168426904.0],["1384469807782",211675344.0],["1384469867780",155839360.0],["1384469927795",347705920.0],["1384469987790",235047992.0],["1384470047779",178787728.0],["1384470107778",186604216.0]];
-    
-      option_jvm_memory_jmxdata_out_162_209_124_158.series[2].data = [["1384469687953",3491561472.0],["1384469747793",3491561472.0],["1384469807782",3491561472.0],["1384469867780",3491561472.0],["1384469927795",3491561472.0],["1384469987790",3491561472.0],["1384470047779",3491561472.0],["1384470107778",3491561472.0]];
-    
-      option_jvm_memory_jmxdata_out_162_209_124_158.series[3].data = [["1384469687953",245467264.0],["1384469747793",245467264.0],["1384469807782",245467264.0],["1384469867780",245467264.0],["1384469927795",245467264.0],["1384469987790",245467264.0],["1384470047779",245467264.0],["1384470107778",245467264.0]];
-    
-    var jvm_memory_jmxdata_out_162_209_124_158_chart = new Highcharts.Chart(option_jvm_memory_jmxdata_out_162_209_124_158);
   
       var option_jvm_memory_jmxdata_out_162_209_124_167 = {
           chart: {
@@ -469,6 +427,52 @@
       option_jvm_memory_jmxdata_out_162_209_124_167.series[3].data = [["1384469636131",245467264.0],["1384469695944",245467264.0],["1384469755947",245467264.0],["1384469815945",245467264.0],["1384469875969",245467264.0],["1384469935946",245467264.0],["1384469995945",245467264.0],["1384470055944",245467264.0]];
     
     var jvm_memory_jmxdata_out_162_209_124_167_chart = new Highcharts.Chart(option_jvm_memory_jmxdata_out_162_209_124_167);
+  
+      var option_jvm_memory_jmxdata_out_162_209_124_158 = {
+          chart: {
+            renderTo: 'jvm_memory_jmxdata_out_162_209_124_158',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'jvm_memory jmxdata.out_162.209.124.158'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'HeapMemoryUsage.committed'
+          },
+    
+          {
+            name: 'HeapMemoryUsage.used'
+          },
+    
+          {
+            name: 'HeapMemoryUsage.max'
+          },
+    
+          {
+            name: 'HeapMemoryUsage.init'
+          },
+    
+          ]
+      }
+    
+      option_jvm_memory_jmxdata_out_162_209_124_158.series[0].data = [["1384469687953",235274240.0],["1384469747793",866189312.0],["1384469807782",355401728.0],["1384469867780",211746816.0],["1384469927795",505413632.0],["1384469987790",317587456.0],["1384470047779",308543488.0],["1384470107778",308543488.0]];
+    
+      option_jvm_memory_jmxdata_out_162_209_124_158.series[1].data = [["1384469687953",52860056.0],["1384469747793",168426904.0],["1384469807782",211675344.0],["1384469867780",155839360.0],["1384469927795",347705920.0],["1384469987790",235047992.0],["1384470047779",178787728.0],["1384470107778",186604216.0]];
+    
+      option_jvm_memory_jmxdata_out_162_209_124_158.series[2].data = [["1384469687953",3491561472.0],["1384469747793",3491561472.0],["1384469807782",3491561472.0],["1384469867780",3491561472.0],["1384469927795",3491561472.0],["1384469987790",3491561472.0],["1384470047779",3491561472.0],["1384470107778",3491561472.0]];
+    
+      option_jvm_memory_jmxdata_out_162_209_124_158.series[3].data = [["1384469687953",245467264.0],["1384469747793",245467264.0],["1384469807782",245467264.0],["1384469867780",245467264.0],["1384469927795",245467264.0],["1384469987790",245467264.0],["1384470047779",245467264.0],["1384470107778",245467264.0]];
+    
+    var jvm_memory_jmxdata_out_162_209_124_158_chart = new Highcharts.Chart(option_jvm_memory_jmxdata_out_162_209_124_158);
   
       });
     </script>

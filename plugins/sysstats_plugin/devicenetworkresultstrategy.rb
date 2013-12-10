@@ -16,7 +16,7 @@ module SysstatsPluginModule
       }
     end
   
-    def initialize(db, fs_ip, application, name, test_type, id)
+    def initialize(db, fs_ip, application, name, test_type, id, metric_id)
       @average_metric_list = {
         "rxpck/s" => [],
         "txpck/s" => [],
@@ -36,7 +36,7 @@ module SysstatsPluginModule
         "txcmp/s" => [],
         "rxmcst/s" => []
       }
-      super(db, fs_ip, application, name, test_type, id)
+      super(db, fs_ip, application, name, test_type, id, metric_id)
     end 
   
     def populate_metric(entry, name, id, start, stop)

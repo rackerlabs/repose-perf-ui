@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sysstats - Results - load_test - Compare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/css/repose.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/sysstats">Sysstats</a>
+      <div class="nav-collapse collapse bs-navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/sysstats/tests">Running Tests</a></li>
+          <li><a href="/sysstats/applications">Applications</a></li>
+          <li class="active"><a href="/sysstats/results">Results</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container">
+      <ul class="breadcrumb">
+        <li><a href="/sysstats">Home</a></li>
+        <li><a href="/sysstats/results">Results</a></li>
+        <li><a href="/sysstats/results/main">main</a></li>
+        <li><a href="/sysstats/results/main/load_test">load_test</a></li>
+        <li class="active">SysstatsPlugin - memory_utilization - Comparison</li>
+      </ul>
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Test Results</h3>
+        </div>
+        <div class="span11" style="overflow: auto;">
+	        <table class="table table-hover" id="comparisonTable" style="max-width: none;">
+
+          <thead>
+            <tr>
+              <th>key</th>
+              <th>instance</th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">kbmemfree</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">kbmemused</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">%memused</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">kbbuffers</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">kbcached</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">kbcommit</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">%commit</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">kbactive</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">kbinact</span></th>
+  
+            </tr>
+          </thead>
+          
+          <tbody>
+
+            <tr>
+              <td>a4f791ae-1a10-446b-9055-e1130cc53bec</td>
+              <td>sysstats_memory_utilization.out_10.23.246.101</td>
+     
+              <td>14149690</td>
+     
+              <td>1192014</td>
+     
+              <td>7.77</td>
+     
+              <td>227340</td>
+     
+              <td>624998</td>
+     
+              <td>142387</td>
+     
+              <td>0.93</td>
+     
+              <td>639357</td>
+     
+              <td>290169</td>
+     
+            </tr>
+  
+            <tr>
+              <td>compare-key</td>
+              <td>sysstats_memory_utilization.out_162.209.124.158</td>
+     
+              <td>14089593</td>
+     
+              <td>1252111</td>
+     
+              <td>8.16</td>
+     
+              <td>229703</td>
+     
+              <td>680411</td>
+     
+              <td>678254</td>
+     
+              <td>4.42</td>
+     
+              <td>644567</td>
+     
+              <td>344669</td>
+     
+            </tr>
+  
+          </tbody>
+        </table>
+		</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">kbmemfree</h3>
+        </div>        
+        <div id="kbmemfree" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">kbmemused</h3>
+        </div>        
+        <div id="kbmemused" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">%memused</h3>
+        </div>        
+        <div id="_memused" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">kbbuffers</h3>
+        </div>        
+        <div id="kbbuffers" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">kbcached</h3>
+        </div>        
+        <div id="kbcached" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">kbcommit</h3>
+        </div>        
+        <div id="kbcommit" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">%commit</h3>
+        </div>        
+        <div id="_commit" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">kbactive</h3>
+        </div>        
+        <div id="kbactive" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">kbinact</h3>
+        </div>        
+        <div id="kbinact" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+    </div>
+    <hr>
+    <footer>
+      <p>&copy; Rackspace Hosting 2013</p>
+    </footer>
+  </div> <!-- /container -->
+    <!-- JavaScript plugins (requires jQuery) -->
+    <!-- <script src="http://code.jquery.com/jquery.js"></script>-->
+    <script src="/js/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+    <script src="/js/respond.js"></script>
+    <script src="/js/repose.min.js"></script>
+    <!-- <script src="http://code.highcharts.com/highcharts.js"></script>-->
+    <script src="/js/highcharts.js"></script>
+    <!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.13.3/jquery.tablesorter.min.js"></script>-->
+    <script src="/js/tablesorter.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+      	$("table#comparisonTable").tablesorter({ sortList: [[1,0]] });
+        var results = ["a4f791ae-1a10-446b-9055-e1130cc53bec", "compare-key"]
+
+
+      var option_kbmemfree = {
+          chart: {
+            renderTo: 'kbmemfree',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'kbmemfree'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_memory_utilization.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_memory_utilization.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_kbmemused = {
+          chart: {
+            renderTo: 'kbmemused',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'kbmemused'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_memory_utilization.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_memory_utilization.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option__memused = {
+          chart: {
+            renderTo: '_memused',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: '%memused'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_memory_utilization.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_memory_utilization.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_kbbuffers = {
+          chart: {
+            renderTo: 'kbbuffers',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'kbbuffers'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_memory_utilization.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_memory_utilization.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_kbcached = {
+          chart: {
+            renderTo: 'kbcached',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'kbcached'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_memory_utilization.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_memory_utilization.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_kbcommit = {
+          chart: {
+            renderTo: 'kbcommit',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'kbcommit'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_memory_utilization.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_memory_utilization.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option__commit = {
+          chart: {
+            renderTo: '_commit',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: '%commit'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_memory_utilization.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_memory_utilization.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_kbactive = {
+          chart: {
+            renderTo: 'kbactive',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'kbactive'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_memory_utilization.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_memory_utilization.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_kbinact = {
+          chart: {
+            renderTo: 'kbinact',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'kbinact'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_memory_utilization.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_memory_utilization.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      
+      $.ajax({
+      	url: '/sysstats/results/main/load_test/compare-plugin/metric', 
+      	type: 'POST',
+      	data: 'compare=' + results + '&plugin=SysstatsPlugin|||memory_utilization',
+      	success: function(data) {
+      		var i =0;
+      		for(var i = 0, max = data.length; i < max; i++){
+      			var id = data[i].id;
+      			var content = data[i].data.memory_utilization.content;
+      			var headers = data[i].data.memory_utilization.headers;
+
+      			var index = get_index(headers, 'kbmemfree');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_kbmemfree.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_kbmemfree.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_kbmemfree.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var kbmemfree_chart = new Highcharts.Chart(option_kbmemfree);
+	      		}
+
+      			var index = get_index(headers, 'kbmemused');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_kbmemused.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_kbmemused.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_kbmemused.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var kbmemused_chart = new Highcharts.Chart(option_kbmemused);
+	      		}
+
+      			var index = get_index(headers, '%memused');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option__memused.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option__memused.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option__memused.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var _memused_chart = new Highcharts.Chart(option__memused);
+	      		}
+
+      			var index = get_index(headers, 'kbbuffers');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_kbbuffers.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_kbbuffers.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_kbbuffers.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var kbbuffers_chart = new Highcharts.Chart(option_kbbuffers);
+	      		}
+
+      			var index = get_index(headers, 'kbcached');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_kbcached.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_kbcached.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_kbcached.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var kbcached_chart = new Highcharts.Chart(option_kbcached);
+	      		}
+
+      			var index = get_index(headers, 'kbcommit');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_kbcommit.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_kbcommit.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_kbcommit.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var kbcommit_chart = new Highcharts.Chart(option_kbcommit);
+	      		}
+
+      			var index = get_index(headers, '%commit');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option__commit.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option__commit.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option__commit.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var _commit_chart = new Highcharts.Chart(option__commit);
+	      		}
+
+      			var index = get_index(headers, 'kbactive');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_kbactive.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_kbactive.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_kbactive.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var kbactive_chart = new Highcharts.Chart(option_kbactive);
+	      		}
+
+      			var index = get_index(headers, 'kbinact');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_kbinact.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_kbinact.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_kbinact.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var kbinact_chart = new Highcharts.Chart(option_kbinact);
+	      		}
+
+      			
+      		}
+		}
+     }); 
+     
+     function get_index(array, value){
+     	for(var i =0, max = array.length; i < max; i ++){
+     		if(value == array[i]){
+     			return i;
+     		}
+     	}
+     	return -1;
+     }
+
+      });
+    </script>
+  </body>
+</html>

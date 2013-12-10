@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sysstats - Results - load_test - Compare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/css/repose.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/sysstats">Sysstats</a>
+      <div class="nav-collapse collapse bs-navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/sysstats/tests">Running Tests</a></li>
+          <li><a href="/sysstats/applications">Applications</a></li>
+          <li class="active"><a href="/sysstats/results">Results</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container">
+      <ul class="breadcrumb">
+        <li><a href="/sysstats">Home</a></li>
+        <li><a href="/sysstats/results">Results</a></li>
+        <li><a href="/sysstats/results/main">main</a></li>
+        <li><a href="/sysstats/results/main/load_test">load_test</a></li>
+        <li class="active">SysstatsPlugin - ip_failure_network - Comparison</li>
+      </ul>
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Test Results</h3>
+        </div>
+        <div class="span11" style="overflow: auto;">
+	        <table class="table table-hover" id="comparisonTable" style="max-width: none;">
+
+          <thead>
+            <tr>
+              <th>key</th>
+              <th>instance</th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">ihdrerr/s</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">iadrerr/s</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">iukwnpr/s</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">idisc/s</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">odisc/s</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">onort/s</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">fragok/s</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">fragf/s</span></th>
+  
+            </tr>
+          </thead>
+          
+          <tbody>
+
+            <tr>
+              <td>a4f791ae-1a10-446b-9055-e1130cc53bec</td>
+              <td>sysstats_ip_failure_network.out_10.23.246.101</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+            </tr>
+  
+            <tr>
+              <td>compare-key</td>
+              <td>sysstats_ip_failure_network.out_162.209.124.158</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+            </tr>
+  
+          </tbody>
+        </table>
+		</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">ihdrerr/s</h3>
+        </div>        
+        <div id="ihdrerr_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">iadrerr/s</h3>
+        </div>        
+        <div id="iadrerr_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">iukwnpr/s</h3>
+        </div>        
+        <div id="iukwnpr_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">idisc/s</h3>
+        </div>        
+        <div id="idisc_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">odisc/s</h3>
+        </div>        
+        <div id="odisc_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">onort/s</h3>
+        </div>        
+        <div id="onort_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">fragok/s</h3>
+        </div>        
+        <div id="fragok_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">fragf/s</h3>
+        </div>        
+        <div id="fragf_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+    </div>
+    <hr>
+    <footer>
+      <p>&copy; Rackspace Hosting 2013</p>
+    </footer>
+  </div> <!-- /container -->
+    <!-- JavaScript plugins (requires jQuery) -->
+    <!-- <script src="http://code.jquery.com/jquery.js"></script>-->
+    <script src="/js/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+    <script src="/js/respond.js"></script>
+    <script src="/js/repose.min.js"></script>
+    <!-- <script src="http://code.highcharts.com/highcharts.js"></script>-->
+    <script src="/js/highcharts.js"></script>
+    <!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.13.3/jquery.tablesorter.min.js"></script>-->
+    <script src="/js/tablesorter.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+      	$("table#comparisonTable").tablesorter({ sortList: [[1,0]] });
+        var results = ["a4f791ae-1a10-446b-9055-e1130cc53bec", "compare-key"]
+
+
+      var option_ihdrerr_s = {
+          chart: {
+            renderTo: 'ihdrerr_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'ihdrerr/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_ip_failure_network.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_ip_failure_network.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_iadrerr_s = {
+          chart: {
+            renderTo: 'iadrerr_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'iadrerr/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_ip_failure_network.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_ip_failure_network.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_iukwnpr_s = {
+          chart: {
+            renderTo: 'iukwnpr_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'iukwnpr/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_ip_failure_network.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_ip_failure_network.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_idisc_s = {
+          chart: {
+            renderTo: 'idisc_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'idisc/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_ip_failure_network.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_ip_failure_network.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_odisc_s = {
+          chart: {
+            renderTo: 'odisc_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'odisc/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_ip_failure_network.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_ip_failure_network.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_onort_s = {
+          chart: {
+            renderTo: 'onort_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'onort/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_ip_failure_network.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_ip_failure_network.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_fragok_s = {
+          chart: {
+            renderTo: 'fragok_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'fragok/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_ip_failure_network.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_ip_failure_network.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_fragf_s = {
+          chart: {
+            renderTo: 'fragf_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'fragf/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_ip_failure_network.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_ip_failure_network.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      
+      $.ajax({
+      	url: '/sysstats/results/main/load_test/compare-plugin/metric', 
+      	type: 'POST',
+      	data: 'compare=' + results + '&plugin=SysstatsPlugin|||ip_failure_network',
+      	success: function(data) {
+      		var i =0;
+      		for(var i = 0, max = data.length; i < max; i++){
+      			var id = data[i].id;
+      			var content = data[i].data.ip_failure_network.content;
+      			var headers = data[i].data.ip_failure_network.headers;
+
+      			var index = get_index(headers, 'ihdrerr/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_ihdrerr_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_ihdrerr_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_ihdrerr_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var ihdrerr_s_chart = new Highcharts.Chart(option_ihdrerr_s);
+	      		}
+
+      			var index = get_index(headers, 'iadrerr/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_iadrerr_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_iadrerr_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_iadrerr_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var iadrerr_s_chart = new Highcharts.Chart(option_iadrerr_s);
+	      		}
+
+      			var index = get_index(headers, 'iukwnpr/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_iukwnpr_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_iukwnpr_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_iukwnpr_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var iukwnpr_s_chart = new Highcharts.Chart(option_iukwnpr_s);
+	      		}
+
+      			var index = get_index(headers, 'idisc/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_idisc_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_idisc_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_idisc_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var idisc_s_chart = new Highcharts.Chart(option_idisc_s);
+	      		}
+
+      			var index = get_index(headers, 'odisc/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_odisc_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_odisc_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_odisc_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var odisc_s_chart = new Highcharts.Chart(option_odisc_s);
+	      		}
+
+      			var index = get_index(headers, 'onort/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_onort_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_onort_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_onort_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var onort_s_chart = new Highcharts.Chart(option_onort_s);
+	      		}
+
+      			var index = get_index(headers, 'fragok/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_fragok_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_fragok_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_fragok_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var fragok_s_chart = new Highcharts.Chart(option_fragok_s);
+	      		}
+
+      			var index = get_index(headers, 'fragf/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_fragf_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_fragf_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_fragf_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var fragf_s_chart = new Highcharts.Chart(option_fragf_s);
+	      		}
+
+      			
+      		}
+		}
+     }); 
+     
+     function get_index(array, value){
+     	for(var i =0, max = array.length; i < max; i ++){
+     		if(value == array[i]){
+     			return i;
+     		}
+     	}
+     	return -1;
+     }
+
+      });
+    </script>
+  </body>
+</html>

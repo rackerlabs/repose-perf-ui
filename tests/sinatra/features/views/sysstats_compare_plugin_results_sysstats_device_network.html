@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sysstats - Results - load_test - Compare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/css/repose.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/sysstats">Sysstats</a>
+      <div class="nav-collapse collapse bs-navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/sysstats/tests">Running Tests</a></li>
+          <li><a href="/sysstats/applications">Applications</a></li>
+          <li class="active"><a href="/sysstats/results">Results</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container">
+      <ul class="breadcrumb">
+        <li><a href="/sysstats">Home</a></li>
+        <li><a href="/sysstats/results">Results</a></li>
+        <li><a href="/sysstats/results/main">main</a></li>
+        <li><a href="/sysstats/results/main/load_test">load_test</a></li>
+        <li class="active">SysstatsPlugin - device_network - Comparison</li>
+      </ul>
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Test Results</h3>
+        </div>
+        <div class="span11" style="overflow: auto;">
+	        <table class="table table-hover" id="comparisonTable" style="max-width: none;">
+
+          <thead>
+            <tr>
+              <th>key</th>
+              <th>instance</th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">rxpck/s</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">txpck/s</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">rxkB/s</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">txkB/s</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">rxcmp/s</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">txcmp/s</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">rxmcst/s</span></th>
+  
+            </tr>
+          </thead>
+          
+          <tbody>
+
+            <tr>
+              <td>a4f791ae-1a10-446b-9055-e1130cc53bec</td>
+              <td>sysstats_device_network.out_10.23.246.101-lo</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+            </tr>
+  
+            <tr>
+              <td>a4f791ae-1a10-446b-9055-e1130cc53bec</td>
+              <td>sysstats_device_network.out_10.23.246.101-eth1</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+            </tr>
+  
+            <tr>
+              <td>a4f791ae-1a10-446b-9055-e1130cc53bec</td>
+              <td>sysstats_device_network.out_10.23.246.101-eth0</td>
+     
+              <td>2521.26</td>
+     
+              <td>1910.63</td>
+     
+              <td>736.57</td>
+     
+              <td>244.19</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+            </tr>
+  
+            <tr>
+              <td>compare-key</td>
+              <td>sysstats_device_network.out_162.209.124.158-lo</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+            </tr>
+  
+            <tr>
+              <td>compare-key</td>
+              <td>sysstats_device_network.out_162.209.124.158-eth1</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+            </tr>
+  
+            <tr>
+              <td>compare-key</td>
+              <td>sysstats_device_network.out_162.209.124.158-eth0</td>
+     
+              <td>68.28</td>
+     
+              <td>56.42</td>
+     
+              <td>19.79</td>
+     
+              <td>5.78</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+              <td>0.00</td>
+     
+            </tr>
+  
+          </tbody>
+        </table>
+		</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">rxpck/s</h3>
+        </div>        
+        <div id="rxpck_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">txpck/s</h3>
+        </div>        
+        <div id="txpck_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">rxkB/s</h3>
+        </div>        
+        <div id="rxkB_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">txkB/s</h3>
+        </div>        
+        <div id="txkB_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">rxcmp/s</h3>
+        </div>        
+        <div id="rxcmp_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">txcmp/s</h3>
+        </div>        
+        <div id="txcmp_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">rxmcst/s</h3>
+        </div>        
+        <div id="rxmcst_s" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+    </div>
+    <hr>
+    <footer>
+      <p>&copy; Rackspace Hosting 2013</p>
+    </footer>
+  </div> <!-- /container -->
+    <!-- JavaScript plugins (requires jQuery) -->
+    <!-- <script src="http://code.jquery.com/jquery.js"></script>-->
+    <script src="/js/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+    <script src="/js/respond.js"></script>
+    <script src="/js/repose.min.js"></script>
+    <!-- <script src="http://code.highcharts.com/highcharts.js"></script>-->
+    <script src="/js/highcharts.js"></script>
+    <!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.13.3/jquery.tablesorter.min.js"></script>-->
+    <script src="/js/tablesorter.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+      	$("table#comparisonTable").tablesorter({ sortList: [[1,0]] });
+        var results = ["a4f791ae-1a10-446b-9055-e1130cc53bec", "compare-key"]
+
+
+      var option_rxpck_s = {
+          chart: {
+            renderTo: 'rxpck_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'rxpck/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-lo'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-eth1'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-eth0'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-lo'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-eth1'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-eth0'
+          },
+    
+          ]
+      }
+
+
+      var option_txpck_s = {
+          chart: {
+            renderTo: 'txpck_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'txpck/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-lo'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-eth1'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-eth0'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-lo'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-eth1'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-eth0'
+          },
+    
+          ]
+      }
+
+
+      var option_rxkB_s = {
+          chart: {
+            renderTo: 'rxkB_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'rxkB/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-lo'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-eth1'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-eth0'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-lo'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-eth1'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-eth0'
+          },
+    
+          ]
+      }
+
+
+      var option_txkB_s = {
+          chart: {
+            renderTo: 'txkB_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'txkB/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-lo'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-eth1'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-eth0'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-lo'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-eth1'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-eth0'
+          },
+    
+          ]
+      }
+
+
+      var option_rxcmp_s = {
+          chart: {
+            renderTo: 'rxcmp_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'rxcmp/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-lo'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-eth1'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-eth0'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-lo'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-eth1'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-eth0'
+          },
+    
+          ]
+      }
+
+
+      var option_txcmp_s = {
+          chart: {
+            renderTo: 'txcmp_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'txcmp/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-lo'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-eth1'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-eth0'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-lo'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-eth1'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-eth0'
+          },
+    
+          ]
+      }
+
+
+      var option_rxmcst_s = {
+          chart: {
+            renderTo: 'rxmcst_s',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'rxmcst/s'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-lo'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-eth1'
+          },
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_device_network.out_10.23.246.101-eth0'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-lo'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-eth1'
+          },
+    
+          {
+            name: 'compare-key sysstats_device_network.out_162.209.124.158-eth0'
+          },
+    
+          ]
+      }
+
+
+      
+      $.ajax({
+      	url: '/sysstats/results/main/load_test/compare-plugin/metric', 
+      	type: 'POST',
+      	data: 'compare=' + results + '&plugin=SysstatsPlugin|||device_network',
+      	success: function(data) {
+      		var i =0;
+      		for(var i = 0, max = data.length; i < max; i++){
+      			var id = data[i].id;
+      			var content = data[i].data.device_network.content;
+      			var headers = data[i].data.device_network.headers;
+
+      			var index = get_index(headers, 'rxpck/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_rxpck_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_rxpck_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_rxpck_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var rxpck_s_chart = new Highcharts.Chart(option_rxpck_s);
+	      		}
+
+      			var index = get_index(headers, 'txpck/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_txpck_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_txpck_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_txpck_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var txpck_s_chart = new Highcharts.Chart(option_txpck_s);
+	      		}
+
+      			var index = get_index(headers, 'rxkB/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_rxkB_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_rxkB_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_rxkB_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var rxkB_s_chart = new Highcharts.Chart(option_rxkB_s);
+	      		}
+
+      			var index = get_index(headers, 'txkB/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_txkB_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_txkB_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_txkB_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var txkB_s_chart = new Highcharts.Chart(option_txkB_s);
+	      		}
+
+      			var index = get_index(headers, 'rxcmp/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_rxcmp_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_rxcmp_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_rxcmp_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var rxcmp_s_chart = new Highcharts.Chart(option_rxcmp_s);
+	      		}
+
+      			var index = get_index(headers, 'txcmp/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_txcmp_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_txcmp_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_txcmp_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var txcmp_s_chart = new Highcharts.Chart(option_txcmp_s);
+	      		}
+
+      			var index = get_index(headers, 'rxmcst/s');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_rxmcst_s.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_rxmcst_s.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_rxmcst_s.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var rxmcst_s_chart = new Highcharts.Chart(option_rxmcst_s);
+	      		}
+
+      			
+      		}
+		}
+     }); 
+     
+     function get_index(array, value){
+     	for(var i =0, max = array.length; i < max; i ++){
+     		if(value == array[i]){
+     			return i;
+     		}
+     	}
+     	return -1;
+     }
+
+      });
+    </script>
+  </body>
+</html>

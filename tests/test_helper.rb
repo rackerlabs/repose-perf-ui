@@ -19,7 +19,9 @@ require './tests/Models/test_tests.rb'
 require './tests/Models/testlocation_tests.rb'
 =end
 
-system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/load_repose_plugin_results.feature tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/load_sysstats_plugin_results.feature"
+system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/sysstats_plugin_results.feature"
+
+#system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/load_repose_plugin_results.feature tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/load_sysstats_plugin_results.feature tests/sinatra/features/sysstats_plugin_results.feature"
 =begin
 
 - stop actually saves the data 
@@ -30,8 +32,9 @@ system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/app
   - Postgres Adapter
 tests/sinatra/features/compare_sysstats_plugin.feature
 tests/sinatra/features/jmeter.feature
-tests/sinatra/features/autobench.feature
 tests/sinatra/features/trends.feature
+tests/sinatra/features/update_app.feature - this includes updating configs/test/test.json/test_runner.json/requests/response
+tests/sinatra/features/slas.feature
 tests/sinatra/features/email.feature
 tests/sinatra/features/newrelic_plugin.feature
 tests/sinatra/features/load_newrelic_plugin.feature
@@ -50,12 +53,14 @@ tests/sinatra/features/load_log4j_plugin.feature
 tests/sinatra/features/compare_log4j_plugin.feature
 tests/sinatra/features/start_stop_view.feature
 tests/sinatra/features/update_app_view.feature
+tests/sinatra/features/gatling.feature
+tests/sinatra/features/calendar.feature
+
 - add ability to start test running from inside the server 
-- add ability to view tests on the fly but hooking directly into disparate sources (not collected though until the test is over)
+- add ability to view tests on the fly by hooking directly into disparate sources (not collected though until the test is over)
   - if plugin does not expose the 'read_live_data' method, then the main plugin method will return empty (no error) and will let user know that this plugin is not able to read live data
 tests/sinatra/features/flood.feature
 
-- add ability to upload new configs, new test, update request/response info
 - add ability to view results table on click and don't show it on page right away
 - add ability to specify server size 
 

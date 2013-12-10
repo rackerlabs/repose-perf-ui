@@ -3,7 +3,7 @@ require_relative 'abstractstrategy.rb'
 class JvmThreadStrategy < ReposeAbstractStrategy
 
   attr_accessor :average_metric_list,:detailed_metric_list 
-  def initialize(db, fs_ip, application, name, test_type, id)
+  def initialize(db, fs_ip, application, name, test_type, id, metric_id)
     @average_metric_list = {
       "PeakThreadCount" => [],
       "DaemonThreadCount" => [],
@@ -29,7 +29,7 @@ class JvmThreadStrategy < ReposeAbstractStrategy
       "TotalStartedThreadCount" => {:preferred_order => :desc, :data => []}
 =end
     }
-    super(db, fs_ip, application, name, test_type, id)
+    super(db, fs_ip, application, name, test_type, id, metric_id)
   end 
 
   def populate_metric(entry, name, id, start, stop)

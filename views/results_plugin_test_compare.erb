@@ -88,7 +88,7 @@ end %>
         <div class="panel-heading">
           <h3 class="panel-title"><%= header %></h3>
         </div>        
-        <div id="<%= header.gsub(/[:.-]/,'_') %>" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+        <div id="<%= header.gsub(/[\/%:.-]/,'_') %>" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
       </div>
 <%
 		end
@@ -125,9 +125,9 @@ end %>
   	summary_plugin_data.each do |key, value|
   		value[:headers].each do |header|
 %>
-      var option_<%= header.gsub(/[:.-]/,'_') %> = {
+      var option_<%= header.gsub(/[\/%:.-]/,'_') %> = {
           chart: {
-            renderTo: '<%= header.gsub(/[:.-]/,'_') %>',
+            renderTo: '<%= header.gsub(/[\/%:.-]/,'_') %>',
             type: 'area',
             zoomType: 'x'
           },
@@ -146,7 +146,7 @@ end %>
     	id = entry[:id]
     	data = entry[:data]
     	data.each do |data_key, data_value|
-    		value[:content].each do |k, instance|
+    		data_value[:content].each do |k, instance|
 	 %>
           {
             name: '<%= id %> <%= k %>'
@@ -183,19 +183,19 @@ end %>
 %>
       			var index = get_index(headers, '<%= header %>');
       			if(index > -1){
-	      			for(var j = 0, jmax = option_<%= header.gsub(/[:.-]/,'_') %>.series.length; j < jmax; j++){
+	      			for(var j = 0, jmax = option_<%= header.gsub(/[\/%:.-]/,'_') %>.series.length; j < jmax; j++){
 	      				for(var content_prop in content){
-		      				if(option_<%= header.gsub(/[:.-]/,'_') %>.series[j].name === id + ' ' + content_prop){
+		      				if(option_<%= header.gsub(/[\/%:.-]/,'_') %>.series[j].name === id + ' ' + content_prop){
 		      					//we have the right header and the right series.  let's add this data set!
 			      				if(content[content_prop][index] !== undefined){
 				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
-				      				option_<%= header.gsub(/[:.-]/,'_') %>.series[j].data = data_content; 
-				      				break;
+				      				option_<%= header.gsub(/[\/%:.-]/,'_') %>.series[j].data = data_content; 
+				      				//break;
 			      				}
 		      				}
 		      			}
 	      			}
-	      			var <%= header.gsub(/[:.-]/,'_') %>_chart = new Highcharts.Chart(option_<%= header.gsub(/[:.-]/,'_') %>);
+	      			var <%= header.gsub(/[\/%:.-]/,'_') %>_chart = new Highcharts.Chart(option_<%= header.gsub(/[\/%:.-]/,'_') %>);
 	      		}
 <%
 		end

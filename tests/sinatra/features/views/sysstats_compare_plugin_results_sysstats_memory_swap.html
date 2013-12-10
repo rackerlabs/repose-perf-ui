@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sysstats - Results - load_test - Compare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/css/repose.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/sysstats">Sysstats</a>
+      <div class="nav-collapse collapse bs-navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/sysstats/tests">Running Tests</a></li>
+          <li><a href="/sysstats/applications">Applications</a></li>
+          <li class="active"><a href="/sysstats/results">Results</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container">
+      <ul class="breadcrumb">
+        <li><a href="/sysstats">Home</a></li>
+        <li><a href="/sysstats/results">Results</a></li>
+        <li><a href="/sysstats/results/main">main</a></li>
+        <li><a href="/sysstats/results/main/load_test">load_test</a></li>
+        <li class="active">SysstatsPlugin - memory_swap - Comparison</li>
+      </ul>
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Test Results</h3>
+        </div>
+        <div class="span11" style="overflow: auto;">
+	        <table class="table table-hover" id="comparisonTable" style="max-width: none;">
+
+          <thead>
+            <tr>
+              <th>key</th>
+              <th>instance</th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">kbswpfree</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">kbswpused</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">%swpused</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">kbswpcad</span></th>
+  
+              <th><span class="metric_desc" data-toggle="tooltip" title="" data-placement="bottom">%swpcad</span></th>
+  
+            </tr>
+          </thead>
+          
+          <tbody>
+
+            <tr>
+              <td>a4f791ae-1a10-446b-9055-e1130cc53bec</td>
+              <td>sysstats_memory_swap.out_10.23.246.101</td>
+     
+              <td>0</td>
+     
+              <td>0</td>
+     
+              <td>0.00</td>
+     
+              <td>0</td>
+     
+              <td>0.00</td>
+     
+            </tr>
+  
+            <tr>
+              <td>compare-key</td>
+              <td>sysstats_memory_swap.out_162.209.124.158</td>
+     
+              <td>0</td>
+     
+              <td>0</td>
+     
+              <td>0.00</td>
+     
+              <td>0</td>
+     
+              <td>0.00</td>
+     
+            </tr>
+  
+          </tbody>
+        </table>
+		</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">kbswpfree</h3>
+        </div>        
+        <div id="kbswpfree" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">kbswpused</h3>
+        </div>        
+        <div id="kbswpused" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">%swpused</h3>
+        </div>        
+        <div id="_swpused" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">kbswpcad</h3>
+        </div>        
+        <div id="kbswpcad" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">%swpcad</h3>
+        </div>        
+        <div id="_swpcad" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+      </div>
+
+    </div>
+    <hr>
+    <footer>
+      <p>&copy; Rackspace Hosting 2013</p>
+    </footer>
+  </div> <!-- /container -->
+    <!-- JavaScript plugins (requires jQuery) -->
+    <!-- <script src="http://code.jquery.com/jquery.js"></script>-->
+    <script src="/js/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+    <script src="/js/respond.js"></script>
+    <script src="/js/repose.min.js"></script>
+    <!-- <script src="http://code.highcharts.com/highcharts.js"></script>-->
+    <script src="/js/highcharts.js"></script>
+    <!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.13.3/jquery.tablesorter.min.js"></script>-->
+    <script src="/js/tablesorter.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+      	$("table#comparisonTable").tablesorter({ sortList: [[1,0]] });
+        var results = ["a4f791ae-1a10-446b-9055-e1130cc53bec", "compare-key"]
+
+
+      var option_kbswpfree = {
+          chart: {
+            renderTo: 'kbswpfree',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'kbswpfree'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_memory_swap.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_memory_swap.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_kbswpused = {
+          chart: {
+            renderTo: 'kbswpused',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'kbswpused'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_memory_swap.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_memory_swap.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option__swpused = {
+          chart: {
+            renderTo: '_swpused',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: '%swpused'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_memory_swap.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_memory_swap.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option_kbswpcad = {
+          chart: {
+            renderTo: 'kbswpcad',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: 'kbswpcad'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_memory_swap.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_memory_swap.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      var option__swpcad = {
+          chart: {
+            renderTo: '_swpcad',
+            type: 'area',
+            zoomType: 'x'
+          },
+          title: {
+            text: '%swpcad'
+          },
+          yAxis:{
+            title: {
+              text: 'measurement here'
+            },
+            min: 0
+          },
+          series: [
+    
+          {
+            name: 'a4f791ae-1a10-446b-9055-e1130cc53bec sysstats_memory_swap.out_10.23.246.101'
+          },
+    
+          {
+            name: 'compare-key sysstats_memory_swap.out_162.209.124.158'
+          },
+    
+          ]
+      }
+
+
+      
+      $.ajax({
+      	url: '/sysstats/results/main/load_test/compare-plugin/metric', 
+      	type: 'POST',
+      	data: 'compare=' + results + '&plugin=SysstatsPlugin|||memory_swap',
+      	success: function(data) {
+      		var i =0;
+      		for(var i = 0, max = data.length; i < max; i++){
+      			var id = data[i].id;
+      			var content = data[i].data.memory_swap.content;
+      			var headers = data[i].data.memory_swap.headers;
+
+      			var index = get_index(headers, 'kbswpfree');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_kbswpfree.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_kbswpfree.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_kbswpfree.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var kbswpfree_chart = new Highcharts.Chart(option_kbswpfree);
+	      		}
+
+      			var index = get_index(headers, 'kbswpused');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_kbswpused.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_kbswpused.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_kbswpused.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var kbswpused_chart = new Highcharts.Chart(option_kbswpused);
+	      		}
+
+      			var index = get_index(headers, '%swpused');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option__swpused.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option__swpused.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option__swpused.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var _swpused_chart = new Highcharts.Chart(option__swpused);
+	      		}
+
+      			var index = get_index(headers, 'kbswpcad');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option_kbswpcad.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option_kbswpcad.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option_kbswpcad.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var kbswpcad_chart = new Highcharts.Chart(option_kbswpcad);
+	      		}
+
+      			var index = get_index(headers, '%swpcad');
+      			if(index > -1){
+	      			for(var j = 0, jmax = option__swpcad.series.length; j < jmax; j++){
+	      				for(var content_prop in content){
+		      				if(option__swpcad.series[j].name === id + ' ' + content_prop){
+		      					//we have the right header and the right series.  let's add this data set!
+			      				if(content[content_prop][index] !== undefined){
+				      				data_content = content[content_prop][index].map(function(item){ return [item.time, parseFloat(item.value)]});
+				      				option__swpcad.series[j].data = data_content; 
+				      				//break;
+			      				}
+		      				}
+		      			}
+	      			}
+	      			var _swpcad_chart = new Highcharts.Chart(option__swpcad);
+	      		}
+
+      			
+      		}
+		}
+     }); 
+     
+     function get_index(array, value){
+     	for(var i =0, max = array.length; i < max; i ++){
+     		if(value == array[i]){
+     			return i;
+     		}
+     	}
+     	return -1;
+     }
+
+      });
+    </script>
+  </body>
+</html>
