@@ -4,7 +4,7 @@ application:
   location: apps/overhead/bootstrap.rb
   type: comparison
   plugins:
-   - location: plugins/mac_perf_mon/plugin.rb
+   - location: plugins/sysstats_plugin/plugin.rb
    - location: plugins/repose_jmx_plugin/plugin.rb
   sub_apps: 
    - 

@@ -30,12 +30,11 @@ system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/app
   - New Relic Adapter
   - Log4J Adapter
   - Postgres Adapter
-tests/sinatra/features/compare_sysstats_plugin.feature
-tests/sinatra/features/jmeter.feature
-tests/sinatra/features/trends.feature
 tests/sinatra/features/update_app.feature - this includes updating configs/test/test.json/test_runner.json/requests/response
 tests/sinatra/features/slas.feature
 tests/sinatra/features/email.feature
+tests/sinatra/features/trends.feature
+tests/sinatra/features/jmeter.feature
 tests/sinatra/features/newrelic_plugin.feature
 tests/sinatra/features/load_newrelic_plugin.feature
 tests/sinatra/features/compare_newrelic_plugin.feature
