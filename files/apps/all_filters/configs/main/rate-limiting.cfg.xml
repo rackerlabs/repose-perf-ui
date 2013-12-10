@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rate-limiting datastore="distributed/hash-ring" overLimit-429-responseCode="false" xmlns="http://docs.rackspacecloud.com/repose/rate-limiting/v1.0">
-  <request-endpoint uri-regex="^/v\d+\.\d+/\.+/limits/" include-absolute-limits="false"/>
-    <limit-group id="limited" groups="User_Standard" default="true">
-      <limit uri="1" uri-regex=".*/v1.0/([-|\w]+)/servers/.*" http-methods="GET" unit="SECOND" value="10000" />
-      <limit uri="2" uri-regex=".*/v1.0/([-|\w]+)/servers/.*" http-methods="POST" unit="SECOND" value="10000" />
-    </limit-group>
-</rate-limiting>

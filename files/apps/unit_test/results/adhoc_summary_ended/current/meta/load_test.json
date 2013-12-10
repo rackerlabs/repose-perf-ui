@@ -1,8 +1,0 @@
-{
-  "node_count": 2,
-  "runner":"jmeter",
-  "start":"1377797165000",
-  "stop":"1377800765000",
-  "tag" : "test with connection pool against Kushala's branch. against origin service",
-  "id" : "jenkins-repose-pt-static-adhoc-155"
-}
