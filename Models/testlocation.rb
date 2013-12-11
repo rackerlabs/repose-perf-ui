@@ -11,29 +11,36 @@ module Models
     
 
     def get_by_name(app_name, name)
+      response_list = []
+      store = Redis.new(@db)
+      begin
+        test_script_list = store.lrange("#{app_name}:#{name}:tests:setup:script", 0, -1)
+        test_script_list.each do |test_script|
+          test_script_json = JSON.parse(test_script)
+          type = "#{test_script_json['type']}_#{test_script_json['test']}".to_sym
+          href = open("http://#{@fs_ip}#{test_script_json['location']}") {|f| f.read }
+          response_list << TestLocation.new(href, type)
+        end
+      ensure
+        store.quit
+      end
+      response_list
+    end
+    
+    def get_by_id(app_name, name, id)
       response = nil
       store = Redis.new(@db)
       begin
-        test_values = store.hgetall("#{app_name}:#{name}:tests:setup:script")
-        raise ArgumentError, "No test file exists for #{app_name} and #{name}" unless test_values
-        href, type = ''
-        
-        test_values.each do |key, value|
-          if key.include?("type")
-            case value
-            when "jmeter"
-              type = :jmeter
-            else
-              raise ArgumentError, "Unknown test file for #{app_name} (#{test_file})"
-            end
-          end 
-          if key.include?("test")
-            location = JSON.parse(value)
-            href = open("http://#{@fs_ip}#{location['location']}") {|f| f.read }
-          end 
+        test_script_list = store.lrange("#{app_name}:#{name}:tests:setup:script", 0, -1)
+        test_script_list.each do |test_script|
+          test_script_json = JSON.parse(test_script)
+          type = "#{test_script_json['type']}_#{test_script_json['test']}".to_sym
+          href = open("http://#{@fs_ip}#{test_script_json['location']}") {|f| f.read }
+
+          if type == id.to_sym
+            response = TestLocation.new(href, type)
+          end
         end
-        
-        response = TestLocation.new(href, type)
       ensure
         store.quit
       end

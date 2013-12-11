@@ -47,17 +47,13 @@ Feature: Application Page
 		When I click on '/invalid/applications/not_found/test_download/jmeter'
 		Then the response should be "404"
 		And the error page should match the "No test script exists for invalid/not_found"
-		
-	Scneario: Navigate to atom hopper main update application
-		When I navigate to '/atom_hopper/applications/main/update'
-		Then the response should be "200"
-		And the page should match the "atom_hopper_application_update" version
-		
+
+	@update_application		
 	Scenario: Add a new config to atom hopper application
-		When I upload "config2" config file to "atom_hopper" "main" application
-		Then the response should be "201"		
+		When I upload "/Users/dimi5963/cloud.rb" config file to "atom_hopper" "main" application
+		Then the file upload response should be 201		
 		And response should be a json
-		And the "atom_hopper:main:setup:configs" list should contain "2" entries in redis
+		And the "atom_hopper:main:setup:configs" list should contain "2" json entries in redis
 		And the "atom_hopper/main/setup/configs" directory should contain "config2" file
 		And "fail" json record should equal to "No application by name of invalid/load_test found" 
 		

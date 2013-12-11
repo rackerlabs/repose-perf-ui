@@ -4,9 +4,9 @@
     <title><%= title %> - Applications = <%= sub_app_id %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
-    <link href="../../css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link href="../../css/repose.css" rel="stylesheet" media="screen">
-    <link href="../../css/prettify.css" rel="stylesheet" media="screen">
+    <link href="../../../css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="../../../css/repose.css" rel="stylesheet" media="screen">
+    <link href="../../../css/prettify.css" rel="stylesheet" media="screen">
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -71,6 +71,10 @@
           </div>
           <% end %>
         </div>
+        <form action="upload" method="POST" enctype='multipart/form-data'>
+        <input type="file" name="upload_config" value=""><br/>
+        <input type="submit" name="Upload Config" value="upload_config_button" />
+        </form>
       </div>
       <div class="panel panel-info">
         <div class="panel-heading">
@@ -94,12 +98,12 @@
     <!-- JavaScript plugins (requires jQuery) -->
     <script src="http://code.jquery.com/jquery.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="../../js/bootstrap.min.js"></script>
+    <script src="../../../js/bootstrap.min.js"></script>
 
     <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
-    <script src="../../js/respond.js"></script>
+    <script src="../../../js/respond.js"></script>
   <!--  <script src="/js/repose.min.js"></script> -->
-    <script src="../../js/prettify.js"></script>
+    <script src="../../../js/prettify.js"></script>
     <script>
         $(function () {
             window.prettyPrint && prettyPrint()

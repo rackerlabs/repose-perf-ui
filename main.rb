@@ -101,7 +101,7 @@ class PerfApp < Sinatra::Base
           :title => new_app.config['application']['name'],
           :request_response_list => Models::Test.new(new_app.db).get_setup_requests_by_name(app[:id], name),
           :config_list => Models::Configuration.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
-          :test_location => Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name)
+          :test_location_list => Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name)
         }
       else
         status 404
@@ -109,6 +109,36 @@ class PerfApp < Sinatra::Base
     else
       status 404
     end
+  end
+  
+  get '/:application/applications/:name/update' do |application, name|
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app 
+      new_app = app[:klass].new(settings.deployment)
+      sub_app = new_app.config['application']['sub_apps'].find do |sa|
+        sa['id'] == name
+      end
+      if sub_app
+        erb :app_detail_update, :locals => {
+          :application => app[:id],
+          :sub_app_id => name.to_sym,
+          :title => new_app.config['application']['name'],
+          :request_response_list => Models::Test.new(new_app.db).get_setup_requests_by_name(app[:id], name),
+          :config_list => Models::Configuration.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
+          :test_location_list => Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name)
+        }
+      else
+        status 404
+      end
+    else
+      status 404
+    end
+  end
+  
+  post '/:application/applications/:name/upload' do |application, name|
+    puts request.inspect
+    puts params
+    status 201
   end
 
   get '/:application/applications/:name/test_download/:file_name' do |application, name, file_name|
@@ -120,7 +150,7 @@ class PerfApp < Sinatra::Base
       end
       if sub_app
         begin 
-          downloaded_file =  Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name).download
+          downloaded_file =  Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_by_id(application, name, file_name).download
           attachment "test_file"
           content_type = 'Application/octet-stream'
           body downloaded_file

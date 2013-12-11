@@ -67,7 +67,7 @@ Given(/^Test is started for "(.*?)" "(.*?)" "(.*?)" initial test$/) do |applicat
   end
 end
 
-Given(/^Test is started for "(.*?)" "(.*?)" "(.*?)" secondary test$/) do |application, name, test|
+Given(/^Running for "(.*?)" "(.*?)" "(.*?)"$/) do |application, name, test|
   Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
   app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
   if app 
@@ -90,6 +90,22 @@ Given(/^Test is started for "(.*?)" "(.*?)" "(.*?)" secondary test$/) do |applic
     set_name = name
     set_test = test
   end
+end
+
+When(/^I upload "(.*?)" config file to "(.*?)" "(.*?)" application$/) do |config_name, application, name|
+  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app 
+    new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
+    fs_ip = new_app.fs_ip
+    set_app = application
+    set_name = name
+  end
+
+  path = "/#{application}/applications/#{name}/update"
+  visit path
+  attach_file("upload_config", config_name)
+  click_on("upload_config_button")
 end
 
 When(/^I post to "([^\"]*)" with '(.*?)'$/) do |path, post_data|
@@ -140,6 +156,31 @@ When(/^I post to '([^\"]*)' with non\-existing guid$/) do |path, post_data|
     test['guid'] = '000-000-000'
     data = test.to_json
     post(path, data)
+end
+
+Then /^the file upload response should be ([^\"]*)$/ do |status|
+  page.status_code.should == status.to_i
+end
+
+Then /^the file upload response should be json$/ do
+    is_json = begin
+      !!JSON.parse(page.body)
+    rescue
+      false
+    end
+  is_json == true
+end
+
+Then(/^the "(.*?)" list should contain "(.*?)" json entries in redis$/) do |redis_key, count|
+  result = nil
+  main_config = Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  app = Apps::Bootstrap.application_list.find {|a| a[:id] == set_app}
+  if app 
+    new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
+    Redis.new(new_app.db).lrange("#{set_app}:#{set_name}:setup:configs", 0, -1).length.should == count.to_i
+  end  
+  result.should_not be_nil
+    
 end
 
 Then /^the response should be "([^\"]*)"$/ do |status|
@@ -366,4 +407,8 @@ After do |scenario|
       Redis.new(new_app.db).del("#{set_app}:test:#{set_name}:#{set_test}:start")
     end
   end   
+end
+
+After('@update_application') do
+  
 end

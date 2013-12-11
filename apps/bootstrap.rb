@@ -215,35 +215,39 @@ module Apps
       response = store.get("#{application}:#{sub_app}:tests:setup:request_response:response")
       store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:meta", "response", response)
 
-      script_info = store.hgetall("#{application}:#{sub_app}:tests:setup:script")
-      raise ArgumentError, "no test script is available for #{application}-#{sub_app}" unless script_info and script_info['test']
-      script_json_info = JSON.parse(script_info['test'])
-      script_result_json = {}
-      script_result_json['name'] = script_json_info['name']
-      script_result_json['type'] = script_info['type']
-      
-      script_result_json['location'] = "/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/#{guid}/meta/#{script_json_info['name']}"
-      
-      f = open("/tmp/#{guid}/meta/#{script_result_json['name']}", 'w')
-      begin
-        open("http://#{fs_ip}#{script_json_info['location']}") do |resp|
-          resp.each_line do |segment|
-            f.write(segment)
-          end
-        end
-      ensure
-        f.close()
-      end
-      
-      result = script_result_json.to_json
-      store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:meta", "script", result)
+      script_info_list = store.lrange("#{application}:#{sub_app}:tests:setup:script", 0, -1)
+      script_info_list.each do |script_info|
+        script_json_info = JSON.parse(script_info)
+        if script_json_info['test'] == type
+          script_result_json = {}
+          script_result_json['name'] = script_json_info['name']
+          script_result_json['type'] = script_json_info['type']
+          script_result_json['location'] = "/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/#{guid}/meta/#{script_json_info['name']}"
 
-      runner_data = store.hget("#{application}:#{sub_app}:tests:setup:test", script_result_json['type'])
-      store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:meta", "test_#{script_result_json['type']}", runner_data)
+          f = open("/tmp/#{guid}/meta/#{script_result_json['name']}", 'w')
+          begin
+            open("http://#{fs_ip}#{script_json_info['location']}") do |resp|
+              resp.each_line do |segment|
+                f.write(segment)
+              end
+            end
+          ensure
+            f.close()
+          end
+          
+          result = script_result_json.to_json
+          store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:meta", "script", result)
+    
+          redis.rpush("#{opts[:app]}:#{opts[:sub_app]}:tests:setup:script", "{\"type\":\"jmeter\", \"test\":\"#{test_type}\", \"name\":\"#{File.basename(test_location)}\",\"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}/#{File.basename(test_location)}\"}")
+      
+          runner_data = store.hget("#{application}:#{sub_app}:tests:setup:meta", "test_#{type}_#{script_result_json['type']}")
+          store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:meta", "test_#{type}_#{script_result_json['type']}", runner_data)
+        end
+      end
     end
     
     def copy_meta_test(application, sub_app, type, json_data, start_test, end_time, runner, store)
-      test_info = store.hget("#{application}:#{sub_app}:tests:setup:test", "common")
+      test_info = store.hget("#{application}:#{sub_app}:tests:setup:meta", "common")
       if test_info
         test_json_info = JSON.parse(test_info)
       else
