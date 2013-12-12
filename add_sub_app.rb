@@ -118,15 +118,20 @@ Dir.glob("#{opts[:configs]}/**/*").each do |f|
     name_to_save = f.gsub(/^#{Regexp.escape(opts[:configs])}\//,"")
     directory_to_save = File.dirname(name_to_save)
     redis.rpush("#{opts[:app]}:#{opts[:sub_app]}:setup:configs", "{\"name\":\"#{name_to_save}\",\"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{name_to_save}")
-    Net::SSH.start(config['storage_info']['server'], config['storage_info']['user']) do |ssh|
-        ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}")
+    if config['storage_info']['server'] == 'localhost'
+      FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}"
+      FileUtils.cp(f, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}/")
+    else
+      Net::SSH.start(config['storage_info']['server'], config['storage_info']['user']) do |ssh|
+          ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}")
+      end
+      Net::SCP.upload!(
+          config['storage_info']['server'], 
+          config['storage_info']['user'], 
+          f, 
+          "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}"
+        )
     end
-    Net::SCP.upload!(
-        config['storage_info']['server'], 
-        config['storage_info']['user'], 
-        f, 
-        "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}"
-      )
   end
 end
   
@@ -143,15 +148,21 @@ logger.info "now create test script for: #{opts[:test]}"
   end
   
   redis.rpush("#{opts[:app]}:#{opts[:sub_app]}:tests:setup:script", "{\"type\":\"jmeter\", \"test\":\"#{test_type}\", \"name\":\"#{File.basename(test_location)}\",\"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}/#{File.basename(test_location)}\"}")
-  Net::SSH.start(config['storage_info']['server'], config['storage_info']['user']) do |ssh|
-      ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}")
+
+  if config['storage_info']['server'] == 'localhost'
+    FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}"
+    FileUtils.cp(f, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}/")
+  else
+    Net::SSH.start(config['storage_info']['server'], config['storage_info']['user']) do |ssh|
+        ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}")
+    end
+    Net::SCP.upload!(
+        config['storage_info']['server'], 
+        config['storage_info']['user'], 
+        test_location, 
+        "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}/"
+      )
   end
-  Net::SCP.upload!(
-      config['storage_info']['server'], 
-      config['storage_info']['user'], 
-      test_location, 
-      "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}/"
-    )
 end
 
   
