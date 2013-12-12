@@ -168,6 +168,46 @@ logger.info "now create test script for: #{opts[:test]}"
   end
 end
 
+logger.info "time to get the responders in here!"
+main_responder = opts[:responders]
+secondary_responder = opts[:compare_responders]
+
+redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "responder", "{\"name\":\"#{File.basename(main_responder)}\", \"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/#{File.basename(main_responder)}\"}")
+
+if config['storage_info']['destination'] == 'localhost'
+  FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/#{File.basename(main_responder)}"
+  FileUtils.cp(main_responder, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/#{File.basename(main_responder)}/")
+else
+  Net::SSH.start(config['storage_info']['destination'], config['storage_info']['user']) do |ssh|
+      ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/")
+  end
+  Net::SCP.upload!(
+      config['storage_info']['destination'], 
+      config['storage_info']['user'], 
+      main_responder, 
+      "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/"
+    )
+end
+
+if secondary_responder
+  redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "responder", "{\"name\":\"#{File.basename(main_responder)}\", \"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(main_responder)}\"}")
+
+  if config['storage_info']['destination'] == 'localhost'
+    FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(main_responder)}"
+    FileUtils.cp(main_responder, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(main_responder)}/")
+  else
+    Net::SSH.start(config['storage_info']['destination'], config['storage_info']['user']) do |ssh|
+        ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/")
+    end
+    Net::SCP.upload!(
+        config['storage_info']['destination'], 
+        config['storage_info']['user'],  
+        main_responder, 
+        "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/"
+      )
+  end
+end
+
 
   
 logger.info "finally log the request and response"
