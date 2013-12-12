@@ -112,14 +112,10 @@ logger.info "now get into redis"
 redis = Redis.new({:host => config['redis']['host'], :port => config['redis']['port'], :db => config['redis']['db']})
 logger.info "we're connected here: #{redis.inspect}"
 
-logger.info "now create proper directory for configs"
-Net::SSH.start(config['storage_info']['server'], config['storage_info']['user']) do |ssh|
-    ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/")
-end
 Dir.glob("#{opts[:configs]}/**/*").each do |f|
   unless File.directory?(f)
     logger.info "log this config: #{f}"
-    name_to_save = f.gsub(/^#{Regexp.escape(dir)}\//,"")
+    name_to_save = f.gsub(/^#{Regexp.escape(opts[:configs])}\//,"")
     directory_to_save = File.dirname(name_to_save)
     redis.rpush("#{opts[:app]}:#{opts[:sub_app]}:setup:configs", "{\"name\":\"#{name_to_save}\",\"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{name_to_save}")
     Net::SSH.start(config['storage_info']['server'], config['storage_info']['user']) do |ssh|
