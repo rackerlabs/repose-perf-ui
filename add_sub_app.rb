@@ -35,6 +35,7 @@ Required parameters:
   configs - config location
   test - test location per type (default)
   request - request/response location (yaml file)
+  responders - responder location (default)
 Usage:
        set_up_app --app <app id> --plugins <plugin list> --name <app name> --type <singular|comparison> --description <app description> --configs <config location> --test <test location> --request <request location>
 where [options] are:
@@ -50,6 +51,8 @@ EOS
   opt :duration_test, "duration test location", :type => :string
   opt :adhoc_test, "adhoc test location", :type => :string
   opt :request, "Request location", :type => :string
+  opt :responders, "Responder location", :type => :string
+  opt :compare_responders, "Responder location", :type => :string
 end
 
 Trollop::die :app, "must be specified" unless opts[:app]
@@ -117,7 +120,7 @@ Dir.glob("#{opts[:configs]}/**/*").each do |f|
     logger.info "log this config: #{f}"
     name_to_save = f.gsub(/^#{Regexp.escape(opts[:configs])}\//,"")
     directory_to_save = File.dirname(name_to_save)
-    redis.rpush("#{opts[:app]}:#{opts[:sub_app]}:setup:configs", "{\"name\":\"#{name_to_save}\",\"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{name_to_save}")
+    redis.rpush("#{opts[:app]}:#{opts[:sub_app]}:setup:configs", "{\"name\":\"#{name_to_save}\",\"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{name_to_save}\"}")
     if config['storage_info']['destination'] == 'localhost'
       FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}"
       FileUtils.cp(f, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}/")
@@ -164,6 +167,7 @@ logger.info "now create test script for: #{opts[:test]}"
       )
   end
 end
+
 
   
 logger.info "finally log the request and response"
