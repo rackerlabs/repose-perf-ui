@@ -110,7 +110,7 @@ File.open(File.expand_path("config/apps/test_#{opts[:app]}.yaml", Dir.pwd), 'w')
 
 logger.info "now get into redis"
 redis = Redis.new({:host => config['redis']['host'], :port => config['redis']['port'], :db => config['redis']['db']})
-logger.info "we're connected here: #{redis.inspect}"
+logger.info "we're connected here: #{redis}"
 
 Dir.glob("#{opts[:configs]}/**/*").each do |f|
   unless File.directory?(f)
@@ -118,7 +118,7 @@ Dir.glob("#{opts[:configs]}/**/*").each do |f|
     name_to_save = f.gsub(/^#{Regexp.escape(opts[:configs])}\//,"")
     directory_to_save = File.dirname(name_to_save)
     redis.rpush("#{opts[:app]}:#{opts[:sub_app]}:setup:configs", "{\"name\":\"#{name_to_save}\",\"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{name_to_save}")
-    if config['storage_info']['server'] == 'localhost'
+    if config['storage_info']['destination'] == 'localhost'
       FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}"
       FileUtils.cp(f, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}/")
     else
@@ -149,9 +149,9 @@ logger.info "now create test script for: #{opts[:test]}"
   
   redis.rpush("#{opts[:app]}:#{opts[:sub_app]}:tests:setup:script", "{\"type\":\"jmeter\", \"test\":\"#{test_type}\", \"name\":\"#{File.basename(test_location)}\",\"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}/#{File.basename(test_location)}\"}")
 
-  if config['storage_info']['server'] == 'localhost'
+  if config['storage_info']['destination'] == 'localhost'
     FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}"
-    FileUtils.cp(f, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}/")
+    FileUtils.cp(test_location, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}/")
   else
     Net::SSH.start(config['storage_info']['destination'], config['storage_info']['user']) do |ssh|
         ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}")
