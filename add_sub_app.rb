@@ -122,11 +122,11 @@ Dir.glob("#{opts[:configs]}/**/*").each do |f|
       FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}"
       FileUtils.cp(f, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}/")
     else
-      Net::SSH.start(config['storage_info']['server'], config['storage_info']['user']) do |ssh|
+      Net::SSH.start(config['storage_info']['destination'], config['storage_info']['user']) do |ssh|
           ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}")
       end
       Net::SCP.upload!(
-          config['storage_info']['server'], 
+          config['storage_info']['destination'], 
           config['storage_info']['user'], 
           f, 
           "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}"
@@ -153,11 +153,11 @@ logger.info "now create test script for: #{opts[:test]}"
     FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}"
     FileUtils.cp(f, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}/")
   else
-    Net::SSH.start(config['storage_info']['server'], config['storage_info']['user']) do |ssh|
+    Net::SSH.start(config['storage_info']['destination'], config['storage_info']['user']) do |ssh|
         ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}")
     end
     Net::SCP.upload!(
-        config['storage_info']['server'], 
+        config['storage_info']['destination'], 
         config['storage_info']['user'], 
         test_location, 
         "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}/"
