@@ -93,6 +93,7 @@ Attributes:
   release - specify release.  We'll be testing against 2.11.0
   flavor_type - can either be original or performance
   runner - which runner to use to run the test (jmeter, gatling, etc)
+  with_repose - whether repose or origin target server
 Usage:
        cloud --name <app name> --test-type <load|duration|benchmark> --action <start|stop>
 where [options] are:
@@ -227,6 +228,11 @@ elsif opts[:action] == 'start'
   config_list = redis.lrange("#{opts[:app]}:#{opts[:sub_app]}:setup:configs", 0, -1)
 
   guid = SecureRandom.uuid
+  
+  if opts[:with_repose] and opts[:release] and opts[:release] == 'master'
+    system "cd ~/repose_repo/repose ; git pull origin master; mvn clean install -DskipTests; "
+  end
+
   server_ip_info[:nodes].each do |server|
     config_list.each do |config_data|
       #first, download from remote
@@ -289,11 +295,38 @@ elsif opts[:action] == 'start'
   
     logger.info "download repose"
     if opts[:with_repose]
-      unless opts[:release]
+      if opts[:release]
+        if opts[:release] == 'master'
+          logger.info "download master version"
+          Net::SCP.upload!(
+            server, 
+            'root', 
+            "/root/repose_repo/repose/repose-aggregator/components/filter-bundle/target/*.ear", 
+            "/home/repose/usr/share/repose/filters/filter-bundle.ear", 
+            {:recursive => true, :verbose => true }
+          )
+          
+          Net::SCP.upload!(
+            server, 
+            'root', 
+            "/root/repose_repo/repose/repose-aggregator/extensions/extensions-filter-bundle/target/*.ear", 
+            "/home/repose/usr/share/repose/filters/extensions-filter-bundle.ear", 
+            {:recursive => true, :verbose => true }
+          )
+          
+          Net::SCP.upload!(
+            server, 
+            'root', 
+            "/root/repose_repo/repose/repose-aggregator/core/valve/target/repose-valve.jar", 
+            "/home/repose/usr/share/repose/repose-valve.jar", 
+            {:recursive => true, :verbose => true }
+          )
+        else
+          system "ssh root@#{server} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --version #{opts[:release]}'"
+        end
+      else 
         logger.info "download snapshot version"
         system "ssh root@#{server} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --snapshot'"      
-      else
-        system "ssh root@#{server} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --version #{opts[:release]}'" 
       end
       logger.info "stop jmxtrans"
       system "ssh root@#{server} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
