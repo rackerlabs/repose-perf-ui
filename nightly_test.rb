@@ -119,6 +119,12 @@ Trollop::die :name, "must be specified" unless opts[:name]
 logger.debug opts
 
 if opts[:action] == 'stop'
+  #TODO: stop jmxtrans
+  #TODO: stop sysstats
+  #TODO: killall node
+  #TODO: rm -rf /usr/share/repose
+  #TODO: rm -rf /config/*
+  #TODO: call stop test 
   begin
     logger.debug "copy directories over"
     #copy directory over.  remove current
@@ -229,18 +235,19 @@ elsif opts[:action] == 'start'
 
   guid = SecureRandom.uuid
   
-  if opts[:with_repose] and opts[:release] and opts[:release] == 'master'
-    system "cd ~/repose_repo/repose ; git pull origin master; mvn clean install -DskipTests; "
-  end
-  
   logger.info "get meta information"
+
   meta_information = redis.hgetall("#{opts[:app]}:#{opts[:sub_app]}:setup:meta")
-  main_responders = main_information.find_all {|m| m =~ /responder\|main\|/}
-  secondary_responders = main_information.find_all {|m| m =~ /responder\|secondary\|/}
+  main_responders = meta_information.select {|m,_| m =~ /responder\|main\|/}
+  secondary_responders = meta_information.select {|m,_| m =~ /responder\|secondary\|/}
   logger.info "main responders: #{main_responders}"
   logger.info "secondary responders: #{secondary_responders}"
 
 
+  if opts[:with_repose] and opts[:release] and opts[:release] == 'master'
+    system "cd ~/repose_repo/repose ; git pull origin master; mvn clean install -DskipTests; "
+  end
+  
   server_ip_info[:nodes].each do |server|
     config_list.each do |config_data|
       #first, download from remote
@@ -351,17 +358,112 @@ elsif opts[:action] == 'start'
       system "ssh root@#{server} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
       logger.debug "start jmxtrans"
       system "ssh root@#{server} -f 'cd /usr/share/jmxtrans ; ./jmxtrans.sh start example.json '" 
-      logger.info "start repose"
-      system "ssh root@#{server} -f 'nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ -s 6666 start & '" 
       
       logger.info "upload responders"
+      main_responders.each do |key, responder|
+        responder_json = JSON.parse(responder)
+        name = responder_json['name']
+        location = responder_json['location']
+        if config['storage_info']['destination'] == 'localhost'
+          Net::SSH.start(server, 'root') do |ssh|
+            ssh.exec!("mkdir -p /home/mocks")
+          end
+          logger.info "#{config['storage_info']['path']}/#{location}"
+          Net::SCP.upload!(
+            server, 
+            'root', 
+            "#{config['storage_info']['path']}#{location}", 
+            "/home/mocks/", 
+            {:recursive => true, :verbose => true }
+          )
+        else
+          tmp_dir = "/tmp/#{guid}/"
+          FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
+          Net::SCP.download!(
+            config['storage_info']['destination'], 
+            config['storage_info']['user'], 
+            location, 
+            tmp_dir, 
+            {:recursive => true,
+              :verbose => Logger::DEBUG}
+          ) 
       
-      #TODO: upload responders
-      #TODO: start responders
-      #TODO: test if localhost:7070 returns correct non-500
+          #second, upload to remote
+          Net::SCP.upload!(
+            server, 
+            'root', 
+            "/tmp/#{guid}/#{name}", 
+            "/home/mocks/", 
+            {:recursive => true, :verbose => true }
+          )
+      
+          FileUtils.rm_rf("/tmp/#{guid}")
+        end
+        system "ssh root@#{server} -f 'node /home/mocks/#{name} & '"
+      end 
+      secondary_responders.each do |key, responder|
+        responder_json = JSON.parse(responder)
+        name = responder_json['name']
+        location = responder_json['location']
+        if config['storage_info']['destination'] == 'localhost'
+          Net::SSH.start(server, 'root') do |ssh|
+            ssh.exec!("mkdir -p /home/mocks")
+          end
+          Net::SCP.upload!(
+            server, 
+            'root', 
+            "#{config['storage_info']['path']}/#{location}", 
+            "/home/mocks/", 
+            {:recursive => true, :verbose => true }
+          )
+        else
+          tmp_dir = "/tmp/#{guid}/"
+          FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
+          Net::SCP.download!(
+            config['storage_info']['destination'], 
+            config['storage_info']['user'], 
+            location, 
+            tmp_dir, 
+            {:recursive => true,
+              :verbose => Logger::DEBUG}
+          ) 
+      
+          #second, upload to remote
+          Net::SCP.upload!(
+            server, 
+            'root', 
+            "/tmp/#{guid}/#{name}", 
+            "/home/mocks/", 
+            {:recursive => true, :verbose => true }
+          )
+      
+          FileUtils.rm_rf("/tmp/#{guid}")
+        end
+        
+        system "ssh root@#{server} -f 'node /home/mocks/#{name} & '"
+      end if secondary_responders 
+
+      logger.info "start repose"
+      system "ssh root@#{server} -f 'nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ -s 6666 start & '" 
+       
+      
+      is_valid = false
+      until is_valid
+        begin
+          response_code = Net::HTTP.get_response(URI("http://#{server}:7070")).code.
+          logger.info "response: #{response_code}"
+          is_valid = response_code.to_i < 500
+        rescue Exception => msg
+          logger.info "connection exception: #{msg}"
+          logger.info "response: #{response_code}"
+          is_valid = response_code.to_i < 500
+        end
+        sleep 1
+      end
     end
   end
 
+  #TODO: remove all jmeter and log data
   #TODO: upload jmeter stuff (based on runner) such as jmx
   #TODO: make a call on test agent
   #TODO: make a post call to post the data to start the test
@@ -427,20 +529,3 @@ end
   Dir.mkdir("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/meta")
   Dir.mkdir("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/configs")
   FileUtils.cp_r("#{target_dir}/." , "#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/meta")
-  FileUtils.cp_r("#{config_target_dir}/." , "#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/configs")
-
-  #start test
-  test_agent = env.service.servers.find {|server| server.name =~ /test_agent/}.ipv4_address
-  logger.debug "test agent: #{test_agent}"
-
-  system "scp #{target_dir}/test_#{opts[:app]}.jmx root@#{test_agent}:/home/apache/test.jmx"  
-  system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test.jmx -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{lb_ip} -Jthreads=#{runner_json['threads']} -Jramp=#{runner_json['rampup']} -Jport=80 -Jduration=#{length * 60 * 1000} >> /home/apache/summary.log & '"
-  
-  until Time.now.to_i * 1000 >= end_time
-    logger.debug "time now: #{Time.now.to_i}000.  waiting until #{end_time}"
-    sleep(30)
-  end
-  system "scp root@#{test_agent}:/home/apache/summary.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/summary.log"
-  system "ssh root@#{test_agent} -f '/home/apache/apache-jmeter-2.10/bin/shutdown.sh ; sleep 10 '"
-  system "ssh root@#{test_agent} 'rm /home/apache/summary.log '"  
-=end
