@@ -301,7 +301,14 @@ elsif opts[:action] == 'start'
           
           filter_bundle_ear = Dir.glob("/root/repose_repo/repose/repose-aggregator/components/filter-bundle/target/*.ear").first
           extension_bundle_ear = Dir.glob("/root/repose_repo/repose/repose-aggregator/extensions/extensions-filter-bundle/target/*.ear").first
-          
+          logger.info "filter bundle: #{filter_bundle_ear}"
+ 	  logger.info "extension filter bundle: #{extension_bundle_ear}"
+	  logger.info "server: #{server}"
+
+          Net::SSH.start(server, 'root') do |ssh|
+            ssh.exec!("mkdir -p /home/repose/usr/share/repose/filters")
+          end
+
           Net::SCP.upload!(
             server, 
             'root', 
