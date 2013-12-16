@@ -174,7 +174,7 @@ main_responders = opts[:responders]
 secondary_responders = opts[:compare_responders]
 
 main_responders.split(',').each do |main_responder|
-  redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "responder|#{File.basename(main_responder)}", "{\"name\":\"#{File.basename(main_responder)}\", \"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/#{File.basename(main_responder)}\"}")
+  redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "responder|main|#{File.basename(main_responder)}", "{\"name\":\"#{File.basename(main_responder)}\", \"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/#{File.basename(main_responder)}\"}")
 
   if config['storage_info']['destination'] == 'localhost'
     FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/#{File.basename(main_responder)}"
@@ -194,7 +194,7 @@ end
 
 if secondary_responders
   secondary_responders.split(',').each do |secondary_responder|
-    redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "responder|#{File.basename(secondary_responder)}", "{\"name\":\"#{File.basename(secondary_responder)}\", \"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(secondary_responder)}\"}")
+    redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "responder|secondary|#{File.basename(secondary_responder)}", "{\"name\":\"#{File.basename(secondary_responder)}\", \"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(secondary_responder)}\"}")
   
     if config['storage_info']['destination'] == 'localhost'
       FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(secondary_responder)}"

@@ -232,6 +232,14 @@ elsif opts[:action] == 'start'
   if opts[:with_repose] and opts[:release] and opts[:release] == 'master'
     system "cd ~/repose_repo/repose ; git pull origin master; mvn clean install -DskipTests; "
   end
+  
+  logger.info "get meta information"
+  meta_information = redis.hgetall("#{opts[:app]}:#{opts[:sub_app]}:setup:meta")
+  main_responders = main_information.find_all {|m| m =~ /responder\|main\|/}
+  secondary_responders = main_information.find_all {|m| m =~ /responder\|secondary\|/}
+  logger.info "main responders: #{main_responders}"
+  logger.info "secondary responders: #{secondary_responders}"
+
 
   server_ip_info[:nodes].each do |server|
     config_list.each do |config_data|
@@ -302,8 +310,8 @@ elsif opts[:action] == 'start'
           filter_bundle_ear = Dir.glob("/root/repose_repo/repose/repose-aggregator/components/filter-bundle/target/*.ear").first
           extension_bundle_ear = Dir.glob("/root/repose_repo/repose/repose-aggregator/extensions/extensions-filter-bundle/target/*.ear").first
           logger.info "filter bundle: #{filter_bundle_ear}"
- 	  logger.info "extension filter bundle: #{extension_bundle_ear}"
-	  logger.info "server: #{server}"
+ 	        logger.info "extension filter bundle: #{extension_bundle_ear}"
+	        logger.info "server: #{server}"
 
           Net::SSH.start(server, 'root') do |ssh|
             ssh.exec!("mkdir -p /home/repose/usr/share/repose/filters")
@@ -345,6 +353,8 @@ elsif opts[:action] == 'start'
       system "ssh root@#{server} -f 'cd /usr/share/jmxtrans ; ./jmxtrans.sh start example.json '" 
       logger.info "start repose"
       system "ssh root@#{server} -f 'nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ -s 6666 start & '" 
+      
+      logger.info "upload responders"
       
       #TODO: upload responders
       #TODO: start responders
