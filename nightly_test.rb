@@ -298,10 +298,14 @@ elsif opts[:action] == 'start'
       if opts[:release]
         if opts[:release] == 'master'
           logger.info "download master version"
+          
+          filter_bundle_ear = Dir.glob("/root/repose_repo/repose/repose-aggregator/components/filter-bundle/target/*.ear").first
+          extension_bundle_ear = Dir.glob("/root/repose_repo/repose/repose-aggregator/extensions/extensions-filter-bundle/target/*.ear").first
+          
           Net::SCP.upload!(
             server, 
             'root', 
-            "/root/repose_repo/repose/repose-aggregator/components/filter-bundle/target/*.ear", 
+            filter_bundle_ear, 
             "/home/repose/usr/share/repose/filters/filter-bundle.ear", 
             {:recursive => true, :verbose => true }
           )
@@ -309,7 +313,7 @@ elsif opts[:action] == 'start'
           Net::SCP.upload!(
             server, 
             'root', 
-            "/root/repose_repo/repose/repose-aggregator/extensions/extensions-filter-bundle/target/*.ear", 
+            extension_bundle_ear, 
             "/home/repose/usr/share/repose/filters/extensions-filter-bundle.ear", 
             {:recursive => true, :verbose => true }
           )
