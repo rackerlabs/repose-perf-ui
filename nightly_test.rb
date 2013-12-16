@@ -338,8 +338,16 @@ elsif opts[:action] == 'start'
       system "ssh root@#{server} -f 'cd /usr/share/jmxtrans ; ./jmxtrans.sh start example.json '" 
       logger.info "start repose"
       system "ssh root@#{server} -f 'nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ -s 6666 start & '" 
+      
+      #TODO: upload responders
+      #TODO: start responders
+      #TODO: test if localhost:7070 returns correct non-500
     end
   end
+
+  #TODO: upload jmeter stuff (based on runner) such as jmx
+  #TODO: make a call on test agent
+  #TODO: make a post call to post the data to start the test
 end
 =begin
 

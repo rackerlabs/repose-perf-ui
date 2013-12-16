@@ -170,42 +170,46 @@ logger.info "now create test script for: #{opts[:test]}"
 end
 
 logger.info "time to get the responders in here!"
-main_responder = opts[:responders]
-secondary_responder = opts[:compare_responders]
+main_responders = opts[:responders]
+secondary_responders = opts[:compare_responders]
 
-redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "responder", "{\"name\":\"#{File.basename(main_responder)}\", \"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/#{File.basename(main_responder)}\"}")
-
-if config['storage_info']['destination'] == 'localhost'
-  FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/#{File.basename(main_responder)}"
-  FileUtils.cp(main_responder, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/#{File.basename(main_responder)}/")
-else
-  Net::SSH.start(config['storage_info']['destination'], config['storage_info']['user']) do |ssh|
-      ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/")
-  end
-  Net::SCP.upload!(
-      config['storage_info']['destination'], 
-      config['storage_info']['user'], 
-      main_responder, 
-      "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/"
-    )
-end
-
-if secondary_responder
-  redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "responder", "{\"name\":\"#{File.basename(main_responder)}\", \"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(main_responder)}\"}")
+main_responders.split(',').each do |main_responder|
+  redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "responder|#{File.basename(main_responder)}", "{\"name\":\"#{File.basename(main_responder)}\", \"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/#{File.basename(main_responder)}\"}")
 
   if config['storage_info']['destination'] == 'localhost'
-    FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(main_responder)}"
-    FileUtils.cp(main_responder, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(main_responder)}/")
+    FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/#{File.basename(main_responder)}"
+    FileUtils.cp(main_responder, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/#{File.basename(main_responder)}/")
   else
     Net::SSH.start(config['storage_info']['destination'], config['storage_info']['user']) do |ssh|
-        ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/")
+        ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/")
     end
     Net::SCP.upload!(
         config['storage_info']['destination'], 
-        config['storage_info']['user'],  
+        config['storage_info']['user'], 
         main_responder, 
-        "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/"
+        "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/"
       )
+  end
+end
+
+if secondary_responders
+  secondary_responders.split(',').each do |secondary_responder|
+    redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "responder|#{File.basename(secondary_responder)}", "{\"name\":\"#{File.basename(secondary_responder)}\", \"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(secondary_responder)}\"}")
+  
+    if config['storage_info']['destination'] == 'localhost'
+      FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(secondary_responder)}"
+      FileUtils.cp(secondary_responder, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(secondary_responder)}/")
+    else
+      Net::SSH.start(config['storage_info']['destination'], config['storage_info']['user']) do |ssh|
+          ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/")
+      end
+      Net::SCP.upload!(
+          config['storage_info']['destination'], 
+          config['storage_info']['user'],  
+          secondary_responder, 
+          "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/"
+        )
+    end
   end
 end
 
