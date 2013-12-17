@@ -119,31 +119,15 @@ Trollop::die :name, "must be specified" unless opts[:name]
 logger.debug opts
 
 if opts[:action] == 'stop'
-  #TODO: stop jmxtrans
-  #TODO: stop sysstats
-  #TODO: killall node
   #TODO: rm -rf /usr/share/repose
   #TODO: rm -rf /config/*
   #TODO: call stop test 
-  begin
-    logger.debug "copy directories over"
-    #copy directory over.  remove current
-    raise ArgumentError, "current directory does not exist" unless Dir.exists?("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current") 
-    raise ArgumentError, "temp directory already exists"  if Dir.exists?("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}") 
-    FileUtils.cp_r(
-      "#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/." , 
-      "#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}")
-    logger.debug "remove directories"
-    FileUtils.rm_r("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current")
-  rescue ArgumentError => e
-    logger.error e.message
-  end
-
+  
   logger.debug "config: #{config} and logger: #{logger}"
   env = Environment.new(config, logger)
-  env.connect(:iad)
-  env.load_balance_connect(:iad)
-  logger.debug "connected to iad.  Now need to move the data over"
+  env.connect(environment_hash[opts[:sub_app].to_sym])
+  env.load_balance_connect(environment_hash[opts[:sub_app].to_sym])
+
   if opts[:flavor_type] == 'performance' 
     if opts[:with_repose]
       #performance with repose!
@@ -165,16 +149,18 @@ if opts[:action] == 'stop'
       server_ip_info = get_server_ips("repose_lb_original_withoutrepose", logger, env)
     end
   end
+
   server_ip_info[:nodes].each do |server|
-    logger.debug server
-    logger.debug "scp root@#{server}:/home/repose/logs/sysstats.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/sysstats.log_#{server}"
-    system "scp root@#{server}:/home/repose/logs/sysstats.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/sysstats.log_#{server}"
+    logger.info server
+    #logger.debug "scp root@#{server}:/home/repose/logs/sysstats.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/sysstats.log_#{server}"
+    #system "scp root@#{server}:/home/repose/logs/sysstats.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/sysstats.log_#{server}"
     logger.debug "with repose: #{opts[:with_repose]}"
     if opts[:with_repose]
+      logger.info "stop jmxtrans"
       system "ssh root@#{server} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
       system "ssh root@#{server} 'curl http://localhost:6666 -v'"      
-      logger.debug "copying over from scp root@#{server}:/home/repose/logs/jmxdata.out to #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/jmxdata.out"
-      system "scp root@#{server}:/home/repose/logs/jmxdata.out #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/jmxdata.out_#{server}"
+      #logger.debug "copying over from scp root@#{server}:/home/repose/logs/jmxdata.out to #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/jmxdata.out"
+      #system "scp root@#{server}:/home/repose/logs/jmxdata.out #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/jmxdata.out_#{server}"
       
       system "ssh root@#{server} 'rm -rf /home/repose/configs/* '" 
       system "ssh root@#{server} 'rm -rf /home/repose/usr/share/repose/repose-valve.jar '" 
@@ -182,6 +168,7 @@ if opts[:action] == 'stop'
       system "ssh root@#{server} 'rm -rf /home/repose/logs/* '" 
     end
     system "ssh root@#{server} -f 'killall node '"
+    system "ssh root@#{server} -f 'killall java '"
     system "ssh root@#{server} -f 'killall sar '"
     system "ssh root@#{server} -f 'service sysstat stop '"
   end
@@ -249,10 +236,12 @@ elsif opts[:action] == 'start'
   end
   
   server_ip_info[:nodes].each do |server|
+
     config_list.each do |config_data|
       #first, download from remote
 
       if config['storage_info']['destination'] == 'localhost'
+        logger.info "moving over: #{JSON.parse(config_data)['name']}"
         if JSON.parse(config_data)['name'] == 'system-model.cfg.xml'
           system_model_contents = SystemModelTemplate.new(server_ip_info[:nodes],File.read("#{config['storage_info']['path']}/#{JSON.parse(config_data)['location']}")).render
 
@@ -268,6 +257,22 @@ elsif opts[:action] == 'start'
             {:recursive => true, :verbose => true }
           )
           
+          FileUtils.rm_rf("/tmp/#{guid}")
+        elsif JSON.parse(config_data)['name'] == 'dist-datastore.cfg.xml'
+          system_model_contents = SystemModelTemplate.new(server_ip_info[:nodes],File.read("#{config['storage_info']['path']}/#{JSON.parse(config_data)['location']}")).render
+
+          tmp_dir = "/tmp/#{guid}/"
+          FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
+          File.open("/tmp/#{guid}/dist-datastore.cfg.xml", 'w') { |f| f.write(system_model_contents) }
+
+          Net::SCP.upload!(
+            server,
+            'root',
+            "/tmp/#{guid}/dist-datastore.cfg.xml",
+            "/home/repose/configs/",
+            {:recursive => true, :verbose => true }
+          )
+
           FileUtils.rm_rf("/tmp/#{guid}")
         else
           name_to_save = JSON.parse(config_data)['location'].gsub(/^\/#{Regexp.escape(config['storage_info']['prefix'])}\/#{Regexp.escape(opts[:app])}\/#{Regexp.escape(opts[:sub_app])}\/setup\/configs\//,"")
@@ -310,6 +315,54 @@ elsif opts[:action] == 'start'
   
     logger.info "download repose"
     if opts[:with_repose]
+
+      logger.debug "i only care about jmx plugin right now"
+      plugin_list = redis.hget("#{opts[:app]}:#{opts[:sub_app]}:setup:meta:plugins", "ReposeJMXPlugin")
+      plugin_list_json = JSON.parse(plugin_list) if plugin_list
+     
+      plugin_list_json.each do |plugin|
+        if config['storage_info']['destination'] == 'localhost'
+          logger.info "moving over: #{plugin['name']}"
+          Net::SSH.start(server, 'root') do |ssh|
+            ssh.exec!("mkdir -p /usr/share/jmxtrans/")
+          end
+          Net::SCP.upload!(
+            server, 
+            'root', 
+            "#{config['storage_info']['path']}/#{plugin['location']}", 
+            "/usr/share/jmxtrans/", 
+            {:recursive => true, :verbose => true }
+          )
+        else
+          tmp_dir = "/tmp/#{guid}/"
+          FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
+          Net::SCP.download!(
+            config['storage_info']['destination'], 
+            config['storage_info']['user'], 
+            plugin['location'], 
+            tmp_dir, 
+            {:recursive => true,
+              :verbose => Logger::DEBUG}
+          ) 
+      
+          #second, upload to remote
+          Net::SCP.upload!(
+            server, 
+            'root', 
+            "/tmp/#{guid}/", 
+            "/usr/share/jmxtrans/", 
+            {:recursive => true, :verbose => true }
+          )
+        
+          FileUtils.rm_rf("/tmp/#{guid}")
+        end
+ 
+        logger.info "stop jmxtrans"
+        system "ssh root@#{server} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
+        logger.debug "start jmxtrans"
+        system "ssh root@#{server} -f 'cd /usr/share/jmxtrans ; ./jmxtrans.sh start #{plugin['name']} '" 
+      end
+
       if opts[:release]
         if opts[:release] == 'master'
           logger.info "download master version"
@@ -354,10 +407,6 @@ elsif opts[:action] == 'start'
         logger.info "download snapshot version"
         system "ssh root@#{server} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --snapshot'"      
       end
-      logger.info "stop jmxtrans"
-      system "ssh root@#{server} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
-      logger.debug "start jmxtrans"
-      system "ssh root@#{server} -f 'cd /usr/share/jmxtrans ; ./jmxtrans.sh start example.json '" 
       
       logger.info "upload responders"
       main_responders.each do |key, responder|
@@ -441,7 +490,10 @@ elsif opts[:action] == 'start'
         end
         
         system "ssh root@#{server} -f 'node /home/mocks/#{name} & '"
-      end if secondary_responders 
+      end if secondary_responders
+
+      logger.info "start logging sysstats"
+      system "ssh root@#{server} -f 'sar -o /home/repose/logs/sysstats.log 30 >/dev/null 2>&1 & '"
 
       logger.info "start repose"
       system "ssh root@#{server} -f 'nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ -s 6666 start & '" 
@@ -450,19 +502,26 @@ elsif opts[:action] == 'start'
       is_valid = false
       until is_valid
         begin
-          response_code = Net::HTTP.get_response(URI("http://#{server}:7070")).code.
+          response = Net::HTTP.get_response(URI("http://#{server}:7070"))
+          logger.info "response: #{response}"
+          response_code = response.code
           logger.info "response: #{response_code}"
           is_valid = response_code.to_i < 500
         rescue Exception => msg
+          logger.info "response: #{response}"
+          if response
+            response_code = response.code
+            logger.info "response: #{response_code}"
+            is_valid = response_code.to_i < 500
+          end
           logger.info "connection exception: #{msg}"
-          logger.info "response: #{response_code}"
-          is_valid = response_code.to_i < 500
         end
         sleep 1
       end
     end
   end
 
+  
   #TODO: remove all jmeter and log data
   #TODO: upload jmeter stuff (based on runner) such as jmx
   #TODO: make a call on test agent
@@ -475,28 +534,6 @@ end
   runner_json = JSON.parse(File.read("#{target_dir}/#{opts[:test_type]}_test_#{test_json['runner']}.json"))
   logger.debug "runner json: #{runner_json}"
 
-  #find out how many <node> values there are.  Create that many target servers
-  node_count = test_json["node_count"]
-  logger.debug "number of nodes: #{node_count}"
-
-
-  server_ip_info[:nodes].each do |server|
-    logger.debug "set up strick host checking"
-    #system "ssh -o 'StrictHostKeyChecking no' #{server} uptime"
-
-    system "scp #{target_dir}/auth_responder.js root@#{server}:/home/mocks/auth_responder/server.js"
-    system "scp #{target_dir}/mock_responder.js root@#{server}:/home/mocks/mock_responder/server.js"
-    system "scp #{source_dir}/jmxparams.json root@#{server}:/usr/share/jmxtrans/example.json"
-
-    logger.info "everything is uploaded"
-    system "ssh root@#{server} -f 'nohup node /home/mocks/auth_responder/server.js & '" 
-    logger.info "started auth on #{server}"
-    system "ssh root@#{server} -f 'nohup node /home/mocks/mock_responder/server.js & '" 
-    logger.info "started mock on #{server}"
-
-    logger.debug "start logging"
-    system "ssh root@#{server} -f 'sar -o /home/repose/logs/sysstats.log 30 >/dev/null 2>&1 & '"
-  end
   length = opts[:length] ? opts[:length].to_i : 60
 
   start_time = 1000 * (Time.now.to_i + (2 * 60))
@@ -529,3 +566,4 @@ end
   Dir.mkdir("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/meta")
   Dir.mkdir("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/configs")
   FileUtils.cp_r("#{target_dir}/." , "#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/meta")
+=end
