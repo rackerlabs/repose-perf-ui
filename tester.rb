@@ -1,5 +1,48 @@
+require 'logging'
 require 'yaml'
+require 'redis'
+require 'net/scp'
 
+config = YAML.load_file(File.expand_path("config/config.yaml", Dir.pwd))
+
+Logging.color_scheme( 'bright',
+  :levels => {
+    :info  => :green,
+    :warn  => :yellow,
+    :error => :red,
+    :fatal => [:white, :on_red]
+  },
+  :date => :blue,
+  :logger => :cyan,
+  :message => :magenta
+)
+logger = Logging.logger(STDOUT)
+logger.level = :debug
+
+logger.debug "configuration file: #{config}"
+redis = Redis.new({:host => config['redis']['host'], :port => config['redis']['port'], :db => config['redis']['db']})
+
+dir = "/Users/dimi5963/Documents/repose"
+Dir.glob("#{dir}/**/*").each do |f|
+  unless File.directory?(f)
+    name_to_save = f.gsub(/^#{Regexp.escape(dir)}\//,"")
+    directory_to_save = File.dirname(name_to_save)
+    logger.info "#{f} and basename #{File.basename(f)} and name to save #{name_to_save} and directory to save to #{directory_to_save}"  
+    redis.rpush("test_app:main:setup:configs", "{\"name\":\"#{name_to_save}\",\"location\":\"/#{config['storage_info']['prefix']}/test_app/main/setup/configs/#{name_to_save}")
+    Net::SSH.start(config['storage_info']['server'], config['storage_info']['user']) do |ssh|
+        ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/test_app/main/setup/configs/#{directory_to_save}")
+    end
+    Net::SCP.upload!(
+        config['storage_info']['server'], 
+        config['storage_info']['user'], 
+        f, 
+        "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/test_app/main/setup/configs/#{directory_to_save}"
+      )
+  end
+  
+end
+
+=begin
 request_response = {
   "request" => [
     {
@@ -137,6 +180,7 @@ request_response = {
 
 File.open(File.expand_path("request_response.yaml", Dir.pwd), 'w') {|f| f.write request_response.to_yaml }
 puts request_response.to_yaml
+=end
 
 =begin
   

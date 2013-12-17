@@ -34,6 +34,12 @@ def get_server_ips(lb_name, logger, env)
   {:lb => lb_ip, :nodes => node_ips}
 end
 
+def get_test_ip(logger, env)
+  test_agent = env.service.servers.find {|server| server.name =~ /test_agent/}.ipv4_address
+  logger.info "test agent: #{test_agent}"
+  test_agent
+end
+
 environment_hash = {
  :atom_hopper => :iad
 }
@@ -234,7 +240,8 @@ elsif opts[:action] == 'start'
   if opts[:with_repose] and opts[:release] and opts[:release] == 'master'
     system "cd ~/repose_repo/repose ; git pull origin master; mvn clean install -DskipTests; "
   end
-  
+
+=begin  
   server_ip_info[:nodes].each do |server|
 
     config_list.each do |config_data|
@@ -520,8 +527,78 @@ elsif opts[:action] == 'start'
       end
     end
   end
+=end
 
+  test_agent = get_test_ip(logger, env)
+  Net::SSH.start(test_agent, 'root') do |ssh|
+    ssh.exec!("mkdir -p /home/apache/test")
+    ssh.exec!("rm -rf /home/apache/test/*")
+  end
   
+  logger.info "get jmeter stuff from redis"
+  test_json = redis.hget("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "test_#{opts[:test_type]}_#{opts[:runner]}")
+  
+  raise ArgumentError, "invalid test" unless test_json
+  
+  test_data = JSON.parse(test_json)
+  
+  test_script_list = redis.lrange("#{opts[:app]}:#{opts[:sub_app]}:tests:setup:script", 0, -1)
+  raise ArgumentError, "no tests found" unless test_script_list
+  
+  test_script_json_list = JSON.parse(test_script_list)
+  test_script = test_script_json_list.find {|s| s['type'] == opts[:runner] and s['test'] == opts[:test_type]}['location']
+  if config['storage_info']['destination'] == 'localhost'
+    Net::SCP.upload!(
+      server, 
+      'root', 
+      "#{config['storage_info']['path']}/#{test_script}", 
+      "/home/apache/test/"
+    )
+  else
+    tmp_dir = "/tmp/#{guid}/"
+    FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
+    Net::SCP.download!(
+      config['storage_info']['destination'], 
+      config['storage_info']['user'], 
+      test_script, 
+      tmp_dir
+    ) 
+
+    #second, upload to remote
+    Net::SCP.upload!(
+      server, 
+      'root', 
+      "/tmp/#{guid}/#{name}", 
+      "/home/apache/test/"
+    )
+
+    FileUtils.rm_rf("/tmp/#{guid}")
+  end
+
+  host = server_ip_info[:lb]
+  startdelay = test_data["startdelay"]
+  rampup = test_data["rampup"]
+  duration = test_data["duration"]
+  case opts[:test_type]
+    when "load"
+      rampdown = test_data["rampdown"] 
+      throughput = test_data["throughput"]
+      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/tests/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 >> /home/apache/tests/summary.log & '"
+    when "stress"  
+      rampup_threads = test_data["rampup_threads"]  
+      maxthreads = test_data["maxthreads"]
+      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/tests/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{duration} -Jrampup_threads=#{rampup_threads} -Jmaxthreads=#{maxthreads} -Jport=80 >> /home/apache/tests/summary.log & '"
+    else
+      raise ArgumentError, "invalid test type"
+    end
+  
+  
+  until Time.now.to_i * 1000 >= end_time
+    logger.debug "time now: #{Time.now.to_i}000.  waiting until #{end_time}"
+    sleep(30)
+  end
+   
+
   #TODO: remove all jmeter and log data
   #TODO: upload jmeter stuff (based on runner) such as jmx
   #TODO: make a call on test agent
