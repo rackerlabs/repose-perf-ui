@@ -39,6 +39,7 @@ class Environment
 
     @logger.info "connected to service #{@service.inspect}"
 
+    @logger.info @service.servers
     @service.servers.each do |server|
       @servers << server
     end

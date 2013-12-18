@@ -65,6 +65,7 @@ module Models
  1. get file remotely (specified by configs whether it's an scp or wget)
  2. load file in specific directory via scp
 =end
+      FileUtils.mkdir_p "/tmp/#{guid}/data/"
       Net::SCP.download!(
         source_result_info['server'], 
         source_result_info['user'], 

@@ -12,6 +12,7 @@ require 'logging'
 require 'rbconfig'
 require 'yaml'
 require 'net/scp'
+require 'rest_client'
 
 def get_server_ips(lb_name, logger, env)
   logger.debug "load balancer name: #{lb_name}"
@@ -178,6 +179,48 @@ if opts[:action] == 'stop'
     system "ssh root@#{server} -f 'killall sar '"
     system "ssh root@#{server} -f 'service sysstat stop '"
   end
+
+  #stop
+  if File.exists?(File.expand_path("test_execution.yaml", Dir.pwd))
+    test_yaml = YAML.load_file(File.expand_path("test_execution.yaml", Dir.pwd))
+    if test_yaml and test_yaml.find { |t| t.has_key?("name") and t["name"] == opts[:app]}
+      app_name = test_yaml.find { |t| t.has_key?("name") and t["name"] == opts[:app]}
+      if app_name and app_name["sub_app"].find {|t|  t.has_key?("name") and t["name"] == opts[:sub_app]}
+        sub_app_name = app_name["sub_app"].find {|t|  t.has_key?("name") and t["name"] == opts[:sub_app]}
+        if sub_app_name and sub_app_name["test_type"].find {|t| t.has_key?("name") and t["name"] == opts[:test_type]}
+          test_type = sub_app_name["test_type"].find {|t| t.has_key?("name") and t["name"] == opts[:test_type]}
+          guid = test_type["guid"]
+        end
+      end
+    end
+  end
+
+  raise ArgumentError, "no guid" unless guid
+
+  test_agent = get_test_ip(logger, env)
+  request_body = {
+    "guid" =>  guid,
+    "servers" => {
+      "results" => {
+        "server" => test_agent,
+        "user" => "root",
+        "path" => "/home/apache/test/summary.log"
+      }
+    }
+  }
+  
+  logger.info "http://localhost/#{opts[:app]}/applications/#{opts[:sub_app]}/#{opts[:test_type]}/stop"
+  logger.info request_body.to_json
+  response = RestClient.post "http://localhost/#{opts[:app]}/applications/#{opts[:sub_app]}/#{opts[:test_type]}/stop", request_body.to_json
+  logger.debug response
+  logger.debug response.code
+   FileUtils.rm_rf(File.expand_path("test_execution.yaml", Dir.pwd))
+
+  Net::SSH.start(test_agent, 'root') do |ssh|
+    ssh.exec!("/home/apache/apache-jmeter-2.10/bin/shutdown.sh")
+    ssh.exec!("sleep 5")
+    ssh.exec!("rm -rf /home/apache/test/*")
+  end
 elsif opts[:action] == 'start'
 =begin
 -- STEPS:
@@ -241,7 +284,6 @@ elsif opts[:action] == 'start'
     system "cd ~/repose_repo/repose ; git pull origin master; mvn clean install -DskipTests; "
   end
 
-=begin  
   server_ip_info[:nodes].each do |server|
 
     config_list.each do |config_data|
@@ -527,7 +569,6 @@ elsif opts[:action] == 'start'
       end
     end
   end
-=end
 
   test_agent = get_test_ip(logger, env)
   Net::SSH.start(test_agent, 'root') do |ssh|
@@ -539,19 +580,17 @@ elsif opts[:action] == 'start'
   test_json = redis.hget("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "test_#{opts[:test_type]}_#{opts[:runner]}")
   
   raise ArgumentError, "invalid test" unless test_json
-  
   test_data = JSON.parse(test_json)
   
   test_script_list = redis.lrange("#{opts[:app]}:#{opts[:sub_app]}:tests:setup:script", 0, -1)
   raise ArgumentError, "no tests found" unless test_script_list
   
-  test_script_json_list = JSON.parse(test_script_list)
-  test_script = test_script_json_list.find {|s| s['type'] == opts[:runner] and s['test'] == opts[:test_type]}['location']
+  test_script = JSON.parse(test_script_list.find {|s| parsed_result = JSON.parse(s) ; parsed_result['type'] == opts[:runner] and parsed_result['test'] == opts[:test_type]})
   if config['storage_info']['destination'] == 'localhost'
     Net::SCP.upload!(
-      server, 
+      test_agent, 
       'root', 
-      "#{config['storage_info']['path']}/#{test_script}", 
+      "#{config['storage_info']['path']}/#{test_script['location']}", 
       "/home/apache/test/"
     )
   else
@@ -560,13 +599,13 @@ elsif opts[:action] == 'start'
     Net::SCP.download!(
       config['storage_info']['destination'], 
       config['storage_info']['user'], 
-      test_script, 
+      test_script['location'], 
       tmp_dir
     ) 
 
     #second, upload to remote
     Net::SCP.upload!(
-      server, 
+      test_agent, 
       'root', 
       "/tmp/#{guid}/#{name}", 
       "/home/apache/test/"
@@ -583,64 +622,77 @@ elsif opts[:action] == 'start'
     when "load"
       rampdown = test_data["rampdown"] 
       throughput = test_data["throughput"]
-      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/tests/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 >> /home/apache/tests/summary.log & '"
+      logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 >> /home/apache/test/summary.log & '"
+      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 >> /home/apache/test/summary.log & '"
     when "stress"  
       rampup_threads = test_data["rampup_threads"]  
       maxthreads = test_data["maxthreads"]
-      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/tests/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{duration} -Jrampup_threads=#{rampup_threads} -Jmaxthreads=#{maxthreads} -Jport=80 >> /home/apache/tests/summary.log & '"
+      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{duration} -Jrampup_threads=#{rampup_threads} -Jmaxthreads=#{maxthreads} -Jport=80 >> /home/apache/test/summary.log & '"
     else
       raise ArgumentError, "invalid test type"
     end
+  request_body = {"length" =>  opts[:length], "name" => opts[:name], "runner" => opts[:runner] }
+  request_body["description"] = opts[:description] if opts[:description]
+  request_body["flavor_type"] = opts[:flavor_type] if opts[:flavor_type]
+  request_body["release"] = opts[:release] if opts[:release]
   
-  
-  until Time.now.to_i * 1000 >= end_time
-    logger.debug "time now: #{Time.now.to_i}000.  waiting until #{end_time}"
-    sleep(30)
+  logger.info "http://localhost/#{opts[:app]}/applications/#{opts[:sub_app]}/#{opts[:test_type]}/start"
+  logger.info request_body.to_json
+  response = RestClient.post "http://localhost/#{opts[:app]}/applications/#{opts[:sub_app]}/#{opts[:test_type]}/start", request_body.to_json
+  logger.debug response
+  logger.debug response.code
+
+  raise ArgumentError unless response.code == 200
+
+  if File.exists?(File.expand_path("test_execution.yaml", Dir.pwd))
+    test_yaml = YAML.load_file(File.expand_path("test_execution.yaml", Dir.pwd))
+    if test_yaml and test_yaml.find { |t| t.has_key?("name") and t["name"] == opts[:app]}
+      app_name = test_yaml.find { |t| t.has_key?("name") and t["name"] == opts[:app]}
+      if app_name and app_name["sub_app"].find {|t|  t.has_key?("name") and t["name"] == opts[:sub_app]}
+        sub_app_name = app_name["sub_app"].find {|t|  t.has_key?("name") and t["name"] == opts[:sub_app]}
+        if sub_app_name and sub_app_name["test_type"].find {|t| t.has_key?("name") and t["name"] == opts[:test_type]}
+          raise ArgumentError, "already exists!"
+        else
+          sub_app_name["test_type"] << {
+            "name" => opts[:test_type],
+            "guid" => JSON.parse(response)["guid"]
+          }
+        end
+      else
+        app_name["sub_app"] << {
+          "name" => opts[:sub_app],
+          "test_type" => [{
+            "name" => opts[:test_type],
+            "guid" => JSON.parse(response)["guid"]
+          }]
+        }
+      end
+    else
+      test_yaml << {
+        "name" => opts[:app],
+        "sub_app" => [{
+          "name" => opts[:sub_app],
+          "test_type" => [{
+            "name" => opts[:test_type],
+            "guid" => JSON.parse(response)["guid"]
+          }]
+        }]
+      }
+    end
+  else
+    test_yaml = [{
+      "name" => opts[:app],
+      "sub_app" => [{
+        "name" => opts[:sub_app],
+        "test_type" => [{
+          "name" => opts[:test_type],
+          "guid" => JSON.parse(response)["guid"]
+        }]
+      }]
+    }]
   end
-   
 
-  #TODO: remove all jmeter and log data
-  #TODO: upload jmeter stuff (based on runner) such as jmx
-  #TODO: make a call on test agent
-  #TODO: make a post call to post the data to start the test
+  logger.info "yaml content: #{test_yaml.to_yaml}"
+
+  File.open(File.expand_path("test_execution.yaml", Dir.pwd), 'w') {|f| f.write test_yaml.to_yaml }
 end
-=begin
-
-  test_json = JSON.parse(File.read("#{target_dir}/#{opts[:test_type]}_test.json"))
-  logger.debug "test json: #{test_json}"
-  runner_json = JSON.parse(File.read("#{target_dir}/#{opts[:test_type]}_test_#{test_json['runner']}.json"))
-  logger.debug "runner json: #{runner_json}"
-
-  length = opts[:length] ? opts[:length].to_i : 60
-
-  start_time = 1000 * (Time.now.to_i + (2 * 60))
-  logger.debug "start time: #{start_time}"
-  end_time = start_time + (length * 60 * 1000)
-  logger.debug "end time: #{end_time}"
-  logger.debug "tag: #{opts[:tag]}"
-  test_type_template = opts[:with_repose] ? "repose_test" : "origin_test"
-  test_json_contents = TestTemplate.new(start_time, end_time, opts[:tag], opts[:id], opts[:test_type], File.read("#{target_dir}/#{opts[:test_type]}_test.json")).render
-  File.open("#{target_dir}/#{opts[:test_type]}_test.json", 'w') { |f| f.write(test_json_contents) }
-  logger.debug test_json_contents
-  logger.debug "took care of test json content"
-
-  lb_ip = server_ip_info[:lb]
-  logger.debug "load balance ip address: #{lb_ip}"
-
-  #jmeter_contents = JmeterTemplate.new(start_time, end_time, 20, 60, lb_ip, File.read("#{target_dir}/test_#{opts[:app]}.jmx")).render
-  #logger.debug jmeter_contents 
-  #File.open("#{target_dir}/test_#{opts[:app]}.jmx", 'w') { |f| f.write(jmeter_contents) }
-  #start tiem and stop time should both be in millis starting at 5 minutes AFTER spinup of all servers and scp'ing all files
-  #modify runner file (ip, threads, start, stop, rampup) and stage 
-  #logger.debug "took care of jmeter json content"
-
-  #make results directory
-  Dir.mkdir("#{config['home_dir']}/files/apps/#{opts[:app]}/results") unless Dir.exists?("#{config['home_dir']}/files/apps/#{opts[:app]}/results")
-  Dir.mkdir("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}") unless Dir.exists?("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}")
-  Dir.mkdir("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current")
-
-  #copy over configs and test setup
-  Dir.mkdir("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/meta")
-  Dir.mkdir("#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/configs")
-  FileUtils.cp_r("#{target_dir}/." , "#{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/current/meta")
-=end

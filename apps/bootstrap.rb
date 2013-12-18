@@ -238,7 +238,7 @@ module Apps
           result = script_result_json.to_json
           store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:meta", "script", result)
     
-          redis.rpush("#{opts[:app]}:#{opts[:sub_app]}:tests:setup:script", "{\"type\":\"jmeter\", \"test\":\"#{test_type}\", \"name\":\"#{File.basename(test_location)}\",\"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}/#{File.basename(test_location)}\"}")
+          store.rpush("#{application}:#{sub_app}:tests:setup:script", "{\"type\":\"#{script_result_json['type']}\", \"test\":\"#{type}\", \"name\":\"#{script_result_json['name']}\",\"location\":\"/#{storage_info['prefix']}/#{application}/#{sub_app}/setup/meta/#{type}/#{script_result_json['name']}\"}")
       
           runner_data = store.hget("#{application}:#{sub_app}:tests:setup:meta", "test_#{type}_#{script_result_json['type']}")
           store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:meta", "test_#{type}_#{script_result_json['type']}", runner_data)
@@ -287,19 +287,25 @@ module Apps
       runner = Apps::Bootstrap.runner_list[start_test['runner'].to_sym]
       runner.store_results(application, sub_app, type, json_data['guid'], source_result_info, storage_info, store)
       
-      source_config_info = json_data['servers']['config']
+      source_config_info = json_data['servers']['config'] if json_data['servers'].has_key?('config')
       copy_configs(application, sub_app, type, json_data['guid'], source_config_info, storage_info, store) if source_config_info
       
-      FileUtils.mkpath "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}" unless File.exists?("#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}")
-      
-      Net::SCP.upload!(
-        storage_info['destination'], 
-        storage_info['user'], 
-        "/tmp/#{json_data['guid']}", 
-        "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}", 
-        {:recursive => true, :verbose => true }
-      )
-      
+      if storage_info['destination'] == 'localhost'
+        FileUtils.mkdir_p "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}" unless File.exists?("#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}")
+        FileUtils.cp_r "/tmp/#{json_data['guid']}/", "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/"
+      else
+        Net::SSH.start(server, 'root') do |ssh|
+          ssh.exec!("mkdir -p #{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}")
+        end
+
+        Net::SCP.upload!(
+          storage_info['destination'], 
+          storage_info['user'], 
+          "/tmp/#{json_data['guid']}", 
+          "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}", 
+          {:recursive => true, :verbose => true }
+        )
+      end      
     end
     
     def copy_configs(application, sub_app, type, guid, source_config_info, storage_info, store)

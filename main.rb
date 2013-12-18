@@ -677,7 +677,7 @@ class PerfApp < Sinatra::Base
   POST /atom_hopper/applications/main/load/start -d '{"length":60, "description": "this is a description of the test", "flavor_type": "performance", "release": 1.6}'
 =end    
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-    if app and Apps::Bootstrap.test_list.keys.include?(test) 
+    if app and (Apps::Bootstrap.test_list.keys.include?(test) or Apps::Bootstrap.test_list.keys.include?("#{test}_test"))
       new_app = app[:klass].new(settings.deployment)
       sub_app = new_app.config['application']['sub_apps'].find do |sa|
         sa['id'] == name
@@ -713,7 +713,7 @@ class PerfApp < Sinatra::Base
   }
 =end    
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-    if app and Apps::Bootstrap.test_list.keys.include?(test) 
+    if app and (Apps::Bootstrap.test_list.keys.include?(test) or Apps::Bootstrap.test_list.keys.include?("#{test}_test"))
       new_app = app[:klass].new(settings.deployment)
       sub_app = new_app.config['application']['sub_apps'].find do |sa|
         sa['id'] == name
@@ -722,7 +722,7 @@ class PerfApp < Sinatra::Base
         request.body.rewind
         json_data = JSON.parse(request.body.read)
         content_type :json
-        halt 400, { "fail" => "required keys are missing"}.to_json unless json_data.has_key?("guid")
+        halt 400, { "fail" => "required keys are missing"}.to_json unless json_data.has_key?("guid") and json_data.has_key?("servers") and json_data["servers"].has_key?("results")
         stop_response = new_app.stop_test_recording(application, name, test.chomp('_test'), json_data)
         halt 400, {'Content-Type' => 'application/json'}, stop_response.to_json if stop_response.has_key?("fail")
         body stop_response.to_json

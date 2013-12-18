@@ -140,7 +140,7 @@ Dir.glob("#{opts[:configs]}/**/*").each do |f|
 end
   
 logger.info "now add the meta info"
-redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "test_load_jmeter", "{ \"host\":"", \"startdelay\":10, \"rampup\":10, \"duration\":3600, \"rampdown\":10, \"throughput\":500}", "test_stress_jmeter", "{ \"host\":"", \"startdelay\":10, \"rampup\":5, \"duration\":300, \"rampup_threads\":5, \"maxthreads\":500}")
+redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "test_load_jmeter", "{ \"host\":\"localhost\", \"startdelay\":10, \"rampup\":10, \"duration\":3600, \"rampdown\":10, \"throughput\":500}", "test_stress_jmeter", "{ \"host\":\"localhost\", \"startdelay\":10, \"rampup\":5, \"duration\":300, \"rampup_threads\":5, \"maxthreads\":500}")
 
 logger.info "now create test script for: #{opts[:test]}"
 ["adhoc","load","duration","stress"].each do |test_type|
@@ -177,8 +177,8 @@ main_responders.split(',').each do |main_responder|
   redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "responder|main|#{File.basename(main_responder)}", "{\"name\":\"#{File.basename(main_responder)}\", \"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/#{File.basename(main_responder)}\"}")
 
   if config['storage_info']['destination'] == 'localhost'
-    FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/#{File.basename(main_responder)}"
-    FileUtils.cp(main_responder, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/#{File.basename(main_responder)}/")
+    FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main"
+    FileUtils.cp(main_responder, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/")
   else
     Net::SSH.start(config['storage_info']['destination'], config['storage_info']['user']) do |ssh|
         ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/")
@@ -197,8 +197,8 @@ if secondary_responders
     redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "responder|secondary|#{File.basename(secondary_responder)}", "{\"name\":\"#{File.basename(secondary_responder)}\", \"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(secondary_responder)}\"}")
   
     if config['storage_info']['destination'] == 'localhost'
-      FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(secondary_responder)}"
-      FileUtils.cp(secondary_responder, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(secondary_responder)}/")
+      FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/"
+      FileUtils.cp(secondary_responder, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/")
     else
       Net::SSH.start(config['storage_info']['destination'], config['storage_info']['user']) do |ssh|
           ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/")
