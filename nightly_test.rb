@@ -135,6 +135,12 @@ if opts[:action] == 'stop'
   env.connect(environment_hash[opts[:sub_app].to_sym])
   env.load_balance_connect(environment_hash[opts[:sub_app].to_sym])
 
+  test_agent = get_test_ip(logger, env)
+
+  Net::SSH.start(test_agent, 'root') do |ssh|
+    ssh.exec!("/home/apache/apache-jmeter-2.10/bin/shutdown.sh")
+  end
+
   if opts[:flavor_type] == 'performance' 
     if opts[:with_repose]
       #performance with repose!
@@ -173,9 +179,9 @@ if opts[:action] == 'stop'
       system "ssh root@#{server} 'rm -rf /home/repose/usr/share/repose/repose-valve.jar '" 
       system "ssh root@#{server} 'rm -rf /home/repose/usr/share/repose/filters/* '" 
       system "ssh root@#{server} 'rm -rf /home/repose/logs/* '" 
+      system "ssh root@#{server} -f 'killall java '"
     end
     system "ssh root@#{server} -f 'killall node '"
-    system "ssh root@#{server} -f 'killall java '"
     system "ssh root@#{server} -f 'killall sar '"
     system "ssh root@#{server} -f 'service sysstat stop '"
   end
@@ -189,15 +195,18 @@ if opts[:action] == 'stop'
         sub_app_name = app_name["sub_app"].find {|t|  t.has_key?("name") and t["name"] == opts[:sub_app]}
         if sub_app_name and sub_app_name["test_type"].find {|t| t.has_key?("name") and t["name"] == opts[:test_type]}
           test_type = sub_app_name["test_type"].find {|t| t.has_key?("name") and t["name"] == opts[:test_type]}
-          guid = test_type["guid"]
+          if opts[:with_repose]
+            guid = test_type["repose_guid"]
+          else
+            guid = test_type["origin_guid"]
+          end
         end
       end
     end
   end
 
   raise ArgumentError, "no guid" unless guid
-
-  test_agent = get_test_ip(logger, env)
+  
   request_body = {
     "guid" =>  guid,
     "servers" => {
@@ -208,17 +217,33 @@ if opts[:action] == 'stop'
       }
     }
   }
-  
+
   logger.info "http://localhost/#{opts[:app]}/applications/#{opts[:sub_app]}/#{opts[:test_type]}/stop"
   logger.info request_body.to_json
-  response = RestClient.post "http://localhost/#{opts[:app]}/applications/#{opts[:sub_app]}/#{opts[:test_type]}/stop", request_body.to_json
+  response = RestClient::Request.execute(:method => :post, :url => "http://localhost/#{opts[:app]}/applications/#{opts[:sub_app]}/#{opts[:test_type]}/stop", :timeout => -1,  :payload => request_body.to_json)
   logger.debug response
   logger.debug response.code
-   FileUtils.rm_rf(File.expand_path("test_execution.yaml", Dir.pwd))
+
+  logger.info "remove the used values from yaml"
+  if File.exists?(File.expand_path("test_execution.yaml", Dir.pwd))
+    test_yaml = YAML.load_file(File.expand_path("test_execution.yaml", Dir.pwd))
+    if test_yaml and test_yaml.find { |t| t.has_key?("name") and t["name"] == opts[:app]}
+      app_name = test_yaml.find { |t| t.has_key?("name") and t["name"] == opts[:app]}
+      if app_name and app_name["sub_app"].find {|t|  t.has_key?("name") and t["name"] == opts[:sub_app]}
+        sub_app_name = app_name["sub_app"].find {|t|  t.has_key?("name") and t["name"] == opts[:sub_app]}
+        if sub_app_name and sub_app_name["test_type"].find {|t| t.has_key?("name") and t["name"] == opts[:test_type]}
+          test_type = sub_app_name["test_type"].find {|t| t.has_key?("name") and t["name"] == opts[:test_type]}
+          sub_app_name["test_type"].delete(test_type) unless opts[:with_repose]
+        end
+      end
+    end
+  end
+  
+  logger.info "yaml content: #{test_yaml.to_yaml}"
+
+  File.open(File.expand_path("test_execution.yaml", Dir.pwd), 'w') {|f| f.write test_yaml.to_yaml }
 
   Net::SSH.start(test_agent, 'root') do |ssh|
-    ssh.exec!("/home/apache/apache-jmeter-2.10/bin/shutdown.sh")
-    ssh.exec!("sleep 5")
     ssh.exec!("rm -rf /home/apache/test/*")
   end
 elsif opts[:action] == 'start'
@@ -285,85 +310,86 @@ elsif opts[:action] == 'start'
   end
 
   server_ip_info[:nodes].each do |server|
+    if opts[:with_repose]
+      config_list.each do |config_data|
+        #first, download from remote
 
-    config_list.each do |config_data|
-      #first, download from remote
+        if config['storage_info']['destination'] == 'localhost'
+          logger.info "moving over: #{JSON.parse(config_data)['name']}"
+          if JSON.parse(config_data)['name'] == 'system-model.cfg.xml'
+            system_model_contents = SystemModelTemplate.new(server_ip_info[:nodes],File.read("#{config['storage_info']['path']}/#{JSON.parse(config_data)['location']}")).render
 
-      if config['storage_info']['destination'] == 'localhost'
-        logger.info "moving over: #{JSON.parse(config_data)['name']}"
-        if JSON.parse(config_data)['name'] == 'system-model.cfg.xml'
-          system_model_contents = SystemModelTemplate.new(server_ip_info[:nodes],File.read("#{config['storage_info']['path']}/#{JSON.parse(config_data)['location']}")).render
+            tmp_dir = "/tmp/#{guid}/"
+            FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
+            File.open("/tmp/#{guid}/system-model.cfg.xml", 'w') { |f| f.write(system_model_contents) }
 
+            Net::SCP.upload!(
+              server, 
+              'root', 
+              "/tmp/#{guid}/system-model.cfg.xml", 
+              "/home/repose/configs/", 
+              {:recursive => true, :verbose => true }
+            )
+          
+            FileUtils.rm_rf("/tmp/#{guid}")
+          elsif JSON.parse(config_data)['name'] == 'dist-datastore.cfg.xml'
+            system_model_contents = SystemModelTemplate.new(server_ip_info[:nodes],File.read("#{config['storage_info']['path']}/#{JSON.parse(config_data)['location']}")).render
+
+            tmp_dir = "/tmp/#{guid}/"
+            FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
+            File.open("/tmp/#{guid}/dist-datastore.cfg.xml", 'w') { |f| f.write(system_model_contents) }
+
+            Net::SCP.upload!(
+              server,
+              'root',
+              "/tmp/#{guid}/dist-datastore.cfg.xml",
+              "/home/repose/configs/",
+              {:recursive => true, :verbose => true }
+            ) 
+
+            FileUtils.rm_rf("/tmp/#{guid}")
+          else
+            name_to_save = JSON.parse(config_data)['location'].gsub(/^\/#{Regexp.escape(config['storage_info']['prefix'])}\/#{Regexp.escape(opts[:app])}\/#{Regexp.escape(opts[:sub_app])}\/setup\/configs\//,"")
+            directory_to_save = File.dirname(name_to_save)
+            Net::SSH.start(server, 'root') do |ssh|
+              ssh.exec!("mkdir -p /home/repose/configs/#{directory_to_save}")
+            end
+            Net::SCP.upload!(
+              server, 
+              'root', 
+              "#{config['storage_info']['path']}/#{JSON.parse(config_data)['location']}", 
+              "/home/repose/configs/#{directory_to_save}", 
+              {:recursive => true, :verbose => true }
+            ) 
+          end
+        else
           tmp_dir = "/tmp/#{guid}/"
           FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
-          File.open("/tmp/#{guid}/system-model.cfg.xml", 'w') { |f| f.write(system_model_contents) }
-
+          Net::SCP.download!(
+            config['storage_info']['destination'], 
+            config['storage_info']['user'], 
+            JSON.parse(config_data)['location'], 
+            tmp_dir, 
+            {:recursive => true,
+              :verbose => Logger::DEBUG}
+          ) 
+        
+          #second, upload to remote
           Net::SCP.upload!(
             server, 
             'root', 
-            "/tmp/#{guid}/system-model.cfg.xml", 
+            "/tmp/#{guid}/", 
             "/home/repose/configs/", 
             {:recursive => true, :verbose => true }
           )
-          
+        
           FileUtils.rm_rf("/tmp/#{guid}")
-        elsif JSON.parse(config_data)['name'] == 'dist-datastore.cfg.xml'
-          system_model_contents = SystemModelTemplate.new(server_ip_info[:nodes],File.read("#{config['storage_info']['path']}/#{JSON.parse(config_data)['location']}")).render
-
-          tmp_dir = "/tmp/#{guid}/"
-          FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
-          File.open("/tmp/#{guid}/dist-datastore.cfg.xml", 'w') { |f| f.write(system_model_contents) }
-
-          Net::SCP.upload!(
-            server,
-            'root',
-            "/tmp/#{guid}/dist-datastore.cfg.xml",
-            "/home/repose/configs/",
-            {:recursive => true, :verbose => true }
-          )
-
-          FileUtils.rm_rf("/tmp/#{guid}")
-        else
-          name_to_save = JSON.parse(config_data)['location'].gsub(/^\/#{Regexp.escape(config['storage_info']['prefix'])}\/#{Regexp.escape(opts[:app])}\/#{Regexp.escape(opts[:sub_app])}\/setup\/configs\//,"")
-          directory_to_save = File.dirname(name_to_save)
-          Net::SSH.start(server, 'root') do |ssh|
-            ssh.exec!("mkdir -p /home/repose/configs/#{directory_to_save}")
-          end
-          Net::SCP.upload!(
-            server, 
-            'root', 
-            "#{config['storage_info']['path']}/#{JSON.parse(config_data)['location']}", 
-            "/home/repose/configs/#{directory_to_save}", 
-            {:recursive => true, :verbose => true }
-          )
         end
-      else
-        tmp_dir = "/tmp/#{guid}/"
-        FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
-        Net::SCP.download!(
-          config['storage_info']['destination'], 
-          config['storage_info']['user'], 
-          JSON.parse(config_data)['location'], 
-          tmp_dir, 
-          {:recursive => true,
-            :verbose => Logger::DEBUG}
-        ) 
-      
-        #second, upload to remote
-        Net::SCP.upload!(
-          server, 
-          'root', 
-          "/tmp/#{guid}/", 
-          "/home/repose/configs/", 
-          {:recursive => true, :verbose => true }
-        )
-      
-        FileUtils.rm_rf("/tmp/#{guid}")
       end
     end
   
-    logger.info "download repose"
     if opts[:with_repose]
+      logger.info "download repose"
 
       logger.debug "i only care about jmx plugin right now"
       plugin_list = redis.hget("#{opts[:app]}:#{opts[:sub_app]}:setup:meta:plugins", "ReposeJMXPlugin")
@@ -456,116 +482,121 @@ elsif opts[:action] == 'start'
         logger.info "download snapshot version"
         system "ssh root@#{server} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --snapshot'"      
       end
-      
-      logger.info "upload responders"
-      main_responders.each do |key, responder|
-        responder_json = JSON.parse(responder)
-        name = responder_json['name']
-        location = responder_json['location']
-        if config['storage_info']['destination'] == 'localhost'
-          Net::SSH.start(server, 'root') do |ssh|
-            ssh.exec!("mkdir -p /home/mocks")
-          end
-          logger.info "#{config['storage_info']['path']}/#{location}"
-          Net::SCP.upload!(
-            server, 
-            'root', 
-            "#{config['storage_info']['path']}#{location}", 
-            "/home/mocks/", 
-            {:recursive => true, :verbose => true }
-          )
-        else
-          tmp_dir = "/tmp/#{guid}/"
-          FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
-          Net::SCP.download!(
-            config['storage_info']['destination'], 
-            config['storage_info']['user'], 
-            location, 
-            tmp_dir, 
-            {:recursive => true,
-              :verbose => Logger::DEBUG}
-          ) 
-      
-          #second, upload to remote
-          Net::SCP.upload!(
-            server, 
-            'root', 
-            "/tmp/#{guid}/#{name}", 
-            "/home/mocks/", 
-            {:recursive => true, :verbose => true }
-          )
-      
-          FileUtils.rm_rf("/tmp/#{guid}")
+    end
+    
+    logger.info "upload responders"
+    main_responders.each do |key, responder|
+      responder_json = JSON.parse(responder)
+      name = responder_json['name']
+      location = responder_json['location']
+      if config['storage_info']['destination'] == 'localhost'
+        Net::SSH.start(server, 'root') do |ssh|
+          ssh.exec!("mkdir -p /home/mocks")
         end
-        system "ssh root@#{server} -f 'node /home/mocks/#{name} & '"
-      end 
-      secondary_responders.each do |key, responder|
-        responder_json = JSON.parse(responder)
-        name = responder_json['name']
-        location = responder_json['location']
-        if config['storage_info']['destination'] == 'localhost'
-          Net::SSH.start(server, 'root') do |ssh|
-            ssh.exec!("mkdir -p /home/mocks")
-          end
-          Net::SCP.upload!(
-            server, 
-            'root', 
-            "#{config['storage_info']['path']}/#{location}", 
-            "/home/mocks/", 
-            {:recursive => true, :verbose => true }
-          )
-        else
-          tmp_dir = "/tmp/#{guid}/"
-          FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
-          Net::SCP.download!(
-            config['storage_info']['destination'], 
-            config['storage_info']['user'], 
-            location, 
-            tmp_dir, 
-            {:recursive => true,
-              :verbose => Logger::DEBUG}
-          ) 
+        logger.info "#{config['storage_info']['path']}/#{location}"
+        Net::SCP.upload!(
+          server, 
+          'root', 
+          "#{config['storage_info']['path']}#{location}", 
+          "/home/mocks/", 
+          {:recursive => true, :verbose => true }
+        )
+      else
+        tmp_dir = "/tmp/#{guid}/"
+        FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
+        Net::SCP.download!(
+          config['storage_info']['destination'], 
+          config['storage_info']['user'], 
+          location, 
+          tmp_dir, 
+          {:recursive => true,
+            :verbose => Logger::DEBUG}
+        ) 
+    
+        #second, upload to remote
+        Net::SCP.upload!(
+          server, 
+          'root', 
+          "/tmp/#{guid}/#{name}", 
+          "/home/mocks/", 
+          {:recursive => true, :verbose => true }
+        )
       
-          #second, upload to remote
-          Net::SCP.upload!(
-            server, 
-            'root', 
-            "/tmp/#{guid}/#{name}", 
-            "/home/mocks/", 
-            {:recursive => true, :verbose => true }
-          )
-      
-          FileUtils.rm_rf("/tmp/#{guid}")
+        FileUtils.rm_rf("/tmp/#{guid}")
+      end
+      system "ssh root@#{server} -f 'node /home/mocks/#{name} & '"
+    end 
+    secondary_responders.each do |key, responder|
+      responder_json = JSON.parse(responder)
+      name = responder_json['name']
+      location = responder_json['location']
+      if config['storage_info']['destination'] == 'localhost'
+        Net::SSH.start(server, 'root') do |ssh|
+          ssh.exec!("mkdir -p /home/mocks")
         end
+        Net::SCP.upload!(
+          server, 
+          'root', 
+          "#{config['storage_info']['path']}/#{location}", 
+          "/home/mocks/", 
+          {:recursive => true, :verbose => true }
+        )
+      else
+        tmp_dir = "/tmp/#{guid}/"
+        FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
+        Net::SCP.download!(
+          config['storage_info']['destination'], 
+          config['storage_info']['user'], 
+          location, 
+          tmp_dir, 
+          {:recursive => true,
+            :verbose => Logger::DEBUG}
+        ) 
+      
+        #second, upload to remote
+        Net::SCP.upload!(
+          server, 
+          'root', 
+          "/tmp/#{guid}/#{name}", 
+          "/home/mocks/", 
+          {:recursive => true, :verbose => true }
+        )
+      
+        FileUtils.rm_rf("/tmp/#{guid}")
+      end
         
-        system "ssh root@#{server} -f 'node /home/mocks/#{name} & '"
-      end if secondary_responders
+      system "ssh root@#{server} -f 'node /home/mocks/#{name} & '"
+    end if secondary_responders
 
-      logger.info "start logging sysstats"
-      system "ssh root@#{server} -f 'sar -o /home/repose/logs/sysstats.log 30 >/dev/null 2>&1 & '"
+    logger.info "start logging sysstats"
+    system "ssh root@#{server} -f 'sar -o /home/repose/logs/sysstats.log 30 >/dev/null 2>&1 & '"
 
+    if opts[:with_repose]
       logger.info "start repose"
       system "ssh root@#{server} -f 'nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ -s 6666 start & '" 
        
       
       is_valid = false
+      response = nil
       until is_valid
         begin
+          logger.info "execute: http://#{server}:7070 for test"
           response = Net::HTTP.get_response(URI("http://#{server}:7070"))
-          logger.info "response: #{response}"
+          logger.info "response - no exception: #{response}"
           response_code = response.code
-          logger.info "response: #{response_code}"
+          logger.info "response - no exception: #{response_code}"
           is_valid = response_code.to_i < 500
         rescue Exception => msg
-          logger.info "response: #{response}"
+          logger.info "response - exception: #{response}"
           if response
             response_code = response.code
-            logger.info "response: #{response_code}"
+            logger.info "response - exception: #{response_code}"
             is_valid = response_code.to_i < 500
           end
           logger.info "connection exception: #{msg}"
         end
         sleep 1
+        response = nil
       end
     end
   end
@@ -623,11 +654,11 @@ elsif opts[:action] == 'start'
       rampdown = test_data["rampdown"] 
       throughput = test_data["throughput"]
       logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 >> /home/apache/test/summary.log & '"
-      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 >> /home/apache/test/summary.log & '"
+      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 -l /home/apache/test/response.jtl >> /home/apache/test/summary.log & '"
     when "stress"  
       rampup_threads = test_data["rampup_threads"]  
       maxthreads = test_data["maxthreads"]
-      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{duration} -Jrampup_threads=#{rampup_threads} -Jmaxthreads=#{maxthreads} -Jport=80 >> /home/apache/test/summary.log & '"
+      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{duration} -Jrampup_threads=#{rampup_threads} -Jmaxthreads=#{maxthreads} -Jport=80 -l /home/apache/test/response.jtl >> /home/apache/test/summary.log & '"
     else
       raise ArgumentError, "invalid test type"
     end
@@ -635,7 +666,25 @@ elsif opts[:action] == 'start'
   request_body["description"] = opts[:description] if opts[:description]
   request_body["flavor_type"] = opts[:flavor_type] if opts[:flavor_type]
   request_body["release"] = opts[:release] if opts[:release]
+
+  guid = nil
+  if File.exists?(File.expand_path("test_execution.yaml", Dir.pwd)) && !opts[:with_repose]
+    test_yaml = YAML.load_file(File.expand_path("test_execution.yaml", Dir.pwd))
+    if test_yaml and test_yaml.find { |t| t.has_key?("name") and t["name"] == opts[:app]}
+      app_name = test_yaml.find { |t| t.has_key?("name") and t["name"] == opts[:app]}
+      if app_name and app_name["sub_app"].find {|t|  t.has_key?("name") and t["name"] == opts[:sub_app]}
+        sub_app_name = app_name["sub_app"].find {|t|  t.has_key?("name") and t["name"] == opts[:sub_app]}
+        if sub_app_name and sub_app_name["test_type"].find {|t| t.has_key?("name") and t["name"] == opts[:test_type]}
+          test_type = sub_app_name["test_type"].find {|t| t.has_key?("name") and t["name"] == opts[:test_type]}
+          guid = test_type["repose_guid"]
+        end
+      end
+    end
+  end
   
+  request_body["comparison_guid"] = guid unless opts[:with_repose]
+
+
   logger.info "http://localhost/#{opts[:app]}/applications/#{opts[:sub_app]}/#{opts[:test_type]}/start"
   logger.info request_body.to_json
   response = RestClient.post "http://localhost/#{opts[:app]}/applications/#{opts[:sub_app]}/#{opts[:test_type]}/start", request_body.to_json
@@ -651,45 +700,70 @@ elsif opts[:action] == 'start'
       if app_name and app_name["sub_app"].find {|t|  t.has_key?("name") and t["name"] == opts[:sub_app]}
         sub_app_name = app_name["sub_app"].find {|t|  t.has_key?("name") and t["name"] == opts[:sub_app]}
         if sub_app_name and sub_app_name["test_type"].find {|t| t.has_key?("name") and t["name"] == opts[:test_type]}
-          raise ArgumentError, "already exists!"
+          test_type = sub_app_name["test_type"].find {|t| t.has_key?("name") and t["name"] == opts[:test_type]}
+          if opts[:with_repose] and test_type.has_key?("repose_guid")
+            raise ArgumentError, "already exists!"
+          elsif !opts[:with_repose] && test_type.has_key?("origin_guid")
+            raise ArgumentError, "already exists!"
+          elsif opts[:with_repose]
+            test_type["repose_guid"] = JSON.parse(response)["guid"]
+          else
+            test_type["origin_guid"] = JSON.parse(response)["guid"]
+          end
         else
-          sub_app_name["test_type"] << {
-            "name" => opts[:test_type],
-            "guid" => JSON.parse(response)["guid"]
-          }
+          if opts[:with_repose]
+            sub_app_name["test_type"] << {
+              "name" => opts[:test_type],
+              "repose_guid" => JSON.parse(response)["guid"]
+            }
+          else
+            raise ArgumentError, "no guid for repose!"
+          end
         end
       else
-        app_name["sub_app"] << {
-          "name" => opts[:sub_app],
-          "test_type" => [{
-            "name" => opts[:test_type],
-            "guid" => JSON.parse(response)["guid"]
-          }]
-        }
+        if opts[:with_repose]
+          app_name["sub_app"] << {
+            "name" => opts[:sub_app],
+            "test_type" => [{
+              "name" => opts[:test_type],
+              "repose_guid" => JSON.parse(response)["guid"]
+            }]
+          }
+        else
+          raise ArgumentError, "no guid for repose!"
+        end
       end
     else
-      test_yaml << {
+      if opts[:with_repose]
+        test_yaml << {
+          "name" => opts[:app],
+          "sub_app" => [{
+            "name" => opts[:sub_app],
+            "test_type" => [{
+              "name" => opts[:test_type],
+              "repose_guid" => JSON.parse(response)["guid"]
+            }]
+          }]
+        }
+      else
+        raise ArgumentError, "no guid for repose!"
+      end
+    end
+  else
+    if opts[:with_repose]
+      test_yaml = [{
         "name" => opts[:app],
         "sub_app" => [{
           "name" => opts[:sub_app],
           "test_type" => [{
             "name" => opts[:test_type],
-            "guid" => JSON.parse(response)["guid"]
+            "repose_guid" => JSON.parse(response)["guid"]
           }]
         }]
-      }
-    end
-  else
-    test_yaml = [{
-      "name" => opts[:app],
-      "sub_app" => [{
-        "name" => opts[:sub_app],
-        "test_type" => [{
-          "name" => opts[:test_type],
-          "guid" => JSON.parse(response)["guid"]
-        }]
       }]
-    }]
+    else
+      raise ArgumentError, "no guid for repose!"
+    end
   end
 
   logger.info "yaml content: #{test_yaml.to_yaml}"
