@@ -648,7 +648,7 @@ elsif opts[:action] == 'start'
   host = server_ip_info[:lb]
   startdelay = test_data["startdelay"]
   rampup = test_data["rampup"]
-  duration = test_data["duration"]
+  duration = opts[:length] ? opts[:length] : test_data["duration"]
   case opts[:test_type]
     when "load"
       rampdown = test_data["rampdown"] 
@@ -662,7 +662,7 @@ elsif opts[:action] == 'start'
     else
       raise ArgumentError, "invalid test type"
     end
-  request_body = {"length" =>  opts[:length], "name" => opts[:name], "runner" => opts[:runner] }
+  request_body = {"length" =>  duration, "name" => opts[:name], "runner" => opts[:runner] }
   request_body["description"] = opts[:description] if opts[:description]
   request_body["flavor_type"] = opts[:flavor_type] if opts[:flavor_type]
   request_body["release"] = opts[:release] if opts[:release]

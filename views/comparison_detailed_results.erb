@@ -219,18 +219,21 @@
         };       
 
         $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/metric/avg/id/<%= test_id %>', function(data) {
-          art_option.series[0].data = data.repose;
-          art_option.series[1].data = data.origin;
+<% test_id.split('+').each_with_index do |item, id| %> 
+          art_option.series[<%= id %>].data = data['avg']['<%= item %>'];
+<% end %>
           var art_chart = new Highcharts.Chart(art_option);
         }); 
         $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/metric/errors/id/<%= test_id %>', function(data) {
-          cpu_option.series[0].data = data.repose;
-          cpu_option.series[1].data = data.origin;
+<% test_id.split('+').each_with_index do |item, id| %> 
+          cpu_option.series[<%= id %>].data = data['errors']['<%= item %>'];
+<% end %>
           var cpu_chart = new Highcharts.Chart(cpu_option);
         }); 
         $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/metric/throughput/id/<%= test_id %>', function(data) {
-          network_option.series[0].data = data.repose;
-          network_option.series[1].data = data.origin;
+<% test_id.split('+').each_with_index do |item, id| %> 
+          network_option.series[<%= id %>].data = data['throughput']['<%= item %>'];
+<% end %>
           var network_chart = new Highcharts.Chart(network_option);
         }); 
       });
