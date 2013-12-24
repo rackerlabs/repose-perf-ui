@@ -37,7 +37,7 @@ module Apps
         :message => :magenta
       )
       logger = Logging.logger(STDOUT)
-      logger.level = :info
+      logger.level = :debug
       logger
     end
 
@@ -152,7 +152,8 @@ module Apps
     end
 
     def start_test_recording(application, sub_app = 'main', type = 'load', json_data = {}, timestamp = nil)
-      start_time = timestamp ? timestamp : Time.now
+      @logger.debug "starting test recording"
+      start_time = timestamp ? timestamp : Time.now.to_i
       #store the start time in Redis
       store = Redis.new(@db)
       start_test = {} 
@@ -160,12 +161,15 @@ module Apps
         raise ArgumentError, "invalid comparison guid" if json_data.has_key?('comparison_guid') and !store.lrange("#{application}:#{sub_app}:results:#{type}",0, -1).include?(json_data['comparison_guid'])
         
         id = "#{application}:test:#{sub_app}:#{type}:start"
+        @logger.debug "id: #{id}"
         unless store.get(id)
           guid = SecureRandom.uuid
           start_test = {:guid => guid, :time => start_time }.merge(json_data).to_json
+          @logger.debug "start test guid: #{start_test}"
           store.set(id, start_test)
         end
       rescue => e
+        @logger.error "failed with: #{e}"
         return {"fail" => e.message}.to_json
       ensure
         store.quit
@@ -174,18 +178,24 @@ module Apps
     end
 
     def stop_test_recording(application, sub_app = 'main', type = 'load', json_data = nil, timestamp = nil)
+      @logger.debug "stopping test recording"
       id = "#{application}:test:#{sub_app}:#{type}:start"
+      @logger.debug "id: #{id}"
       store = Redis.new(@db)
       plugin_result_list = []
       begin
         raise ArgumentError, "start time for this test was not found.  Did you forget to start the test?" unless store.get(id)
         start_test = JSON.parse(store.get(id))
+        @logger.debug "start test: #{start_test}"
         raise ArgumentError, "invalid guid" unless json_data['guid'] == start_test['guid']
-        end_time = timestamp ? timestamp : Time.now
+        end_time = timestamp ? timestamp : Time.now.to_i
+        @logger.debug "end time: #{end_time}"
         store_data(application, sub_app, type, json_data, store, storage_info, start_test, end_time, @fs_ip)
+        @logger.debug "after store data"
         #load data for plugins here (from base class)
         plugins = load_plugins
         plugins.each do |plugin|
+          @logger.debug "start storing data for: #{plugin}"
           plugin_result = plugin.new(@db, @fs_ip).store_data(application, sub_app, type, json_data, store, start_test, end_time, storage_info)
           plugin_result_list << plugin_result if plugin_result
         end 
@@ -194,6 +204,7 @@ module Apps
         result["with_errors"] = plugin_result_list if plugin_result_list.length > 0
         return result
       rescue => e
+        @logger.error "failed with: #{e}"
         return {"fail" => e.message}
       ensure
         FileUtils.rm_rf("/tmp/#{json_data['guid']}")
@@ -203,18 +214,23 @@ module Apps
     
     
     def create_tmp_dir(guid)
+      @logger.debug "in create tmp dir"
       FileUtils.mkpath "/tmp/#{guid}/data"
       FileUtils.mkpath "/tmp/#{guid}/meta"
       FileUtils.mkpath "/tmp/#{guid}/configs"
+      @logger.debug "out of create tmp dir"
     end
     
     def copy_meta_data(application, sub_app, type, store, guid, storage_info, fs_ip)
+      @logger.debug "in copy meta data with: #{application}, #{sub_app}, #{type}, #{store}, #{guid}, #{storage_info}, #{fs_ip}"
+      @logger.debug "store meta request and response"
       request = store.get("#{application}:#{sub_app}:tests:setup:request_response:request")
       store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:meta", "request", request)
 
       response = store.get("#{application}:#{sub_app}:tests:setup:request_response:response")
       store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:meta", "response", response)
 
+      @logger.debug "add script info"
       script_info_list = store.lrange("#{application}:#{sub_app}:tests:setup:script", 0, -1)
       script_info_list.each do |script_info|
         script_json_info = JSON.parse(script_info)
@@ -223,7 +239,8 @@ module Apps
           script_result_json['name'] = script_json_info['name']
           script_result_json['type'] = script_json_info['type']
           script_result_json['location'] = "/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/#{guid}/meta/#{script_json_info['name']}"
-
+ 
+          @logger.debug "add script: #{script_result_json} to file store"
           f = open("/tmp/#{guid}/meta/#{script_result_json['name']}", 'w')
           begin
             open("http://#{fs_ip}#{script_json_info['location']}") do |resp|
@@ -234,19 +251,20 @@ module Apps
           ensure
             f.close()
           end
-          
+          @logger.debug "finish script adding.  Add to cache store"
+
           result = script_result_json.to_json
           store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:meta", "script", result)
     
-          store.rpush("#{application}:#{sub_app}:tests:setup:script", "{\"type\":\"#{script_result_json['type']}\", \"test\":\"#{type}\", \"name\":\"#{script_result_json['name']}\",\"location\":\"/#{storage_info['prefix']}/#{application}/#{sub_app}/setup/meta/#{type}/#{script_result_json['name']}\"}")
-      
           runner_data = store.hget("#{application}:#{sub_app}:tests:setup:meta", "test_#{type}_#{script_result_json['type']}")
           store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:meta", "test_#{type}_#{script_result_json['type']}", runner_data)
         end
       end
+      @logger.debug "finish copy_meta_data"
     end
     
     def copy_meta_test(application, sub_app, type, json_data, start_test, end_time, runner, store)
+      @logger.debug "in copy meta test.  Add to cache store"
       test_info = store.hget("#{application}:#{sub_app}:tests:setup:meta", "common")
       if test_info
         test_json_info = JSON.parse(test_info)
@@ -267,6 +285,7 @@ module Apps
     end
         
     def store_data(application, sub_app, type, json_data, store, storage_info, start_test, end_time, fs_ip)
+      @logger.debug "in store data.  Push to cache store"
       store.rpush("#{application}:#{sub_app}:results:#{type}", json_data['guid'])
       create_tmp_dir(json_data['guid'])
       copy_meta_data(application, sub_app, type, store, json_data['guid'], storage_info, fs_ip)
@@ -282,16 +301,22 @@ module Apps
  - application:sub_app:results:type:guid:meta test (NEED application, sub_app, type, json_data, start_test, end_time)
 =end      
       copy_meta_test(application, sub_app, type, json_data, start_test, end_time, start_test['runner'], store)
-            
+      
+      @logger.debug "get runner and store results"      
       source_result_info = json_data['servers']['results']
       runner = Apps::Bootstrap.runner_list[start_test['runner'].to_sym]
+      @logger.debug "store results"
       runner.store_results(application, sub_app, type, json_data['guid'], source_result_info, storage_info, store)
-      
+      @logger.debug "finish storing results"
       source_config_info = json_data['servers']['config'] if json_data['servers'].has_key?('config')
+      @logger.debug "copy configs if required"
       copy_configs(application, sub_app, type, json_data['guid'], source_config_info, storage_info, store) if source_config_info
-      
+      @logger.debug "finish copy configs"
+
       if storage_info['destination'] == 'localhost'
+        @logger.debug "create directory in file store"
         FileUtils.mkdir_p "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}" unless File.exists?("#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}")
+        @logger.debug "copy directory data to file store"
         FileUtils.cp_r "/tmp/#{json_data['guid']}/", "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/"
       else
         Net::SSH.start(server, 'root') do |ssh|
