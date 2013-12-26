@@ -125,7 +125,9 @@ class PerfApp < Sinatra::Base
           :title => new_app.config['application']['name'],
           :request_response_list => Models::Test.new(new_app.db).get_setup_requests_by_name(app[:id], name),
           :config_list => Models::Configuration.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
-          :test_location_list => Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name)
+          :test_location_list => Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
+          :test_type_list => Apps::Bootstrap.test_list.map {|k, v| {:id => k, :name => v["name"] } },
+          :runner_list => Apps::Bootstrap.runner_list.map { |k, _| k }
         }
       else
         status 404
@@ -135,12 +137,237 @@ class PerfApp < Sinatra::Base
     end
   end
   
-  post '/:application/applications/:name/upload' do |application, name|
-    puts request.inspect
-    puts params
-    status 201
+  post '/:application/applications/:name/add_request_response' do |application, name|
+    halt 400, "No request specified" unless params['request']
+    halt 400, "No response specified" unless params['response']
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app 
+      new_app = app[:klass].new(settings.deployment)
+      sub_app = new_app.config['application']['sub_apps'].find do |sa|
+        sa['id'] == name
+      end
+      if sub_app
+        begin 
+          Models::Test.new(new_app.db).add_request_response(application, name, new_app.storage_info, params['request'], params['response'])
+          status 201
+          erb :app_detail_update, :locals => {
+            :application => app[:id],
+            :sub_app_id => name.to_sym,
+            :title => new_app.config['application']['name'],
+            :request_response_list => Models::Test.new(new_app.db).get_setup_requests_by_name(app[:id], name),
+            :config_list => Models::Configuration.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
+            :test_location_list => Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
+            :test_type_list => Apps::Bootstrap.test_list.map {|k, v| {:id => k, :name => v["name"] } },
+            :runner_list => Apps::Bootstrap.runner_list.map { |k, _| k }
+          }
+        rescue ArgumentError => e
+          halt 404, 'invalid request response'
+        end
+      else 
+        halt 404, 'invalid sub app specified'
+      end
+    else
+      halt 404, 'invalid application specified'
+    end 
+  end
+  
+  post '/:application/applications/:name/update_request_response' do |application, name|
+    halt 400, "No request specified" unless params['request'] || params['request']['request_id']
+    halt 400, "No response specified" unless params['response'] || params['response']['request_id']
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app 
+      new_app = app[:klass].new(settings.deployment)
+      sub_app = new_app.config['application']['sub_apps'].find do |sa|
+        sa['id'] == name
+      end
+      if sub_app
+        begin 
+          Models::Test.new(new_app.db).update_request_response(application, name, new_app.storage_info, params['request'], params['response'])
+          status 200
+        rescue ArgumentError => e
+          halt 404, 'invalid request response'
+        end
+      else 
+        halt 404, 'invalid sub app specified'
+      end
+    else
+      halt 404, 'invalid application specified'
+    end 
+  end
+  
+  delete '/:application/applications/:name/remove_request_response/:requests_to_delete' do |application, name,requests_to_delete|
+    request_ids = requests_to_delete.split(',')
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app 
+      new_app = app[:klass].new(settings.deployment)
+      sub_app = new_app.config['application']['sub_apps'].find do |sa|
+        sa['id'] == name
+      end
+      if sub_app
+        begin 
+          Models::Test.new(new_app.db).remove_request_response(application, name, new_app.storage_info, request_ids)
+          status 200
+          erb :app_detail_update, :locals => {
+            :application => app[:id],
+            :sub_app_id => name.to_sym,
+            :title => new_app.config['application']['name'],
+            :request_response_list => Models::Test.new(new_app.db).get_setup_requests_by_name(app[:id], name),
+            :config_list => Models::Configuration.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
+            :test_location_list => Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
+            :test_type_list => Apps::Bootstrap.test_list.map {|k, v| {:id => k, :name => v["name"] } },
+            :runner_list => Apps::Bootstrap.runner_list.map { |k, _| k }
+          }
+        rescue ArgumentError => e
+          halt 404, 'invalid request ids specified'
+        end
+      else 
+        halt 404, 'invalid sub app specified'
+      end
+    else
+      halt 404, 'invalid application specified'
+    end 
+  end
+  
+  post '/:application/applications/:name/upload_config' do |application, name|
+    config_name = params['upload_config'][:filename]
+    config_body = params['upload_config'][:tempfile]
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app 
+      new_app = app[:klass].new(settings.deployment)
+      sub_app = new_app.config['application']['sub_apps'].find do |sa|
+        sa['id'] == name
+      end
+      if sub_app
+        begin 
+          Models::Configuration.new(new_app.db, new_app.fs_ip).add_config(application, name, new_app.storage_info, config_name, config_body)
+          status 201
+          erb :app_detail_update, :locals => {
+            :application => app[:id],
+            :sub_app_id => name.to_sym,
+            :title => new_app.config['application']['name'],
+            :request_response_list => Models::Test.new(new_app.db).get_setup_requests_by_name(app[:id], name),
+            :config_list => Models::Configuration.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
+            :test_location_list => Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
+            :test_type_list => Apps::Bootstrap.test_list.map {|k, v| {:id => k, :name => v["name"] } },
+            :runner_list => Apps::Bootstrap.runner_list.map { |k, _| k }
+          }
+        rescue ArgumentError => e
+          halt 404, 'invalid config file specified'
+        end
+      else 
+        halt 404, 'invalid sub app specified'
+      end
+    else
+      halt 404, 'invalid application specified'
+    end 
+  end
+  
+  post '/:application/applications/:name/upload_test_file' do |application, name|
+    test_file_name = params['upload_test_file'][:filename]
+    test_file_body = params['upload_test_file'][:tempfile]
+    test_file_runner = params['test_file_runner']
+    test_file_type = params['test_file_type']
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app 
+      new_app = app[:klass].new(settings.deployment)
+      sub_app = new_app.config['application']['sub_apps'].find do |sa|
+        sa['id'] == name
+      end
+      if sub_app
+        begin 
+          Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).add_test_file(application, name, new_app.storage_info, test_file_name, test_file_body, test_file_runner, test_file_type)
+          status 201
+          erb :app_detail_update, :locals => {
+            :application => app[:id],
+            :sub_app_id => name.to_sym,
+            :title => new_app.config['application']['name'],
+            :request_response_list => Models::Test.new(new_app.db).get_setup_requests_by_name(app[:id], name),
+            :config_list => Models::Configuration.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
+            :test_location_list => Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
+            :test_type_list => Apps::Bootstrap.test_list.map {|k, v| {:id => k, :name => v["name"] } },
+            :runner_list => Apps::Bootstrap.runner_list.map { |k, _| k }
+          }
+        rescue ArgumentError => e
+          halt 404, 'invalid config file specified'
+        end
+      else 
+        halt 404, 'invalid sub app specified'
+      end
+    else
+      halt 404, 'invalid application specified'
+    end 
   end
 
+  post '/:application/applications/:name/remove_config' do |application, name|
+    config_list = params['remove_config']
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app 
+      new_app = app[:klass].new(settings.deployment)
+      sub_app = new_app.config['application']['sub_apps'].find do |sa|
+        sa['id'] == name
+      end
+      if sub_app
+        begin 
+          config_list.each do |config_name|
+            Models::Configuration.new(new_app.db, new_app.fs_ip).remove_config(application, name, new_app.storage_info, config_name)
+          end
+          status 200
+          erb :app_detail_update, :locals => {
+            :application => app[:id],
+            :sub_app_id => name.to_sym,
+            :title => new_app.config['application']['name'],
+            :request_response_list => Models::Test.new(new_app.db).get_setup_requests_by_name(app[:id], name),
+            :config_list => Models::Configuration.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
+            :test_location_list => Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
+            :test_type_list => Apps::Bootstrap.test_list.map {|k, v| {:id => k, :name => v["name"] } },
+            :runner_list => Apps::Bootstrap.runner_list.map { |k, _| k }
+          }
+        rescue ArgumentError => e
+          halt 404, 'invalid config file specified'
+        end
+      else 
+        halt 404, 'invalid sub app specified'
+      end
+    else
+      halt 404, 'invalid application specified'
+    end     
+  end
+
+  post '/:application/applications/:name/remove_test_file' do |application, name|
+    test_file_list = params['remove_test_file']
+    app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app 
+      new_app = app[:klass].new(settings.deployment)
+      sub_app = new_app.config['application']['sub_apps'].find do |sa|
+        sa['id'] == name
+      end
+      if sub_app
+        begin 
+          test_file_list.each do |test_file|
+            Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).remove_test_file(application, name, new_app.storage_info, test_file)
+          end
+          status 200
+          erb :app_detail_update, :locals => {
+            :application => app[:id],
+            :sub_app_id => name.to_sym,
+            :title => new_app.config['application']['name'],
+            :request_response_list => Models::Test.new(new_app.db).get_setup_requests_by_name(app[:id], name),
+            :config_list => Models::Configuration.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
+            :test_location_list => Models::TestLocationFactory.new(new_app.db, new_app.fs_ip).get_by_name(app[:id], name),
+            :test_type_list => Apps::Bootstrap.test_list.map {|k, v| {:id => k, :name => v["name"] } },
+            :runner_list => Apps::Bootstrap.runner_list.map { |k, _| k }
+          }
+        rescue ArgumentError => e
+          halt 404, 'invalid config file specified'
+        end
+      else 
+        halt 404, 'invalid sub app specified'
+      end
+    else
+      halt 404, 'invalid application specified'
+    end     
+  end
+  
   get '/:application/applications/:name/test_download/:file_name' do |application, name, file_name|
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app 
@@ -227,7 +454,7 @@ class PerfApp < Sinatra::Base
           :application => app[:id],
           :sub_app_id => name.to_sym,
           :title => new_app.config['application']['name'],
-          :result_set_list => results.past_summary_results.test_results(new_app.db, new_app.fs_ip, results.test_list),
+          :result_set_list => results.past_summary_results.test_results(new_app.db, new_app.fs_ip, results.test_list).sort_by {|r| r.start},
           :plugin_list => plugins,
           :test_type => test
         }
@@ -358,8 +585,13 @@ class PerfApp < Sinatra::Base
                 plugin_instance.new(new_app.db, new_app.fs_ip).order_by_date(data)
             end  
           end
-    
-          erb Apps::Bootstrap.initialize_results[new_app.config['application']['type'].to_sym][:plugin_view], :locals => {
+          
+          puts summary_plugin_data
+            
+          erb PluginModule::PluginView.retrieve_view(
+            summary_plugin_data.map{|k,v|
+              v[:plugin_type]
+            }.first,new_app.config['application']['type'].to_sym), :locals => {
             :application => app[:id],
             :sub_app_id => name.to_sym,
             :title => new_app.config['application']['name'],
@@ -545,7 +777,10 @@ class PerfApp < Sinatra::Base
           if summary_plugin_data and summary_plugin_data[option.to_sym][:content].length > 0   
             summary_plugin_data_list << {
               :id => id, 
-              :data => summary_plugin_data
+              :data => summary_plugin_data,
+              :plugin_type => summary_plugin_data_list.map{|k,v|
+                v[:plugin_type]
+              }.first
             }
             valid_comparison_id_list << id
           end
@@ -553,17 +788,20 @@ class PerfApp < Sinatra::Base
         
         #detailed_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_detailed_data(application, name, test, option, id)
         if summary_plugin_data_list and valid_comparison_id_list.length > 0
-          erb :results_plugin_test_compare, :locals => {
-            :application => app[:id],
-            :sub_app_id => name.to_sym,
-            :title => new_app.config['application']['name'],
-            :summary_plugin_data_list => summary_plugin_data_list,
-            :test_type => test,
-            :compare_guids => valid_comparison_id_list,
-            :plugin_name => plugin,
-            :plugin_id => plugin_id,
-            :option => option
-          }
+          erb PluginModule::PluginView.retrieve_view(
+            summary_plugin_data_list.first[:plugin_type],
+            new_app.config['application']['type'].to_sym
+            ), :locals => {
+              :application => app[:id],
+              :sub_app_id => name.to_sym,
+              :title => new_app.config['application']['name'],
+              :summary_plugin_data_list => summary_plugin_data_list,
+              :test_type => test,
+              :compare_guids => valid_comparison_id_list,
+              :plugin_name => plugin,
+              :plugin_id => plugin_id,
+              :option => option
+            }
         else
           halt 404, "No data for #{plugin_id} found"
         end
@@ -688,7 +926,7 @@ class PerfApp < Sinatra::Base
         content_type :json
         halt 400, { "fail" => "required keys are missing"}.to_json unless json_data.has_key?("name") and json_data.has_key?("length") and json_data.has_key?("runner")
         guid_response = new_app.start_test_recording(application, name, test.chomp('_test'), json_data)
-        halt 400, {'Content-Type' => 'application/json'}, {'fail' => 'test for atom_hopper/main/load_test already started'}.to_json if guid_response.length == 0
+        halt 400, {'Content-Type' => 'application/json'}, {'fail' => "test for #{application}/#{name}/#{test} already started"}.to_json if guid_response.length == 0
         halt 400, {'Content-Type' => 'application/json'}, guid_response if JSON.parse(guid_response).has_key?("fail")
         body guid_response
       end

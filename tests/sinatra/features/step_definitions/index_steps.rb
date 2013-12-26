@@ -8,6 +8,9 @@ fs_ip = nil
 set_app = nil
 set_name = nil
 set_test = nil
+config_count = 0
+current_config_count = 0
+
 
 Given(/^No tests are started for "(.*?)" "(.*?)" "(.*?)"$/) do |application, name, test|
   #here, check that no ids are in "application:test:main:load_test:start"
@@ -67,6 +70,19 @@ Given(/^Test is started for "(.*?)" "(.*?)" "(.*?)" initial test$/) do |applicat
   end
 end
 
+Given(/^Test is started for "(.*?)" "(.*?)" "(.*?)" secondary test$/) do |application, name, test|
+  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app 
+    new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
+    started_test = JSON.parse(Redis.new(new_app.db).get("#{application}:test:#{name}:#{test}:start"))
+    set_app = application
+    set_name = name
+    set_test = test
+    guid = started_test['guid']
+  end
+end
+
 Given(/^Running for "(.*?)" "(.*?)" "(.*?)"$/) do |application, name, test|
   Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
   app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
@@ -92,22 +108,6 @@ Given(/^Running for "(.*?)" "(.*?)" "(.*?)"$/) do |application, name, test|
   end
 end
 
-When(/^I upload "(.*?)" config file to "(.*?)" "(.*?)" application$/) do |config_name, application, name|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-  if app 
-    new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
-    fs_ip = new_app.fs_ip
-    set_app = application
-    set_name = name
-  end
-
-  path = "/#{application}/applications/#{name}/update"
-  visit path
-  attach_file("upload_config", config_name)
-  click_on("upload_config_button")
-end
-
 When(/^I post to "([^\"]*)" with '(.*?)'$/) do |path, post_data|
   	post(path, JSON.parse(post_data))
 end
@@ -131,9 +131,13 @@ When(/^I post to "([^\"]*)" with:$/) do |path, post_data|
     post(path, JSON.parse(post_data))
 end
 
-When /^I navigate to '([^\"]*)'$/ do |path|
-  	get path
+When(/^I delete from "([^\"]*)"$/) do |path|
+    delete path
 end
+
+#When /^I navigate to '([^\"]*)'$/ do |path|
+#  	get path
+#end
 
 When /^I click on '([^\"]*)'$/ do |path|
   	get path
@@ -158,6 +162,14 @@ When(/^I post to '([^\"]*)' with non\-existing guid$/) do |path, post_data|
     post(path, data)
 end
 
+Then /^the error should match the "([^\"]*)"$/ do |error|
+  last_response.body.include?(error).should be(true)
+end
+
+Then /^the message should contain "([^\"]*)"$/ do |msg|
+  last_response.body.include?(msg).should be(true)
+end
+
 Then /^the file upload response should be ([^\"]*)$/ do |status|
   page.status_code.should == status.to_i
 end
@@ -171,19 +183,39 @@ Then /^the file upload response should be json$/ do
   is_json == true
 end
 
-Then(/^the "(.*?)" list should contain "(.*?)" json entries in redis$/) do |redis_key, count|
+Then(/^the "(.*?)" list should contain "(.*?)" json entries in redis for "(.*?)" "(.*?)"$/) do |redis_key, count, application, name|
   result = nil
   main_config = Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == set_app}
+  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
   if app 
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
-    Redis.new(new_app.db).lrange("#{set_app}:#{set_name}:setup:configs", 0, -1).length.should == count.to_i
+    result = Redis.new(new_app.db).lrange("#{application}:#{name}:setup:configs", 0, -1)
+    result.length.should == count.to_i
   end  
   result.should_not be_nil
     
 end
 
+Then(/^the "(.*?)" list should contain "(.*?)" entries in redis for "(.*?)" application$/) do |list, count, application|
+  result = nil
+  main_config = Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app
+    new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
+    result = Redis.new(new_app.db).lrange(list, 0, -1)
+    result.length.should == count.to_i
+  end  
+  result.should_not be_nil
+end
+
+Then(/^the "(.*?)" directory should contain "(.*?)" entries for "(.*?)" application$/) do |directory, count, application|
+  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = Apps::Bootstrap.storage_info
+  Dir.entries("#{storage_info['path']}/#{storage_info['prefix']}/#{directory}").size.should be(count + 2)
+end
+
 Then /^the response should be "([^\"]*)"$/ do |status|
+puts last_response.body
 	last_response.status.should == status.to_i
 end
 
@@ -272,49 +304,9 @@ Then /^the page should contain the "([^\"]*)" version$/ do |template|
 	last_response.body.should match /#{Regexp.escape(result)}/
 end
 
-Then /^the page should contain "([^\"]*)" applications$/ do |app_list|
-	app_found = true
-	app_list.split(',').each do |app|
-		app_found = last_response.body.include?(app)
-		break unless app_found
-	end
-
-	app_found.should == true
-end
-
-Then /^the page should contain "([^\"]*)" configuration$/ do |config_list|
-	config_found = true
-	config_list.split(',').each do |config|
-		config_found = last_response.body.include?(config)
-		break unless config_found
-	end
-
-	config_found.should == true
-end
-
-Then /^the page should contain "([^\"]*)" test types$/ do |test_type_list|
-	test_type_found = true
-	test_type_list.split(',').each do |test_type|
-		test_type_found = last_response.body.include?(test_type)
-		break unless test_type_found
-	end
-
-	test_type_found.should == true
-end
-
 Then /^the download page should match the "([^\"]*)" version$/ do |runner|
 	result = File.read(File.join(File.dirname(__FILE__), '..', "views/#{runner}.runner"))
 	last_response.body.should == result
-end
-
-Then /^the error page should match the "([^\"]*)"$/ do |error|
-	last_response.body.should == error
-end
-
-Then(/^the "(.*?)" directory should contain "(.*?)" file$/) do |directory, name|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  storage_info = Apps::Bootstrap.storage_info
-  File.exists?("#{storage_info['path']}/#{storage_info['prefix']}/#{set_app}/#{set_name}/results/#{set_test}/#{guid}/#{directory}/#{name}").should be(true)
 end
 
 Then(/^the "(.*?)" json entry for "(.*?)" hash key in redis should exist$/) do |entry, key|
@@ -368,6 +360,18 @@ Then(/^the "(.*?)" directory should not contain "(.*?)" file$/) do |directory, n
   File.exists?("#{storage_info['path']}/#{storage_info['prefix']}/#{set_app}/#{set_name}/results/#{set_test}/#{guid}/#{directory}/#{name}").should be(false)
 end
 
+Then(/^the "(.*?)" directory should contain "(.*?)" result file$/) do |directory, name|
+  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = Apps::Bootstrap.storage_info
+  File.exists?("#{storage_info['path']}/#{storage_info['prefix']}/#{set_app}/#{set_name}/results/#{set_test}/#{guid}/#{directory}/#{name}").should be(true)
+end
+
+Then(/^the "(.*?)" directory should not contain "(.*?)" result file$/) do |directory, name|
+  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = Apps::Bootstrap.storage_info
+  File.exists?("#{storage_info['path']}/#{storage_info['prefix']}/#{set_app}/#{set_name}/results/#{set_test}/#{guid}/#{directory}/#{name}").should be(false)
+end
+
 Then(/^the "(.*?)" json entry for "(.*?)" hash key in redis does not contain "(.*?)" key and "(.*?)" value$/) do |entry, key, json_key, json_value|
   result = nil
   main_config = Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
@@ -392,7 +396,8 @@ Then(/^the "(.*?)" json entry for "(.*?)" hash key in redis contains "(.*?)" key
   result.should_not be_nil
 end
 
-After do |scenario|
+After('~@index,~@application') do |scenario|
+  puts "after"
   Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
   storage_info = Apps::Bootstrap.storage_info
   FileUtils.rm_rf("#{storage_info['path']}/#{storage_info['prefix']}/#{set_app}/#{set_name}/results/#{set_test}/#{guid}")
@@ -407,8 +412,4 @@ After do |scenario|
       Redis.new(new_app.db).del("#{set_app}:test:#{set_name}:#{set_test}:start")
     end
   end   
-end
-
-After('@update_application') do
-  
 end

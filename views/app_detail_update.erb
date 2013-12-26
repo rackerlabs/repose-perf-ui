@@ -57,23 +57,35 @@
         <div class="panel-heading">
           <h3 class="panel-title">Configurations</h3>
         </div>
-        <div class="accordion" id="config-accordion">
-          <% config_list.each do |key, config| %>
-          <div class="accordion-group">
-            <div class="accordion-heading">
-              <a class="accordion-toggle" data-toggle="collapse" data-parent="#config-accordion" href="#<%= key %>"><%= key %></a>
-            </div>
-            <div id="<%= key %>" class="accordion-body collapse in">
-              <div class="accordion-inner">
-                <pre class="prettyprint linenums languague-css"><!-- --><%= config %><!-- --></pre>
-              </div>
-            </div>
-          </div>
-          <% end %>
-        </div>
-        <form action="upload" method="POST" enctype='multipart/form-data'>
-        <input type="file" name="upload_config" value=""><br/>
-        <input type="submit" name="Upload Config" value="upload_config_button" />
+        <form role="form" action="remove_config" method="POST">
+	        <div class="accordion" id="config-accordion">
+	          <% config_list.each do |key, config| %>
+	          <div class="accordion-group">
+	            <div class="accordion-heading">
+	              <a class="accordion-toggle" data-toggle="collapse" data-parent="#config-accordion" href="#<%= key %>">
+	              	<%= key %>
+				  </a>
+	                  <label style="margin-left: 10px;">
+	                    <input type="checkbox" name="remove_config[]" id="config_<%=key %>" value="<%=key %>"> Remove
+	                  </label>
+	            </div>
+	            <div id="<%= key %>" class="accordion-body collapse in">
+	              <div class="accordion-inner">
+	                <pre class="prettyprint linenums languague-css"><!-- --><%= config %><!-- --></pre>
+	              </div>
+	            </div>
+	          </div>
+	          <% end %>
+	        </div>
+	        <input type="submit" value="Remove selected configs" id="remove_configs_button" class="btn btn-warning" />
+        </form>
+        <form action="upload_config" method="POST" enctype='multipart/form-data' role="form" style="margin-top: 2em;">
+        	<fieldset>
+	        	<div class="form-group">
+			        <input type="file" name="upload_config" value=""><br/>
+			    </div>
+		        <input type="submit" value="Upload Config" id="upload_config_button"  class="btn btn-primary btn-lg btn-block"/>
+        	</fieldset>
         </form>
       </div>
       <div class="panel panel-info">
@@ -82,12 +94,36 @@
         </div>
         <div class="row">
           <label for="testLocation" class="col-lg-2 control-label">Test Location</label>
+	        <form role="form" action="remove_test_file" method="POST">
 <% test_location_list.each do |test_location| %>          
-          <div class="col-lg-10">
-            <a href="/<%= application %>/applications/<%= sub_app_id %>/test_download/<%= test_location.type %>"><%= test_location.type %></a>
-          </div>
-<% end %>          
+	          <div class="col-lg-10">
+	            <a href="/<%= application %>/applications/<%= sub_app_id %>/test_download/<%= test_location.type %>"><%= test_location.type %></a>
+	              <label style="margin-left: 10px;">
+	                <input type="checkbox" name="remove_test_file[]" id="test_file|||<%=test_location.type %>" value="<%=test_location.type %>"> Remove
+	              </label>
+	          </div>
+<% end %> 
+		        <input type="submit" value="Remove selected test files" id="remove_test_file_button" class="btn btn-warning" />
+			</form>         
         </div>
+        <form action="upload_test_file" method="POST" enctype='multipart/form-data' role="form" style="margin-top: 2em;">
+        	<fieldset>
+	        	<div class="form-group">
+			        <input type="file" name="upload_test_file" value=""><br/>
+			        <select class="form_control" name="test_file_runner">
+<% runner_list.each do |runner| %>
+						<option value="<%= runner %>" ><%= runner %></option>
+<% end %>			        	
+			        </select>
+			        <select class="form_control" name="test_file_type">
+<% test_type_list.each do |test_type| %>
+						<option value="<%= test_type[:id] %>" ><%= test_type[:name] %></option>
+<% end %>			        	
+			        </select>
+			    </div>
+		        <input type="submit" value="Upload Test File" id="upload_test_file_button"  class="btn btn-primary btn-lg btn-block"/>
+        	</fieldset>
+        </form>
       </div>
     </div>
     <hr>

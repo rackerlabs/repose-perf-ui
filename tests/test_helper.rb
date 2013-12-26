@@ -19,9 +19,18 @@ require './tests/Models/test_tests.rb'
 require './tests/Models/testlocation_tests.rb'
 =end
 
-system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/sysstats_plugin_results.feature tests/sinatra/features/compare_sysstats_plugin_results.feature"
+system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/load_repose_plugin_results.feature tests/sinatra/features/sysstats_plugin_results.feature tests/sinatra/features/load_graphite_plugin_results.feature tests/sinatra/features/graphite_plugin_results.feature"
 
-#system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/load_repose_plugin_results.feature tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/load_sysstats_plugin_results.feature tests/sinatra/features/sysstats_plugin_results.feature"
+#tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/compare_sysstats_plugin_results.feature"
+
+#newrelic, nagios, postgres - all by monday
+
+#next week -- rest, before/after for graphite, new relic, nagios, postgres
+#week after that - 100% code coverage on unit + mongo
+#---- PRESENTATION WEEK!!!
+#week after that - trends across all tests, emails
+
+#system " tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/load_sysstats_plugin_results.feature tests/sinatra/features/sysstats_plugin_results.feature"
 =begin
 
 - stop actually saves the data 
@@ -31,10 +40,10 @@ system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/app
   - Log4J Adapter
   - Postgres Adapter
 tests/sinatra/features/update_app.feature - this includes updating configs/test/test.json/test_runner.json/requests/response
+tests/sinatra/features/rest_plugin.feature
+tests/sinatra/features/before_after_plugin_type.feature
+tests/sinatra/features/time_series_plugin_type.feature
 tests/sinatra/features/slas.feature
-tests/sinatra/features/email.feature
-tests/sinatra/features/trends.feature
-tests/sinatra/features/jmeter.feature
 tests/sinatra/features/newrelic_plugin.feature
 tests/sinatra/features/load_newrelic_plugin.feature
 tests/sinatra/features/compare_newrelic_plugin.feature
@@ -52,6 +61,10 @@ tests/sinatra/features/load_log4j_plugin.feature
 tests/sinatra/features/compare_log4j_plugin.feature
 tests/sinatra/features/start_stop_view.feature
 tests/sinatra/features/update_app_view.feature
+tests/sinatra/features/email.feature
+tests/sinatra/features/trends.feature
+tests/sinatra/features/diffy.feature
+tests/sinatra/features/jmeter.feature
 tests/sinatra/features/gatling.feature
 tests/sinatra/features/calendar.feature
 

@@ -1,5 +1,5 @@
 require File.expand_path("Models/runner.rb", Dir.pwd)
-require File.expand_path("Models/plugin.rb", Dir.pwd)
+require File.expand_path("Models/plugins/plugin.rb", Dir.pwd)
 
 require 'yaml'
 require 'redis'
@@ -62,7 +62,7 @@ module Apps
     def self.runner_list
       {
         :jmeter => Models::JMeterRunner.new,
-        :pravega => Models::PravegaRunner.new,
+        :gatling => Models::GatlingRunner.new,
         :flood => Models::FloodRunner.new,
         :autobench => Models::AutoBenchRunner.new
       }
@@ -97,14 +97,12 @@ module Apps
         :comparison => {
           :klass => Results::ComparisonResults.new,
           :summary_view => :comparison_summary_results,
-          :detailed_view => :comparison_detailed_results,
-          :plugin_view => :comparison_plugin_results
+          :detailed_view => :comparison_detailed_results
         },
         :singular => {
           :klass => Results::SingularResults.new,
           :summary_view => :singular_summary_results,
-          :detailed_view => :singular_detailed_results,
-          :plugin_view => :singular_plugin_results
+          :detailed_view => :singular_detailed_results
         }
       }
     end
@@ -148,7 +146,7 @@ module Apps
           require plugin unless File.directory?(plugin)
         end
       end
-      plugin_key_list.map {|p| Plugin.plugin_list[p.to_sym]} 
+      plugin_key_list.map {|p| PluginModule::Plugin.plugin_list[p.to_sym]} 
     end
 
     def start_test_recording(application, sub_app = 'main', type = 'load', json_data = {}, timestamp = nil)
@@ -167,6 +165,7 @@ module Apps
           start_test = {:guid => guid, :time => start_time }.merge(json_data).to_json
           @logger.debug "start test guid: #{start_test}"
           store.set(id, start_test)
+          # for all plugins get the ones that are :before_after and get the data into temp redis and save to file
         end
       rescue => e
         @logger.error "failed with: #{e}"
@@ -205,6 +204,7 @@ module Apps
         return result
       rescue => e
         @logger.error "failed with: #{e}"
+        @logger.error e.backtrace
         return {"fail" => e.message}
       ensure
         FileUtils.rm_rf("/tmp/#{json_data['guid']}")
@@ -234,6 +234,7 @@ module Apps
       script_info_list = store.lrange("#{application}:#{sub_app}:tests:setup:script", 0, -1)
       script_info_list.each do |script_info|
         script_json_info = JSON.parse(script_info)
+        @logger.debug "script info: #{script_json_info}"
         if script_json_info['test'] == type
           script_result_json = {}
           script_result_json['name'] = script_json_info['name']

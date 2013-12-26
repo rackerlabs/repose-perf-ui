@@ -50,10 +50,17 @@
             </thead>
             <tbody>
 <% result_set_list.each do |result| %>
+<%  
+   begin
+     date =DateTime.parse(result.start)
+   rescue
+   	 date = DateTime.strptime(result.start.chomp("000"), '%s')
+   end
+%>
               <tr>
                 <td><%= result.name %></td>
                 <td><%= result.description %></td>
-                <td><a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/id/<%= result.id %>"><%= DateTime.strptime(result.start.chomp("000"), '%s')  %></td>
+                <td><a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/id/<%= result.id %>"><%= date %></td>
                 <td><%= result.avg %> ms</td>
                 <td><%= result.throughput %> rps</td>
                 <td><%= result.errors %> total errors</td>
@@ -72,7 +79,7 @@
                 <td>
                   <div class="checkbox">
                     <label>
-                      <input type="checkbox" name="compare[]" value="<%=result.id %>">
+                      <input type="checkbox" name="compare[]" id="<%=result.id %>" value="<%=result.id %>">
                     </label>
                   </div>
                 </td>
@@ -82,7 +89,7 @@
             <tfoot>
               <tr>
                 <td colspan="6">
-                  <button type="submit" class="btn btn-primary">Compare Tests</button>
+                  <button type="submit" class="btn btn-primary" id="compare_tests_button">Compare Tests</button>
                 </td>
               </tr>
             </tfoot>

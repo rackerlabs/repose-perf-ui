@@ -1,5 +1,5 @@
-require_relative './../../Models/plugin.rb'
-require_relative './../../Models/plugin_results.rb'
+require_relative './../../Models/plugins/plugin.rb'
+require_relative './../../Models/plugins/plugin_results.rb'
 require_relative 'cpuresultstrategy.rb'
 require_relative 'kernelresultstrategy.rb'
 require_relative 'devicediskresultstrategy.rb'
@@ -13,7 +13,7 @@ require_relative 'tcpnetworkresultstrategy.rb'
 require_relative 'ipfailurenetworkresultstrategy.rb'
 require_relative 'ipnetworkresultstrategy.rb'
 
-class SysstatsPlugin < Plugin
+class SysstatsPlugin < PluginModule::Plugin
 
     def self.supported_os_list
       [:linux]
@@ -33,73 +33,85 @@ class SysstatsPlugin < Plugin
           :id => 'cpu',
           :name => 'CPU metrics',
           :klass => SysstatsPluginModule::CpuResultStrategy,
-          :execution => 'sar -u'
+          :execution => 'sar -u',
+          :type => :time_series
         },
         {
           :id => 'kernel',
           :name => 'Kernel metrics',
           :klass => SysstatsPluginModule::KernelResultStrategy,
-          :execution => 'sar -v'
+          :execution => 'sar -v',
+          :type => :time_series
         },
         {
           :id => 'memory_swap',
           :name => 'Memory Swap metrics',
           :klass => SysstatsPluginModule::MemorySwapResultStrategy,
-          :execution => 'sar -S'
+          :execution => 'sar -S',
+          :type => :time_series
         },
         {
           :id => 'memory_page',
           :name => 'Memory page metrics',
           :klass => SysstatsPluginModule::MemoryPageResultStrategy,
-          :execution => 'sar -R'
+          :execution => 'sar -R',
+          :type => :time_series
         },
         {
           :id => 'memory_utilization',
           :name => 'Memory utilization metrics',
           :klass => SysstatsPluginModule::MemoryUtilizationResultStrategy,
-          :execution => 'sar -r'
+          :execution => 'sar -r',
+          :type => :time_series
         },
         {
           :id => 'tcp_failure_network',
           :name => 'TCP Failure metrics',
           :klass => SysstatsPluginModule::TcpFailureNetworkResultStrategy,
-          :execution => 'sar -n ETCP'
+          :execution => 'sar -n ETCP',
+          :type => :time_series
         },
         {
           :id => 'tcp_network',
           :name => 'TCP',
           :klass => SysstatsPluginModule::TcpNetworkResultStrategy,
-          :execution => 'sar -n TCP'
+          :execution => 'sar -n TCP',
+          :type => :time_series
         },
         {
           :id => 'ip_failure_network',
           :name => 'IP Failure metrics',
           :klass => SysstatsPluginModule::IpFailureNetworkResultStrategy,
-          :execution => 'sar -n EIP'
+          :execution => 'sar -n EIP',
+          :type => :time_series
         },
         {
           :id => 'ip_network',
           :name => 'IP metrics',
           :klass => SysstatsPluginModule::IpNetworkResultStrategy,
-          :execution => 'sar -n IP'
+          :execution => 'sar -n IP',
+          :type => :time_series
         },
         {
           :id => 'device_network',
           :name => 'Device Network metrics',
           :klass => SysstatsPluginModule::DeviceNetworkResultStrategy,
-          :execution => 'sar -n DEV'
+          :execution => 'sar -n DEV',
+          :type => :time_series
         },
         {
           :id => 'device_disk',
           :name => 'Device Disk metrics',
           :klass => SysstatsPluginModule::DeviceDiskResultStrategy,
-          :execution => 'sar -d'
+          :execution => 'sar -d',
+          :type => :time_series
         },
         {
           :id => 'device_failure',
           :name => 'Device Network Failure metrics',
           :klass => SysstatsPluginModule::DeviceFailureNetworkResultStrategy,
-          :execution => 'sar -n EDEV'
+          :execution => 'sar -n EDEV',
+          :type => :time_series
         }
       ]
     end
@@ -111,7 +123,11 @@ class SysstatsPlugin < Plugin
           metric[:klass].new(
             @db, @fs_ip, application, name, test.chomp('_test'), test_id, metric[:id]
           )
-        ).retrieve_average_results, metric[:id].to_sym, {}
+        ).retrieve_average_results, 
+        metric[:id].to_sym, 
+        {}, 
+        metric[:klass].metric_description,
+        metric[:type]
       ) if metric
     end
 
@@ -126,7 +142,11 @@ class SysstatsPlugin < Plugin
           metric[:klass].new(
             @db, @fs_ip, application, name, test.chomp('_test'), test_id, metric[:id]
           )
-        ).retrieve_detailed_results, metric[:id].to_sym, {}
+        ).retrieve_detailed_results, 
+        metric[:id].to_sym, 
+        {}, 
+        metric[:klass].metric_description,
+        metric[:type]
       ) if metric
     end
 

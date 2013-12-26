@@ -83,7 +83,7 @@
                 <td>
                   <div class="checkbox">
                     <label>
-                      <input type="checkbox" name="compare[]" value="<%=result.id %>">
+                      <input type="checkbox" id="<%=result.id %>" name="compare[]" value="<%=result.id %>">
                     </label>
                   </div>
                 </td>
@@ -93,7 +93,7 @@
             <tfoot>
               <tr>
                 <td colspan="6">
-                  <button type="submit" class="btn btn-primary">Compare Tests</button>
+                  <button type="submit" class="btn btn-primary" id="compare_tests_button">Compare Tests</button>
                 </td>
               </tr>
             </tfoot>

@@ -88,5 +88,67 @@ module Models
       response
     end
     
+    def add_request_response(application, name, storage_info, request, response)
+      store = Redis.new(@db)
+      request_id_list = store.get("#{application}:#{name}:tests:setup:request_response:request")
+      response_id_list = store.get("#{application}:#{name}:tests:setup:request_response:response")
+
+      if request_id_list
+        request_list = JSON.parse(request_id_list)
+        request_id = request_list.map {|r| r['request_id']}.max + 1
+      else
+        request_list = []
+        request_id = 1
+      end
+      
+      request['request_id'] = request_id
+      
+      request_list << request
+      
+      if response_id_list
+        response_list = JSON.parse(response_id_list)
+      else
+        response_list = [] 
+      end
+
+      response['request_id'] = request_id
+      response_list << response
+
+      begin
+        store.set("#{application}:#{name}:tests:setup:request_response:request", request_list.to_json)
+        store.set("#{application}:#{name}:tests:setup:request_response:response", response_list.to_json)
+      end
+    end
+    
+    def update_request_response(application, name, storage_info, request, response)
+      store = Redis.new(@db)
+      request_id_list = JSON.parse(store.get("#{application}:#{name}:tests:setup:request_response:request"))
+      response_id_list = JSON.parse(store.get("#{application}:#{name}:tests:setup:request_response:response"))
+      
+      request_list = request_id_list.delete_if {|r| r['request_id'].to_i == request['request_id'].to_i }
+      response_list = response_id_list.delete_if {|r| r['request_id'].to_i == response['request_id'].to_i }
+  
+      request_list << request
+      response_list << response
+  
+      begin
+        store.set("#{application}:#{name}:tests:setup:request_response:request", request_list.to_json)
+        store.set("#{application}:#{name}:tests:setup:request_response:response", response_list.to_json)
+      end
+    end
+    
+    def remove_request_response(application, name, storage_info, request_ids)
+      store = Redis.new(@db)
+      request_id_list = JSON.parse(store.get("#{application}:#{name}:tests:setup:request_response:request"))
+      response_id_list = JSON.parse(store.get("#{application}:#{name}:tests:setup:request_response:response"))
+      
+      request_list = request_id_list.delete_if {|r| request_ids.include?(r['request_id'].to_s) }
+      response_list = response_id_list.delete_if {|r| request_ids.include?(r['request_id'].to_s) }
+
+      begin
+        store.set("#{application}:#{name}:tests:setup:request_response:request", request_list.to_json)
+        store.set("#{application}:#{name}:tests:setup:request_response:response", response_list.to_json)
+      end
+    end    
   end
 end

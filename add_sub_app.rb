@@ -117,6 +117,7 @@ redis = Redis.new({:host => config['redis']['host'], :port => config['redis']['p
 logger.info "we're connected here: #{redis}"
 
 Dir.glob("#{opts[:configs]}/**/*").each do |f|
+  logger.info "we are here"
   unless File.directory?(f)
     logger.info "log this config: #{f}"
     name_to_save = f.gsub(/^#{Regexp.escape(opts[:configs])}\//,"")
@@ -137,7 +138,7 @@ Dir.glob("#{opts[:configs]}/**/*").each do |f|
         )
     end
   end
-end
+end if opts[:configs]
   
 logger.info "now add the meta info"
 redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "test_load_jmeter", "{ \"host\":\"localhost\", \"startdelay\":10, \"rampup\":10, \"duration\":3600, \"rampdown\":10, \"throughput\":500}", "test_stress_jmeter", "{ \"host\":\"localhost\", \"startdelay\":10, \"rampup\":5, \"duration\":300, \"rampup_threads\":5, \"maxthreads\":500}")

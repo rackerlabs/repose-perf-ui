@@ -1,141 +1,206 @@
+@application
 Feature: Application Page
 	In order to view applications
 	As a performance test user
 	I want to view the sub applications page for each application
 
-	Scenario: Navigate to sub applications page of atom_hopper application
-		When I navigate to '/atom_hopper/applications'
-		Then the response should be "200"
+	Scenario: Navigate to sub applications page of comparison_app application
+		Given I navigate to '/comparison_app'
+		When I click on "Applications"
+		Then the page response status code should be "200"
 		And the page should contain "main" applications
 
 	Scenario: Navigate to sub applications page of invalid application
 		When I navigate to '/invalid/applications'
-		Then the response should be "404"
+		Then the page response status code should be "404"
 
 	Scenario: Navigate to main application
-		When I navigate to '/atom_hopper/applications/main'
-		Then the response should be "200"
+		Given I navigate to '/comparison_app/applications'
+		When I click on 'main'
+		Then the page response status code should be "200"
 		And the page should contain "config1_xml" configuration
 
 	Scenario: Download main test runner file
-		When I click on '/atom_hopper/applications/main/test_download/jmeter'
-		Then the response should be "200"
-		And the download page should match the "jmeter_main" version
+		Given I navigate to '/comparison_app/applications/main'
+		When I click on "jmeter_load"
+		Then the page response status code should be "200"
+		And the page should have "text/html;charset=utf-8" "content-type" header
+		And download file name should be "test_file"
 
-	Scenario: Navigate to invalid sub application of atom_hopper application
-		When I navigate to '/atom_hopper/applications/invalid'
-		Then the response should be "404"
+	Scenario: Navigate to invalid sub application of comparison_app application
+		When I navigate to '/comparison_app/applications/invalid'
+		Then the page response status code should be "404"
 
 	Scenario: Navigate to main sub application of repose application, which doesn't have requests and responses
 		When I navigate to '/overhead/applications/main'
-		Then the page should match the "response_and_requests_not_found" version
+		Then the page response status code should be "500"
+		Then the page should contain "required requests and response jsons are not available. These files are required to let users know what execution happens during a test run."
 
 	Scenario: Navigate to main sub application of no_store application, which has a misconfigured file store
 		When I navigate to '/no_store/applications/main'
-		Then the page should match the "misconfigured_file_store" version
+		Then the page response status code should be "500"
+		Then the page should contain "Unable to gather required data. There's a misconfiguration to connect to backend services."
 
 	Scenario: Navigate to invalid sub application of invalid application
 		When I navigate to '/invalid/applications/invalid'
-		Then the response should be "404"
+		Then the page response status code should be "404"
 
 	Scenario: Download invalid test runner file
-		When I click on '/atom_hopper/applications/not_found/test_download/jmeter'
-		Then the response should be "404"
-		And the error page should match the "No test script exists for atom_hopper/not_found"
+		When I navigate to '/comparison_app/applications/not_found/test_download/jmeter'
+		Then the page response status code should be "404"
+		And the page should contain "No test script exists for comparison_app/not_found"
 
 	Scenario: Download test runner file from invalid application
 		When I click on '/invalid/applications/not_found/test_download/jmeter'
 		Then the response should be "404"
-		And the error page should match the "No test script exists for invalid/not_found"
+		And the error should match the "No test script exists for invalid/not_found"
 
 	@update_application		
-	Scenario: Add a new config to atom hopper application
-		When I upload "/Users/dimi5963/cloud.rb" config file to "atom_hopper" "main" application
-		Then the file upload response should be 201		
-		And response should be a json
-		And the "atom_hopper:main:setup:configs" list should contain "2" json entries in redis
-		And the "atom_hopper/main/setup/configs" directory should contain "config2" file
-		And "fail" json record should equal to "No application by name of invalid/load_test found" 
+	Scenario: Add a new config to comparison app application
+	    Given "1" config files exist in "comparison_app" "main" application
+		When I upload "/Users/dimi5963/pt_passthrough.jmx" config file to "comparison_app" "main" application
+		Then the page response status code should be "201"		
+		And the "comparison_app:main:setup:configs" list should contain "2" json entries in redis for "comparison_app" "main"
+		And the "comparison_app/main/setup/configs" directory should contain "pt_passthrough.jmx" file
+		And the page should contain "config1"
+		And the page should contain "pt_passthrough_jmx"
+		And remove "pt_passthrough_jmx" config from "comparison_app" "main"
+	
+	@update_application	
+	Scenario: Remove a config from comparison app application
+		Given "config2" config file exists in "comparison_app" "main" application
+	    And "2" config files exist in "comparison_app" "main" application
+	    When I navigate to '/comparison_app/applications/main/update'
+		And I remove "config_config2" config file
+		Then the page response status code should be "200"		
+		And the "comparison_app:main:setup:configs" list should contain "1" entries in redis for "comparison_app" application
+		And the "comparison_app/main/setup/configs" directory should contain "1" entries for "comparison_app" application
+		And the page should contain "config1"
+		And the page should not contain "config2"
 		
-	Scenario: Remove a config from atom hopper application
-		Given "config2" config file exists in "atom_hopper" "main" application
-		When I remove "config2" config file from "atom_hopper" "main" application
-		Then the response should be "204"		
-		And response should be a json
-		And the "atom_hopper:main:setup:configs" list should contain "0" entries in redis
-		And the "atom_hopper/main/setup/configs" directory should be empty
-		And "fail" json record should equal to "No application by name of invalid/load_test found" 
+	@update_application
+	Scenario: Update test in comparison app application
+		Given "0" "gatling" "load" test files exist in "comparison_app" "main" application
+		When I navigate to '/comparison_app/applications/main/update'
+		And I select "gatling" "test_file_runner"
+		And I select "Load Test" "test_file_type"
+		And I upload "/Users/dimi5963/pt_passthrough.jmx" test file
+		Then the page response status code should be "201"		
+		And the "comparison_app:main:tests:setup:script" list should contain "2" entries in redis for "comparison_app" application
+		And the "comparison_app/main/setup/meta" directory should contain "2" entries for "comparison_app" application
+		And the page should contain "jmeter_load"
+		And the page should contain "gatling_load"
+		And remove "pt_passthrough.jmx" "gatling" "load" test file for "comparison_app" "main"
 		
-	Scenario: Update test in atom hopper application
-		When I upload "gatling" test file to "atom_hopper" "main" application
-		Then the response should be "201"		
-		And response should be a json
-		And the "atom_hopper:main:setup:script" hash should contain "type" key with "gatling" value in redis
-		And the "atom_hopper:main:setup:script" hash should contain "test" key in redis
-		And the "atom_hopper/main/setup/meta" directory should contain "gatling" file
-		And "fail" json record should equal to "No application by name of invalid/load_test found" 
+	@update_application
+	Scenario: Remove test in comparison app application
+		Given "gatling" "load" test file exists in "comparison_app" "main" application
+	    And "2" "gatling" "load" test files exist in "comparison_app" "main" application
+		When I remove "test_file|||gatling_load" test file from "comparison_app" "main" application
+		Then the page response status code should be "200"		
+		And the "comparison_app:main:tests:setup:script" list should contain "1" entries in redis for "comparison_app" application
+		And the "comparison_app/main/setup/meta" directory should contain "1" entries for "comparison_app" application
+		And the page should contain "jmeter_load"
+		And the page should not contain "gatling_load"
 		
-	Scenario: Remove test in atom hopper application
-		When I remove "jmeter" test file from "atom_hopper" "main" application
-		Then the response should be "400"		
-		And response should be a json
-		And the "atom_hopper:main:setup:script" hash should contain "type" key with "jmeter" value in redis
-		And the "atom_hopper:main:setup:script" hash should contain "test" key in redis
-		And the "atom_hopper/main/setup/meta" directory should contain "test.jmx" file
-		And "fail" json record should equal to "No application by name of invalid/load_test found" 
-		
-	Scenario: Add existing config in atom hopper application
-		When I upload "config1" config file to "atom_hopper" "main" application
-		Then the response should be "400"		
-		And response should be a json
-		And the "atom_hopper:main:setup:configs" list should contain "1" entries in redis
-		And the "atom_hopper/main/setup/configs" directory should contain "config1" file
-		And "fail" json record should equal to "No application by name of invalid/load_test found" 
-		
-	Scenario: Add new request in atom hopper application
-		When I post to "/atom_hopper/applications/main/update" with:
+	@update_application
+	Scenario: Add existing config in comparison app application
+	    Given "1" config files exist in "comparison_app" "main" application
+		When I upload "/Users/dimi5963/projects/lighttpd/data/files/comparison_app/main/setup/configs/config1.xml" config file to "comparison_app" "main" application
+		Then the page response status code should be "404"		
+		And the error page should match the "invalid config file specified"
+		And the "comparison_app:main:setup:configs" list should contain "1" entries in redis for "comparison_app" application
+		And the "comparison_app/main/setup/configs" directory should contain "1" entries for "comparison_app" application
+	
+	@update_application	
+	Scenario: Add new request in comparison app application
+		Given "2" request exists in "comparison_app" "main" application
+		And "2" response exists in "comparison_app" "main" application 
+		When I post to "/comparison_app/applications/main/add_request_response" with:
 		"""
 		  {
-			"request":"test request", 
-			"response": "test response"
+			"request":{
+			  	"method": "GET",
+			  	"uri": "/test"
+			}, 
+			"response": {
+				"response_code": 200
+			}
 		  }
 		"""
-		Then the response should be "201"		
-		And response should be a json
-		And the "atom_hopper:main:setup:request_response:request" json list should have "3" entries in redis
-		And the "atom_hopper:main:setup:request_response:request" json list should contain "method" key with "GET" value in redis
-		And the "atom_hopper:main:setup:request_response:request" json list should contain "url" key with "/test" value in redis
-		And the "atom_hopper:main:setup:request_response:response" json list should have "3" entries in redis
-		And "fail" json record should equal to "No application by name of invalid/load_test found" 
-		
-	Scenario: Update request in atom hopper application
-		When I post to "/atom_hopper/applications/main/update" with:
+		Then the response should be "201"
+		And the "comparison_app:main:tests:setup:request_response:request" json list should have "3" entries in redis for "comparison_app"
+		And the "comparison_app:main:tests:setup:request_response:response" json list should have "3" entries in redis for "comparison_app"
+		And the "comparison_app:main:tests:setup:request_response:request" json list should contain "uri" key with "/test" value in redis for "comparison_app"
+		And the message should contain "/test"
+		And remove "request_id" "3" from redis "comparison_app:main:tests:setup:request_response:request" key for "comparison_app"
+		And remove "request_id" "3" from redis "comparison_app:main:tests:setup:request_response:response" key for "comparison_app"
+	
+	@update_applications	
+	Scenario: Update request in comparison app application
+		When I post to "/comparison_app/applications/main/update_request_response" with:
 		"""
 		  {
-		    "request_id": "1",
-			"request":"test request", 
-			"response": "test response"
+			"request":{
+				"request_id": 1,
+			  	"method": "GET",
+			  	"uri": "/test"
+			}, 
+			"response": {
+				"request_id": 1,
+				"response_code": 204
+			}
 		  }
 		"""
 		Then the response should be "200"		
-		And response should be a json
-		And the "atom_hopper:main:setup:request_response:request" json list should have "2" entries in redis
-		And the "atom_hopper:main:setup:request_response:request" json list should contain "method" key with "GET" value in redis
-		And the "atom_hopper:main:setup:request_response:request" json list should contain "url" key with "/test" value in redis
-		And the "atom_hopper:main:setup:request_response:response" json list should have "2" entries in redis
-		And "fail" json record should equal to "No application by name of invalid/load_test found" 
-		
-	Scenario: Remove all requests in atom hopper application
-		When I delete from "/atom_hopper/applications/main/update" with:
+		And the "comparison_app:main:tests:setup:request_response:request" json list should have "2" entries in redis for "comparison_app"
+		And the "comparison_app:main:tests:setup:request_response:request" json list should contain "uri" key with "/test" value in redis for "comparison_app"
+		And the "comparison_app:main:tests:setup:request_response:response" json list should have "2" entries in redis for "comparison_app"
+		And update "request_id" "1" from redis "comparison_app:main:tests:setup:request_response:request" key for "comparison_app":
 		"""
-		  {
-			"request_list":[1,2]
-		  }
+			{
+				"request_id":1,
+				"method":"GET",
+				"uri":"/v1.0/{user}/flavors",
+				"headers":[
+					"x-auth-token: valid-admin-token${user}",
+					"x-auth-project-id: test",
+					"accept: application/json"
+				]
+			}
 		"""
-		Then the response should be "400"		
+		And update "request_id" "1" from redis "comparison_app:main:tests:setup:request_response:response" key for "comparison_app":
+		"""
+			{
+				"request_id":1,
+				"response_code":200
+			} 
+		"""
+	
+	@update_application	
+	Scenario: Remove all requests in comparison app application
+		When I delete from "/comparison_app/applications/main/remove_request_response/1"
+		Then the response should be "200"		
 		And response should be a json
-		And the "atom_hopper:main:setup:request_response:request" json list should have "2" entries in redis
-		And the "atom_hopper:main:setup:request_response:request" json list should contain "method" key with "GET" value in redis
-		And the "atom_hopper:main:setup:request_response:request" json list should contain "url" key with "/test" value in redis
-		And the "atom_hopper:main:setup:request_response:response" json list should have "2" entries in redis
-		And "fail" json record should equal to "No application by name of invalid/load_test found" 
+		And the "comparison_app:main:tests:setup:request_response:request" json list should have "1" entries in redis for "comparison_app"
+		And the "comparison_app:main:tests:setup:request_response:response" json list should have "1" entries in redis for "comparison_app"
+		And add "request_id" "1" from redis "comparison_app:main:tests:setup:request_response:request" key for "comparison_app":
+		"""
+			{
+				"request_id":1,
+				"method":"GET",
+				"uri":"/v1.0/{user}/flavors",
+				"headers":[
+					"x-auth-token: valid-admin-token${user}",
+					"x-auth-project-id: test",
+					"accept: application/json"
+				]
+			}
+		"""
+		And add "request_id" "1" from redis "comparison_app:main:tests:setup:request_response:response" key for "comparison_app":
+		"""
+			{
+				"request_id":1,
+				"response_code":200
+			} 
+		"""

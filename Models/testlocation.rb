@@ -36,7 +36,6 @@ module Models
           test_script_json = JSON.parse(test_script)
           type = "#{test_script_json['type']}_#{test_script_json['test']}".to_sym
           href = open("http://#{@fs_ip}#{test_script_json['location']}") {|f| f.read }
-
           if type == id.to_sym
             response = TestLocation.new(href, type)
           end
@@ -87,7 +86,63 @@ module Models
       href = open("http://#{@fs_ip}#{script_json['location']}") {|f| f.read }
 
       response = TestLocation.new(href, type)
+    end
+    
+    def add_test_file(application, name, storage_info, test_file_name, test_file_body, test_file_runner, test_file_type)
+      store = Redis.new(@db)
+      test_file_json = {
+        "type" => test_file_runner,
+        "test" => test_file_type.chomp('_test'),
+        "name" => test_file_name,
+        "location" => "/#{storage_info['prefix']}/#{application}/#{name}/setup/meta/#{test_file_name}"
+      }
+      begin
+        if storage_info['destination'] == 'localhost'
+          FileUtils.mkpath "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{name}/setup/meta" unless File.exists?("#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{name}/setup/meta")
+          File.open("#{storage_info['path']}/#{test_file_json['location']}", "w") do |f|
+            f.write(test_file_body.read)
+          end
+        else
+          tmp_dir = "/tmp/#{guid}/"
+          File.open("/tmp/#{guid}/#{test_file_name}", "w") do |f|
+            f.write(test_file_body.read)
+          end
+          FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
+          Net::SCP.upload!(
+            config['storage_info']['destination'], 
+            config['storage_info']['user'], 
+            "/tmp/#{guid}/#{test_file_name}", 
+            "#{storage_info['path']}/#{test_file_json['location']}", 
+            {:recursive => true,
+              :verbose => Logger::DEBUG}
+          ) 
+          FileUtils.rm_rf("/tmp/#{guid}")
+        end       
+        store.rpush("#{application}:#{name}:tests:setup:script", test_file_json.to_json)
+      end
+    end
+    
+    def remove_test_file(application, name, storage_info, test_file_name)
+      store = Redis.new(@db)
+      runner = test_file_name.split('_')[0]
+      test_type = test_file_name.split('_')[1]
       
+      test_json = store.lrange("#{application}:#{name}:tests:setup:script", 0, -1).find do |test|
+        JSON.parse(test)['type'] == runner && JSON.parse(test)['test'] == test_type
+      end
+      if test_json
+        begin
+          test_hash = JSON.parse(test_json)
+          if storage_info['destination'] == 'localhost'
+            FileUtils.remove_file "#{storage_info['path']}/#{test_hash['location']}"
+          else
+            Net::SSH.start(test_agent, 'root') do |ssh|
+              ssh.exec!("rm #{storage_info['path']}/#{test_hash['location']}")
+            end
+          end       
+          store.lrem("#{application}:#{name}:tests:setup:script", 1, test_json)
+        end
+      end
     end
   end
 

@@ -16,7 +16,6 @@ module Models
           temp_hash[:errors] = errors
         end
       end 
-puts temp_hash.inspect
 =begin
       if temp_hash[:length].nil?
         summary = `tail -1 #{summary_location}`
@@ -50,23 +49,24 @@ puts temp_hash.inspect
  2. load file in specific directory via scp
 =end
       FileUtils.mkdir_p "/tmp/#{guid}/data/"
-      Net::SCP.download!(
-        source_result_info['server'], 
-        source_result_info['user'], 
-        source_result_info['path'], 
-        "/tmp/#{guid}/data/summary.log")      
-        
-        result_data = {}
-        result_data['location'] = "/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/#{guid}/data/summary.log"
-        result_data['name'] = 'summary.log'
-        
-        result = result_data.to_json
-        
-        store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:data", "results", result)
+      #if source_result_info['server'] == 'localhost'
+        Net::SCP.download!(
+          source_result_info['server'], 
+          source_result_info['user'], 
+          source_result_info['path'], 
+          "/tmp/#{guid}/data/summary.log")      
+          
+          result_data = {}
+          result_data['location'] = "/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/#{guid}/data/summary.log"
+          result_data['name'] = 'summary.log'
+          
+          result = result_data.to_json
+      #end        
+      store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:data", "results", result)
     end
   end
 
-	class PravegaRunner
+	class GatlingRunner
 	end
 
 	class FloodRunner

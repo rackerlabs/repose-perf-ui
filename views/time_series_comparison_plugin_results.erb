@@ -78,27 +78,29 @@
         <div class="panel-heading">
           <h3 class="panel-title">Detailed Test Results for <%= instance %></h3>
         </div>
-        <table class="table table-hover">
-          <caption>Repose (Origin only)</caption>
-          <thead>
-            <tr>
-              <th>Time</th>
-    <% value[:headers].each do |header| %>
-              <th><%= header %></th>
-    <% end %>
-            </tr>
-          </thead>
-          <tbody>
-    <% data.each do |time, entry| %>
-            <tr>
-              <td><%= time %></td>
-      <% entry.each do |p| %>
-              <td><%= p %></td>
-      <% end %>
-            </tr>
-    <% end %>
-          </tbody>
-        </table>
+        <div class="span11" style="overflow: auto;">
+	        <table class="table table-hover" style="max-width: none;">
+	          <caption>Repose (Origin only)</caption>
+	          <thead>
+	            <tr>
+	              <th>Time</th>
+	    <% value[:headers].each do |header| %>
+	              <th><%= header %></th>
+	    <% end %>
+	            </tr>
+	          </thead>
+	          <tbody>
+	    <% data.each do |time, entry| %>
+	            <tr>
+	              <td><%= time %></td>
+	      <% entry.each do |p| %>
+	              <td><%= p %></td>
+	      <% end %>
+	            </tr>
+	    <% end %>
+	          </tbody>
+	        </table>
+	     </div>
       </div>
   <% end %>
 <% end %>

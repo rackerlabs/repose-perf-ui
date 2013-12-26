@@ -107,7 +107,6 @@ module Results
           test.merge!(test_json) if test_json
           runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
           summary_data = JSON.parse(data_result)['location']
-  
           runner_class.compile_summary_results(test, test[:guid], "http://#{fs_ip}#{summary_data}")
           singular_test_list << Result.new(
               test['start'],test[:length],test[:average],

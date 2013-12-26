@@ -1,13 +1,14 @@
-require_relative './../../Models/plugin.rb'
-require_relative './../../Models/plugin_results.rb'
+require_relative './../../Models/plugins/plugin.rb'
+require_relative './../../Models/plugins/plugin_results.rb'
+require_relative './../../Models/plugins/adapters/remote_server.rb'
 require_relative 'filterstrategy.rb'
 require_relative 'jvmmemorystrategy.rb'
 require_relative 'jvmthreadstrategy.rb'
 require_relative 'garbagecollectionstrategy.rb'
 require_relative 'reposelogstrategy.rb'
 
-class ReposeJmxPlugin < Plugin
-  
+class ReposeJmxPlugin < PluginModule::Plugin
+
   def self.supported_os_list
     [:linux,:macosx,:windows]
   end
@@ -17,31 +18,31 @@ class ReposeJmxPlugin < Plugin
       {
         :id => 'filters',
         :name => 'Filter breakdown',
-        :klass => FilterStrategy,
+        :klass => ReposeJmxPluginModule::FilterStrategy,
         :type => :time_series
       },
       {
         :id => 'gc',
         :name => 'Garbage Collection',
-        :klass => GarbageCollectionStrategy,
+        :klass => ReposeJmxPluginModule::GarbageCollectionStrategy,
         :type => :time_series
       },
       {
         :id => 'jvm_memory',
         :name => 'JVM Memory',
-        :klass => JvmMemoryStrategy,
+        :klass => ReposeJmxPluginModule::JvmMemoryStrategy,
         :type => :time_series
       },
       {
         :id => 'jvm_threads',
         :name => 'JVM Threads',
-        :klass => JvmThreadStrategy,
+        :klass => ReposeJmxPluginModule::JvmThreadStrategy,
         :type => :time_series
       },
       {
         :id => 'logs',
         :name => 'Repose logs',
-        :klass => ReposeLogStrategy,
+        :klass => ReposeJmxPluginModule::ReposeLogStrategy,
         :type => :blob
       }
     ]
@@ -54,13 +55,14 @@ class ReposeJmxPlugin < Plugin
         metric[:klass].new(
           @db, @fs_ip, application, name,test.chomp('_test'), test_id, metric[:id]
         )
-      ).retrieve_average_results, metric[:id].to_sym, {}
+      ).retrieve_average_results, 
+      metric[:id].to_sym, 
+      {}, 
+      metric[:klass].metric_description,
+      metric[:type]
     ) if metric
   end
 
-=begin
-	show all data and return in a list of hashes
-=end
   def show_detailed_data(application, name, test, id, test_id, options=nil)
     metric = ReposeJmxPlugin.show_plugin_names.find {|i| i[:id] == id }
     PluginModule::PastPluginResults.format_results(
@@ -68,7 +70,11 @@ class ReposeJmxPlugin < Plugin
         metric[:klass].new(
           @db, @fs_ip, application, name, test.chomp('_test'), test_id, metric[:id]
         )
-      ).retrieve_detailed_results, metric[:id].to_sym, {}
+      ).retrieve_detailed_results, 
+      metric[:id].to_sym, 
+      {}, 
+      metric[:klass].metric_description,
+      metric[:type]
     ) if metric
   end
 
@@ -92,7 +98,7 @@ class ReposeJmxPlugin < Plugin
           servers = plugin_data['servers']
           if servers
             servers.each do |server|
-              PluginModule::RemoteServerAdapter.new(store, 'repose_jmx_plugin', server, storage_info).load(json_data['guid'], 'ALL', application, sub_app, type)
+              PluginModule::Adapters::RemoteServerAdapter.new(store, 'repose_jmx_plugin', server, storage_info).load(json_data['guid'], 'ALL', application, sub_app, type)
             end
           else
             raise ArgumentError, "no server list specified"
@@ -106,5 +112,4 @@ class ReposeJmxPlugin < Plugin
       return {'repose_jmx_plugin' => e.message}
     end
   end
-
 end
