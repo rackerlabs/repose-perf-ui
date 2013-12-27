@@ -44,7 +44,7 @@ Feature: Load Graphite Plugin Page
 		And response should be a json
 		And "result" json record should equal to "OK"
 		And the "results" json entry for "data" hash key in redis should exist
-		And the "graphite_rest_plugin|ALL|graphitedata.out_graphite.drivesrvr-dev.com" json entry for "data" hash key in redis should exist
+		And the "graphite_rest_plugin|time_series|graphitedata.out_graphite.drivesrvr-dev.com" json entry for "data" hash key in redis should exist
 		And the "data" directory should contain "summary.log" result file
 		And the "data/graphite_rest_plugin" directory should contain "graphitedata.out_graphite.drivesrvr-dev.com" result file
 		And the "request" json entry for "meta" hash key in redis should exist
@@ -95,7 +95,7 @@ Feature: Load Graphite Plugin Page
 		And response should be a json
 		And "result" json record should equal to "OK"
 		And the "results" json entry for "data" hash key in redis should exist
-		And the "graphite_rest_plugin|ALL|graphitedata.out_graphite.drivesrvr-dev.com" json entry for "data" hash key in redis should not exist
+		And the "graphite_rest_plugin|time_series|graphitedata.out_graphite.drivesrvr-dev.com" json entry for "data" hash key in redis should not exist
 		And the "data" directory should contain "summary.log" result file
 		And the "data/graphite_rest_plugin" directory should not contain "graphitedata.out_graphite.drivesrvr-dev.com" result file
 		And the "request" json entry for "meta" hash key in redis should exist
@@ -147,7 +147,7 @@ Feature: Load Graphite Plugin Page
 		And "result" json record should equal to "OK"
 		And the "results" json entry for "data" hash key in redis should exist
 		And "with_errors" list has "graphite_rest_plugin" record, which should equal to "getaddrinfo: nodename nor servname provided, or not known"
-		And the "graphite_rest_plugin|ALL|graphitedata.out_graphite.drivesrvr-dev.com" json entry for "data" hash key in redis should not exist
+		And the "graphite_rest_plugin|time_series|graphitedata.out_graphite.drivesrvr-dev.com" json entry for "data" hash key in redis should not exist
 		And the "data" directory should contain "summary.log" result file
 		And the "data/graphite_rest_plugin" directory should not contain "graphitedata.out_graphite.drivesrvr-dev.com" result file
 		And the "request" json entry for "meta" hash key in redis should exist

@@ -1,9 +1,9 @@
 require_relative './../../Models/plugins/plugin.rb'
 require_relative './../../Models/plugins/plugin_results.rb'
-require_relative './../../Models/plugins/adapters/graphite.rb'
-require_relative 'graphitetimeseriesstrategy.rb'
+require_relative './../../Models/plugins/adapters/newrelic.rb'
+require_relative 'newrelictimeseriesstrategy.rb'
 
-class GraphiteRestPlugin < PluginModule::Plugin
+class NewrelicRestPlugin < PluginModule::Plugin
   
   def self.supported_os_list
     [:linux,:macosx,:windows]
@@ -12,16 +12,16 @@ class GraphiteRestPlugin < PluginModule::Plugin
   def self.show_plugin_names
     [
       {
-        :id => 'graphite',
-        :name => 'Graphite Time Series Metrics',
-        :klass => GraphiteRestPluginModule::GraphiteTimeSeriesStrategy,
+        :id => 'newrelic',
+        :name => 'New Relic Time Series Metrics',
+        :klass => NewRelicRestPluginModule::NewRelicTimeSeriesStrategy,
         :type => :time_series
       }
     ]
   end
 
   def show_summary_data(application, name, test, id, test_id, options=nil)
-    metric = GraphiteRestPlugin.show_plugin_names.find {|i| i[:id] == id }
+    metric = NewrelicRestPlugin.show_plugin_names.find {|i| i[:id] == id }
     PluginModule::PastPluginResults.format_results(
       PluginModule::PluginResult.new(
         metric[:klass].new(
@@ -39,7 +39,7 @@ class GraphiteRestPlugin < PluginModule::Plugin
 	show all data and return in a list of hashes
 =end
   def show_detailed_data(application, name, test, id, test_id, options=nil)
-    metric = GraphiteRestPlugin.show_plugin_names.find {|i| i[:id] == id }
+    metric = NewrelicRestPlugin.show_plugin_names.find {|i| i[:id] == id }
     PluginModule::PastPluginResults.format_results(
       PluginModule::PluginResult.new(
         metric[:klass].new(
@@ -68,12 +68,14 @@ class GraphiteRestPlugin < PluginModule::Plugin
   def store_data(application, sub_app, type, json_data, store, start_test_data, end_time, storage_info)
     begin
       if json_data.has_key?('plugins')
-        plugin_data = json_data['plugins'].find {|p| p['id'] == 'graphite_rest_plugin'}
+        plugin_data = json_data['plugins'].find {|p| p['id'] == 'newrelic_rest_plugin'}
         if plugin_data
-          servers = plugin_data['servers']
+          plugin_type = plugin_data['type'] ? plugin_data['type'] : 'time_series'
+          #not servers and modify everything here!!
+          servers = plugin_data['fields']
           if servers
             servers.each do |server|
-              PluginModule::Adapters::GraphiteRestAdapter.new(store, 'graphite_rest_plugin', server, storage_info).load(json_data['guid'], 'ALL', application, sub_app, type, start_test_data['time'], end_time)
+              PluginModule::Adapters::GraphiteRestAdapter.new(store, 'newrelic_rest_plugin', server, storage_info).load(json_data['guid'], plugin_type, application, sub_app, type, start_test_data['time'], end_time)
             end
           else
             raise ArgumentError, "no server list specified"

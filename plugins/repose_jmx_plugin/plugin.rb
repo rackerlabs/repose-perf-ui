@@ -95,10 +95,11 @@ class ReposeJmxPlugin < PluginModule::Plugin
       if json_data.has_key?('plugins')
         plugin_data = json_data['plugins'].find {|p| p['id'] == 'repose_jmx_plugin'}
         if plugin_data
+          plugin_type = plugin_data['type'] ? plugin_data['type'] : 'time_series'
           servers = plugin_data['servers']
           if servers
             servers.each do |server|
-              PluginModule::Adapters::RemoteServerAdapter.new(store, 'repose_jmx_plugin', server, storage_info).load(json_data['guid'], 'ALL', application, sub_app, type)
+              PluginModule::Adapters::RemoteServerAdapter.new(store, 'repose_jmx_plugin', server, storage_info).load(json_data['guid'], plugin_type, application, sub_app, type)
             end
           else
             raise ArgumentError, "no server list specified"

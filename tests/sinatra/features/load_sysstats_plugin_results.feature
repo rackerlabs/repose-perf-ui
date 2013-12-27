@@ -47,18 +47,18 @@ Feature: Load Repose Plugin Page
 		And response should be a json
 		And "result" json record should equal to "OK"
 		And the "results" json entry for "data" hash key in redis should exist
-		And the "sysstats_plugin|ALL|sysstats_cpu.out_10.23.246.101" json entry for "data" hash key in redis should exist
-		And the "sysstats_plugin|ALL|sysstats_kernel.out_10.23.246.101" json entry for "data" hash key in redis should exist
-		And the "sysstats_plugin|ALL|sysstats_device_disk.out_10.23.246.101" json entry for "data" hash key in redis should exist
-		And the "sysstats_plugin|ALL|sysstats_device_failure.out_10.23.246.101" json entry for "data" hash key in redis should exist
-		And the "sysstats_plugin|ALL|sysstats_device_network.out_10.23.246.101" json entry for "data" hash key in redis should exist
-		And the "sysstats_plugin|ALL|sysstats_ip_failure_network.out_10.23.246.101" json entry for "data" hash key in redis should exist
-		And the "sysstats_plugin|ALL|sysstats_ip_network.out_10.23.246.101" json entry for "data" hash key in redis should exist
-		And the "sysstats_plugin|ALL|sysstats_tcp_failure_network.out_10.23.246.101" json entry for "data" hash key in redis should exist
-		And the "sysstats_plugin|ALL|sysstats_tcp_network.out_10.23.246.101" json entry for "data" hash key in redis should exist
-		And the "sysstats_plugin|ALL|sysstats_memory_page.out_10.23.246.101" json entry for "data" hash key in redis should exist
-		And the "sysstats_plugin|ALL|sysstats_memory_swap.out_10.23.246.101" json entry for "data" hash key in redis should exist
-		And the "sysstats_plugin|ALL|sysstats_memory_utilization.out_10.23.246.101" json entry for "data" hash key in redis should exist
+		And the "sysstats_plugin|time_series|sysstats_cpu.out_10.23.246.101" json entry for "data" hash key in redis should exist
+		And the "sysstats_plugin|time_series|sysstats_kernel.out_10.23.246.101" json entry for "data" hash key in redis should exist
+		And the "sysstats_plugin|time_series|sysstats_device_disk.out_10.23.246.101" json entry for "data" hash key in redis should exist
+		And the "sysstats_plugin|time_series|sysstats_device_failure.out_10.23.246.101" json entry for "data" hash key in redis should exist
+		And the "sysstats_plugin|time_series|sysstats_device_network.out_10.23.246.101" json entry for "data" hash key in redis should exist
+		And the "sysstats_plugin|time_series|sysstats_ip_failure_network.out_10.23.246.101" json entry for "data" hash key in redis should exist
+		And the "sysstats_plugin|time_series|sysstats_ip_network.out_10.23.246.101" json entry for "data" hash key in redis should exist
+		And the "sysstats_plugin|time_series|sysstats_tcp_failure_network.out_10.23.246.101" json entry for "data" hash key in redis should exist
+		And the "sysstats_plugin|time_series|sysstats_tcp_network.out_10.23.246.101" json entry for "data" hash key in redis should exist
+		And the "sysstats_plugin|time_series|sysstats_memory_page.out_10.23.246.101" json entry for "data" hash key in redis should exist
+		And the "sysstats_plugin|time_series|sysstats_memory_swap.out_10.23.246.101" json entry for "data" hash key in redis should exist
+		And the "sysstats_plugin|time_series|sysstats_memory_utilization.out_10.23.246.101" json entry for "data" hash key in redis should exist
 		And the "data" directory should contain "summary.log" file
 		And the "data/sysstats_plugin" directory should contain "sysstats_cpu.out_10.23.246.101" file
 		And the "data/sysstats_plugin" directory should contain "sysstats_kernel.out_10.23.246.101" file
@@ -123,18 +123,18 @@ Feature: Load Repose Plugin Page
 		And "result" json record should equal to "OK"
 		And "with_errors" list has "sysstats_plugin" record, which should equal to "getaddrinfo: nodename nor servname provided, or not known"
 		And the "results" json entry for "data" hash key in redis should exist
-		And the "sysstats_plugin|ALL|sysstats_cpu.out_10.23.246.101" json entry for "data" hash key in redis should not exist
-		And the "sysstats_plugin|ALL|sysstats_kernel.out_10.23.246.101" json entry for "data" hash key in redis should not exist
-		And the "sysstats_plugin|ALL|sysstats_device_disk.out_10.23.246.101" json entry for "data" hash key in redis should not exist
-		And the "sysstats_plugin|ALL|sysstats_device_failure.out_10.23.246.101" json entry for "data" hash key in redis should not exist
-		And the "sysstats_plugin|ALL|sysstats_device_network.out_10.23.246.101" json entry for "data" hash key in redis should not exist
-		And the "sysstats_plugin|ALL|sysstats_ip_failure_network.out_10.23.246.101" json entry for "data" hash key in redis should not exist
-		And the "sysstats_plugin|ALL|sysstats_ip_network.out_10.23.246.101" json entry for "data" hash key in redis should not exist
-		And the "sysstats_plugin|ALL|sysstats_tcp_failure_network.out_10.23.246.101" json entry for "data" hash key in redis should not exist
-		And the "sysstats_plugin|ALL|sysstats_tcp_network.out_10.23.246.101" json entry for "data" hash key in redis should not exist
-		And the "sysstats_plugin|ALL|sysstats_memory_page.out_10.23.246.101" json entry for "data" hash key in redis should not exist
-		And the "sysstats_plugin|ALL|sysstats_memory_swap.out_10.23.246.101" json entry for "data" hash key in redis should not exist
-		And the "sysstats_plugin|ALL|sysstats_memory_utilization.out_10.23.246.101" json entry for "data" hash key in redis should not exist
+		And the "sysstats_plugin|time_series|sysstats_cpu.out_10.23.246.101" json entry for "data" hash key in redis should not exist
+		And the "sysstats_plugin|time_series|sysstats_kernel.out_10.23.246.101" json entry for "data" hash key in redis should not exist
+		And the "sysstats_plugin|time_series|sysstats_device_disk.out_10.23.246.101" json entry for "data" hash key in redis should not exist
+		And the "sysstats_plugin|time_series|sysstats_device_failure.out_10.23.246.101" json entry for "data" hash key in redis should not exist
+		And the "sysstats_plugin|time_series|sysstats_device_network.out_10.23.246.101" json entry for "data" hash key in redis should not exist
+		And the "sysstats_plugin|time_series|sysstats_ip_failure_network.out_10.23.246.101" json entry for "data" hash key in redis should not exist
+		And the "sysstats_plugin|time_series|sysstats_ip_network.out_10.23.246.101" json entry for "data" hash key in redis should not exist
+		And the "sysstats_plugin|time_series|sysstats_tcp_failure_network.out_10.23.246.101" json entry for "data" hash key in redis should not exist
+		And the "sysstats_plugin|time_series|sysstats_tcp_network.out_10.23.246.101" json entry for "data" hash key in redis should not exist
+		And the "sysstats_plugin|time_series|sysstats_memory_page.out_10.23.246.101" json entry for "data" hash key in redis should not exist
+		And the "sysstats_plugin|time_series|sysstats_memory_swap.out_10.23.246.101" json entry for "data" hash key in redis should not exist
+		And the "sysstats_plugin|time_series|sysstats_memory_utilization.out_10.23.246.101" json entry for "data" hash key in redis should not exist
 		And the "data" directory should contain "summary.log" file
 		And the "data/sysstats_plugin" directory should not contain "sysstats_cpu.out_10.23.246.101" file
 		And the "data/sysstats_plugin" directory should not contain "sysstats_kernel.out_10.23.246.101" file

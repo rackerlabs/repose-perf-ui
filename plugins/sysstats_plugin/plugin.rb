@@ -172,6 +172,7 @@ class SysstatsPlugin < PluginModule::Plugin
         if json_data.has_key?('plugins')
           plugin_data = json_data['plugins'].find {|p| p['id'] == 'sysstats_plugin'}
           if plugin_data
+            plugin_type = plugin_data['type'] ? plugin_data['type'] : 'time_series'
             servers = plugin_data['servers']
             if servers
               servers.each do |server|
@@ -200,7 +201,7 @@ class SysstatsPlugin < PluginModule::Plugin
                     tmp_server, 
                     storage_info).load(
                       json_data['guid'], 
-                      'ALL', 
+                      plugin_type, 
                       application, 
                       sub_app, 
                       type) do
