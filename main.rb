@@ -585,8 +585,6 @@ class PerfApp < Sinatra::Base
                 plugin_instance.new(new_app.db, new_app.fs_ip).order_by_date(data)
             end  
           end
-          
-          puts summary_plugin_data
             
           erb PluginModule::PluginView.retrieve_view(
             summary_plugin_data.map{|k,v|

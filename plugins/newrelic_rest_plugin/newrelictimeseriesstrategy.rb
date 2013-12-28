@@ -1,7 +1,7 @@
 require_relative 'abstractstrategy.rb'
 
-module NewrelicRestPluginModule
-  class NewrelicTimeSeriesStrategy < NewrelicRestPluginModule::AbstractStrategy
+module NewRelicRestPluginModule
+  class NewRelicTimeSeriesStrategy < NewRelicRestPluginModule::AbstractStrategy
   
     attr_accessor :average_metric_list,:detailed_metric_list 
     
@@ -20,43 +20,25 @@ module NewrelicRestPluginModule
     def populate_metric(entry, name, id, start, stop)
       output = open(entry).read
       results = JSON.parse(output) if output
-      puts entry, name, id, start, stop
+      key = name.sub(/newrelic\.out_/,'')
       if results
-        #1. set average_metric_list and detailed_metric_list
-        #2. set metric_description (probably to nil or maybe load from config????)
-        results.each do |target|
-          datapoint_results = []
-          average_results = 0
-          target['datapoints'].each do |datapoint|
-            datapoint_results << {:time => datapoint[1], :value => datapoint[0]}
-            average_results = average_results + datapoint[0]
-          end
-          @detailed_metric_list[target['target']] = [
-            {:dev_name => name, :results => datapoint_results}
-          ]
-          @average_metric_list[target['target']] = [
-            {:dev_name => name, :results => (average_results/target['datapoints'].length)}
-          ]
+        average_results = 0
+        datapoint_results = {}
+        average_results = {}
+        results.each do |entry|
+          datapoint_results[entry['name']] = [] unless datapoint_results[entry['name']]
+          datapoint_results[entry['name']] <<  {:time => DateTime.parse(entry['begin']).to_time.to_i, :value => entry[key]}
+          average_results[entry['name']] = 0 unless average_results[entry['name']]
+          average_results[entry['name']] = average_results[entry['name']] + entry[key].to_f
+        end
+          
+        datapoint_results.each do |k, entry|
+          @detailed_metric_list[key] = [] unless @detailed_metric_list[key] 
+          @detailed_metric_list[key] << {:dev_name => k, :results => entry}
+          @average_metric_list[key] = [] unless @average_metric_list[key] 
+          @average_metric_list[key] << {:dev_name => k, :results => (average_results[k]/entry.length)}
         end
       end
-=begin
-      open(entry).readlines.each do |line|
-        line.scan(/^localhost.*sun_management_ThreadImpl\.(\w+)\s+(\d*\.?\d*?)\s+(\d+)$/).map do |counter,value,timestamp|
-          initialize_metric(@detailed_metric_list, counter, name)
-          @detailed_metric_list[counter].find {|key_data| key_data[:dev_name] == name}[:results] << {:time => timestamp, :value => value}
-          #@detailed_metric_list[counter][:data].find {|key_data| key_data[:dev_name] == name}[:results] << {:time => timestamp, :value => value}
-        end
-      end
-      @detailed_metric_list.each do |key, v|
-        initialize_metric(@average_metric_list, key, name)
-        v.each do | dev_name_entry |
-          average_results = dev_name_entry[:results].map {|result| result[:value].to_f}
-          average = average_results.inject(:+).to_f / average_results.length
-          @average_metric_list[key].find {|key_data| key_data[:dev_name] == name}[:results] = average
-          #@average_metric_list[key][:data].find {|key_data| key_data[:dev_name] == name}[:results] = average
-        end
-      end
-=end      
     end
   end
 end

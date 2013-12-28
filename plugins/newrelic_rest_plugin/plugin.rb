@@ -75,19 +75,19 @@ class NewrelicRestPlugin < PluginModule::Plugin
           servers = plugin_data['fields']
           if servers
             servers.each do |server|
-              PluginModule::Adapters::GraphiteRestAdapter.new(store, 'newrelic_rest_plugin', server, storage_info).load(json_data['guid'], plugin_type, application, sub_app, type, start_test_data['time'], end_time)
+              PluginModule::Adapters::NewrelicRestAdapter.new(store, 'newrelic_rest_plugin', server, storage_info).load(json_data['guid'], plugin_type, application, sub_app, type, start_test_data['time'], end_time)
             end
           else
             raise ArgumentError, "no server list specified"
           end
         else
-          raise ArgumentError, "graphite_rest_plugin id not found"  
+          raise ArgumentError, "newrelic_rest_plugin id not found"  
         end
       end
       return nil
     rescue => e
       p e.backtrace
-      return {'graphite_rest_plugin' => e.message}
+      return {'newrelic_rest_plugin' => e.message}
     end
   end
 end

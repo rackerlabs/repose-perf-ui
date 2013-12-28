@@ -24,7 +24,6 @@ module GraphiteRestPluginModule
     def populate_metric(entry, name, id, start, stop)
       output = open(entry).read
       results = JSON.parse(output) if output
-      puts entry, name, id, start, stop
       if results
         #1. set average_metric_list and detailed_metric_list
         #2. set metric_description (probably to nil or maybe load from config????)

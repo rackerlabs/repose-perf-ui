@@ -264,6 +264,14 @@ Then(/^"(.*?)" list has "(.*?)" record, which should equal to "(.*?)"$/) do |lis
   result.should_not be_nil
 end
 
+Then(/^"(.*?)" list has "(.*?)" record, which should contain "(.*?)"$/) do |list, key, value|
+  result = nil
+  results = JSON.parse(last_response.body)
+  result = results[list].find{|l| l.has_key?(key)}
+  result[key].should include(value)
+  result.should_not be_nil
+end
+
 Then(/^"([\w_]+)" "([\w_]+)" json should equal to "(.*?)"$/) do |key_one, key_two, value|
   results = JSON.parse(last_response.body)
   results[key_one][key_two].should == value

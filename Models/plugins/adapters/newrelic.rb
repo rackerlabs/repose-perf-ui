@@ -1,15 +1,18 @@
-require 'htmlentities'
+require 'cgi'
 require 'rest-client'
 
 module PluginModule
   module Adapters
-    class GraphiteRestAdapter
-      attr_reader :remote_field, :remote_metrics, :local_host, :local_user, :local_path, :plugin_id, :store, :local_prefix
+    class NewrelicRestAdapter
+      attr_reader :remote_field, :remote_metrics, :remote_api, :remote_account, :remote_agent, :local_host, :local_user, :local_path, :plugin_id, :store, :local_prefix
       
       def initialize(store, plugin_id, remote, local)
         raise ArgumentError unless remote and local
         @remote_field = remote['field']
+        @remote_account = remote['account']
+        @remote_agent = remote['agent']
         @remote_metrics = remote['metric']
+        @remote_api = remote['api-key']
         @local_host = local['server']
         @local_user = local['user']
         @local_path = "#{local['path']}/#{local['prefix']}"
@@ -24,25 +27,24 @@ module PluginModule
         tmp_dir = "/tmp/#{guid}/data/#{@plugin_id}/"
         FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
         
-        coder = HTMLEntities.new
-        metrics.map {|m| coder.encode(m)}
+        encoded_metrics = @remote_metrics.map {|m| CGI::escape(m)}
 
         
-        metrics = @remote_metrics.join('&metric[]=')
+        metrics = encoded_metrics.join('&metrics[]=')
         if start.is_a?(Fixnum)
-          target_start = DateTime.strptime(start.to_s,"%s").strftime("%H:%M_%Y%m%d")
+          target_start = DateTime.strptime(start.to_s,"%s").strftime("%Y-%m-%dT%H:%m:%SZ")
         else
-          target_start = DateTime.parse(start).strftime("%H:%M_%Y%m%d")
+          target_start = DateTime.parse(start).strftime("%Y-%m-%dT%H:%m:%SZ")
         end
 
         if stop.is_a?(Fixnum)
-          target_stop = DateTime.strptime(stop.to_s,"%s").strftime("%H:%M_%Y%m%d")
+          target_stop = DateTime.strptime(stop.to_s,"%s").strftime("%Y-%m-%dT%H:%m:%SZ")
         else
-          target_stop = DateTime.parse(stop).strftime("%H:%M_%Y%m%d")
+          target_stop = DateTime.parse(stop).strftime("%Y-%m-%dT%H:%m:%SZ")
         end
         
-        File.open("#{tmp_dir}/graphitedata.out_#{@remote_host}", 'w') do |f|
-          f.write(RestClient.get "http://#{@remote_host}/render/?#{targets}&from=#{target_start}&until=#{target_stop}&format=json")
+        File.open("#{tmp_dir}/newrelic.out_#{@remote_field}", 'w') do |f|
+          f.write(RestClient.get "https://api.newrelic.com/api/v1/accounts/#{@remote_account}/agents/#{@remote_agent}/data.json?metrics[]=#{metrics}&begin=#{target_start}&end=#{target_stop}&field=#{@remote_field}", {"x-api-key" => @remote_api})
         end
         
         #second, upload to local
