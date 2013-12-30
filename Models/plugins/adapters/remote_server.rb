@@ -8,7 +8,7 @@ module PluginModule
         @remote_host = remote['server']
         @remote_user = remote['user']
         @remote_path = remote['path']
-        @local_host = local['server']
+        @local_host = local['destination']
         @local_user = local['user']
         @local_path = "#{local['path']}/#{local['prefix']}"
         @local_prefix = local['prefix']

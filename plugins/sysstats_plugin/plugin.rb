@@ -1,5 +1,6 @@
 require_relative './../../Models/plugins/plugin.rb'
 require_relative './../../Models/plugins/plugin_results.rb'
+require_relative './../../Models/plugins/adapters/remote_server.rb'
 require_relative 'cpuresultstrategy.rb'
 require_relative 'kernelresultstrategy.rb'
 require_relative 'devicediskresultstrategy.rb'
@@ -118,17 +119,39 @@ class SysstatsPlugin < PluginModule::Plugin
     
     def show_summary_data(application, name, test, id, test_id, options=nil)
       metric = SysstatsPlugin.show_plugin_names.find {|i| i[:id] == id }
-      PluginModule::PastPluginResults.format_results(
-        PluginModule::PluginResult.new(
-          metric[:klass].new(
-            @db, @fs_ip, application, name, test.chomp('_test'), test_id, metric[:id]
-          )
-        ).retrieve_average_results, 
-        metric[:id].to_sym, 
-        {}, 
-        metric[:klass].metric_description,
-        metric[:type]
-      ) if metric
+      results = {}
+      if options && options[:application_type] == :comparison
+        store = Redis.new(@db)
+        #get meta results and either 
+        test_id.split('+').each do |guid|
+          meta_results = store.hgetall("#{application}:#{name}:results:#{test.chomp('_test')}:#{guid}:meta")
+          test_json = JSON.parse(meta_results['test'])
+          results.merge!(PluginModule::PastPluginResults.format_results(
+            PluginModule::PluginResult.new(
+              metric[:klass].new(
+                @db, @fs_ip, application, name,test.chomp('_test'), guid, metric[:id]
+              )
+            ).retrieve_average_results, 
+            metric[:id].to_sym, 
+            {}, 
+            metric[:klass].metric_description,
+            metric[:type]
+          )) if metric
+        end
+      else
+        results = PluginModule::PastPluginResults.format_results(
+          PluginModule::PluginResult.new(
+            metric[:klass].new(
+              @db, @fs_ip, application, name,test.chomp('_test'), test_id, metric[:id]
+            )
+          ).retrieve_average_results, 
+          metric[:id].to_sym, 
+          {}, 
+          metric[:klass].metric_description,
+          metric[:type]
+        ) if metric
+      end 
+      results
     end
 
 
@@ -136,18 +159,40 @@ class SysstatsPlugin < PluginModule::Plugin
   show all data and return in a list of hashes
 =end
     def show_detailed_data(application, name, test, id, test_id, options=nil)
-      metric = SysstatsPlugin.show_plugin_names.find {|i| i[:id] == id }
-      PluginModule::PastPluginResults.format_results(
-        PluginModule::PluginResult.new(
-          metric[:klass].new(
-            @db, @fs_ip, application, name, test.chomp('_test'), test_id, metric[:id]
-          )
-        ).retrieve_detailed_results, 
-        metric[:id].to_sym, 
-        {}, 
-        metric[:klass].metric_description,
-        metric[:type]
-      ) if metric
+      metric = ReposeJmxPlugin.show_plugin_names.find {|i| i[:id] == id }
+      results = {}
+      if options && options[:application_type] == :comparison
+        store = Redis.new(@db)
+        #get meta results and either 
+        test_id.split('+').each do |guid|
+          meta_results = store.hgetall("#{application}:#{name}:results:#{test.chomp('_test')}:#{guid}:meta")
+          test_json = JSON.parse(meta_results['test'])
+          results.merge!(PluginModule::PastPluginResults.format_results(
+            PluginModule::PluginResult.new(
+              metric[:klass].new(
+                @db, @fs_ip, application, name,test.chomp('_test'), guid, metric[:id]
+              )
+            ).retrieve_detailed_results, 
+            metric[:id].to_sym, 
+            {}, 
+            metric[:klass].metric_description,
+            metric[:type]
+          )) if metric
+        end
+      else
+        results = PluginModule::PastPluginResults.format_results(
+          PluginModule::PluginResult.new(
+            metric[:klass].new(
+              @db, @fs_ip, application, name,test.chomp('_test'), test_id, metric[:id]
+            )
+          ).retrieve_detailed_results, 
+          metric[:id].to_sym, 
+          {}, 
+          metric[:klass].metric_description,
+          metric[:type]
+        ) if metric
+      end 
+      results
     end
 
     def order_by_date(content_instance_list)
@@ -195,7 +240,7 @@ class SysstatsPlugin < PluginModule::Plugin
                     'user' => server['user'],
                     'path' => File.join(File.dirname(server['path']), "sysstats_#{plugin[:id]}.out_#{server['server']}") 
                   }
-                  PluginModule::RemoteServerAdapter.new(
+                  PluginModule::Adapters::RemoteServerAdapter.new(
                     store, 
                     'sysstats_plugin', 
                     tmp_server, 
