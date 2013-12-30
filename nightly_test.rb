@@ -126,9 +126,6 @@ Trollop::die :name, "must be specified" unless opts[:name]
 logger.debug opts
 
 if opts[:action] == 'stop'
-  #TODO: rm -rf /usr/share/repose
-  #TODO: rm -rf /config/*
-  #TODO: call stop test 
   
   logger.debug "config: #{config} and logger: #{logger}"
   env = Environment.new(config, logger)
@@ -163,29 +160,6 @@ if opts[:action] == 'stop'
     end
   end
 
-  server_ip_info[:nodes].each do |server|
-    logger.info server
-    #logger.debug "scp root@#{server}:/home/repose/logs/sysstats.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/sysstats.log_#{server}"
-    #system "scp root@#{server}:/home/repose/logs/sysstats.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/sysstats.log_#{server}"
-    logger.debug "with repose: #{opts[:with_repose]}"
-    if opts[:with_repose]
-      logger.info "stop jmxtrans"
-      system "ssh root@#{server} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
-      system "ssh root@#{server} 'curl http://localhost:6666 -v'"      
-      #logger.debug "copying over from scp root@#{server}:/home/repose/logs/jmxdata.out to #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/jmxdata.out"
-      #system "scp root@#{server}:/home/repose/logs/jmxdata.out #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/jmxdata.out_#{server}"
-      
-      system "ssh root@#{server} 'rm -rf /home/repose/configs/* '" 
-      system "ssh root@#{server} 'rm -rf /home/repose/usr/share/repose/repose-valve.jar '" 
-      system "ssh root@#{server} 'rm -rf /home/repose/usr/share/repose/filters/* '" 
-      system "ssh root@#{server} 'rm -rf /home/repose/logs/* '" 
-      system "ssh root@#{server} -f 'killall java '"
-    end
-    system "ssh root@#{server} -f 'killall node '"
-    system "ssh root@#{server} -f 'killall sar '"
-    system "ssh root@#{server} -f 'service sysstat stop '"
-  end
-
   #stop
   if File.exists?(File.expand_path("test_execution.yaml", Dir.pwd))
     test_yaml = YAML.load_file(File.expand_path("test_execution.yaml", Dir.pwd))
@@ -218,13 +192,76 @@ if opts[:action] == 'stop'
     }
   }
 
-  #TODO: add configs
-  #todo: add repose jmx and sysstats plugin
+  request_body["plugins"] = []
+  if opts[:with_repose]
+    request_body["servers"]["config"] = {
+      "server" => server_ip_info[:nodes].first,
+      "user" => "root",
+      "path" => "/home/repose/configs/"
+    }
+    repose_jmx_servers = []
+    server_ip_info[:nodes].each do |server|
+      repose_jmx_servers << {
+        "server" => server,
+        "user" => "root",
+        "path" => "/home/repose/logs/jmxdata.out"
+      } 
+      sysstats_servers << {
+        "server" => server,
+        "user" => "root",
+        "path" => "/home/repose/logs/sysstats.log"
+      } 
+    end
+    request_body["plugins"] << 
+      {
+      "id" => "repose_jmx_plugin",
+      "servers" => repose_jmx_servers
+      }
+  end
+  sysstats_servers = []
+  server_ip_info[:nodes].each do |server|
+    sysstats_servers << {
+      "server" => server,
+      "user" => "root",
+      "path" => "/home/repose/logs/sysstats.log"
+    } 
+  end
+  request_body["plugins"] << 
+    {
+    "id" => "sysstats_plugin",
+    "servers" => sysstats_servers
+    }
+
+
   logger.info "http://localhost/#{opts[:app]}/applications/#{opts[:sub_app]}/#{opts[:test_type]}/stop"
   logger.info request_body.to_json
   response = RestClient::Request.execute(:method => :post, :url => "http://localhost/#{opts[:app]}/applications/#{opts[:sub_app]}/#{opts[:test_type]}/stop", :timeout => -1,  :payload => request_body.to_json)
   logger.debug response
   logger.debug response.code
+
+  server_ip_info[:nodes].each do |server|
+    logger.info server
+    #logger.debug "scp root@#{server}:/home/repose/logs/sysstats.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/sysstats.log_#{server}"
+    #system "scp root@#{server}:/home/repose/logs/sysstats.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/sysstats.log_#{server}"
+    logger.debug "with repose: #{opts[:with_repose]}"
+    if opts[:with_repose]
+      logger.info "stop jmxtrans"
+      system "ssh root@#{server} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
+      system "ssh root@#{server} 'curl http://localhost:6666 -v'"      
+      #logger.debug "copying over from scp root@#{server}:/home/repose/logs/jmxdata.out to #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/jmxdata.out"
+      #system "scp root@#{server}:/home/repose/logs/jmxdata.out #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/jmxdata.out_#{server}"
+
+      
+      system "ssh root@#{server} 'rm -rf /home/repose/configs/* '" 
+      system "ssh root@#{server} 'rm -rf /home/repose/usr/share/repose/repose-valve.jar '" 
+      system "ssh root@#{server} 'rm -rf /home/repose/usr/share/repose/filters/* '" 
+      system "ssh root@#{server} 'rm -rf /home/repose/logs/* '" 
+      system "ssh root@#{server} -f 'killall java '"
+    end
+    system "ssh root@#{server} -f 'killall node '"
+    system "ssh root@#{server} -f 'killall sar '"
+    system "ssh root@#{server} -f 'service sysstat stop '"
+  end
 
   logger.info "remove the used values from yaml"
   if File.exists?(File.expand_path("test_execution.yaml", Dir.pwd))
@@ -651,20 +688,7 @@ elsif opts[:action] == 'start'
   startdelay = test_data["startdelay"]
   rampup = test_data["rampup"]
   duration = opts[:length] ? opts[:length] : test_data["duration"]
-  test_duration = duration * 60
-  case opts[:test_type]
-    when "load"
-      rampdown = test_data["rampdown"] 
-      throughput = test_data["throughput"]
-      logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{test_duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 >> /home/apache/test/summary.log & '"
-      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{test_duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 -l /home/apache/test/response.jtl >> /home/apache/test/summary.log & '"
-    when "stress"  
-      rampup_threads = test_data["rampup_threads"]  
-      maxthreads = test_data["maxthreads"]
-      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{test_duration} -Jrampup_threads=#{rampup_threads} -Jmaxthreads=#{maxthreads} -Jport=80 -l /home/apache/test/response.jtl >> /home/apache/test/summary.log & '"
-    else
-      raise ArgumentError, "invalid test type"
-    end
+
   request_body = {"length" =>  duration, "name" => opts[:name], "runner" => opts[:runner] }
   request_body["description"] = opts[:description] if opts[:description]
   request_body["flavor_type"] = opts[:flavor_type] if opts[:flavor_type]
@@ -772,4 +796,31 @@ elsif opts[:action] == 'start'
   logger.info "yaml content: #{test_yaml.to_yaml}"
 
   File.open(File.expand_path("test_execution.yaml", Dir.pwd), 'w') {|f| f.write test_yaml.to_yaml }
+
+  test_duration = duration * 60
+  case opts[:test_type]
+    when "load"
+      rampdown = test_data["rampdown"] 
+      throughput = test_data["throughput"]
+      logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{test_duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 >> /home/apache/test/summary.log & '"
+      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{test_duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 -l /home/apache/test/response.jtl >> /home/apache/test/summary.log & '"
+    when "stress"  
+      rampup_threads = test_data["rampup_threads"]  
+      maxthreads = test_data["maxthreads"]
+      logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{test_duration} -Jrampup_threads=#{rampup_threads} -Jmaxthreads=#{maxthreads} -Jport=80 -l /home/apache/test/response.jtl >> /home/apache/test/summary.log & '"
+      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -R 162.209.124.170,162.209.124.104,162.209.99.151,162.209.97.222,162.209.103.84 -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gmaxthreads=#{maxthreads} -Gport=80 >> /home/apache/test/summary.log & '"
+
+      sleep(60)
+      logger.info Net::SSH.start(test_agent,'root') {|ssh| ssh.exec!("lsof -i :4445")}
+      total_running_time = 0
+      while Net::SSH.start(test_agent,'root') {|ssh| ssh.exec!("lsof -i :4445")} and total_running_time < 7200
+        sleep(60)
+        total_running_time = total_running_time + 60
+        logger.info Net::SSH.start(test_agent,'root') {|ssh| ssh.exec!("lsof -i :4445")}
+        logger.info total_running_time
+      end
+    else
+      raise ArgumentError, "invalid test type"
+    end
+
 end

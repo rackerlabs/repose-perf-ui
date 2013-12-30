@@ -34,15 +34,20 @@ module PluginModule
         
         puts "downloaded"
         
+        puts @local_host, @local_path, @local_user
         #second, upload to local
-        Net::SCP.upload!(
-          @local_host, 
-          @local_user, 
-          "/tmp/#{guid}/", 
-          "#{@local_path}/#{application}/#{sub_app}/results/#{type}", 
-          {:recursive => true, :verbose => true }
-        )
-        
+        if @local_host == 'localhost'
+          FileUtils.mkpath "#{@local_path}/#{application}/#{sub_app}/results/#{type}" unless File.exists?("#{@localhost_path}/#{application}/#{sub_app}/results/#{type}")
+          FileUtils.cp_r "/tmp/#{guid}/", "#{@local_path}/#{application}/#{sub_app}/results/#{type}/"
+        else
+          Net::SCP.upload!(
+            @local_host, 
+            @local_user, 
+            "/tmp/#{guid}/", 
+            "#{@local_path}/#{application}/#{sub_app}/results/#{type}", 
+            {:recursive => true, :verbose => true }
+          )
+        end
         #third, add to redis
         Dir.glob("#{tmp_dir}/**/*") do |entry|
           entry_basename = File.basename(entry)
