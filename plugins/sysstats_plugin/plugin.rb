@@ -195,7 +195,7 @@ class SysstatsPlugin < PluginModule::Plugin
                     'user' => server['user'],
                     'path' => File.join(File.dirname(server['path']), "sysstats_#{plugin[:id]}.out_#{server['server']}") 
                   }
-                  PluginModule::RemoteServerAdapter.new(
+                  PluginModule::Adapters::RemoteServerAdapter.new(
                     store, 
                     'sysstats_plugin', 
                     tmp_server, 

@@ -454,7 +454,7 @@ class PerfApp < Sinatra::Base
           :application => app[:id],
           :sub_app_id => name.to_sym,
           :title => new_app.config['application']['name'],
-          :result_set_list => results.past_summary_results.test_results(new_app.db, new_app.fs_ip, results.test_list).sort_by {|r| r.start},
+          :result_set_list => results.past_summary_results.test_results(new_app.db, new_app.fs_ip, results.test_list).sort_by {|r| puts r.start; r.start.to_s},
           :plugin_list => plugins,
           :test_type => test
         }
