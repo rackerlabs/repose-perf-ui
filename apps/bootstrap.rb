@@ -169,6 +169,7 @@ module Apps
         end
       rescue => e
         @logger.error "failed with: #{e}"
+        @logger.error e.backtrace
         return {"fail" => e.message}.to_json
       ensure
         store.quit

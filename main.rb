@@ -454,7 +454,7 @@ class PerfApp < Sinatra::Base
           :application => app[:id],
           :sub_app_id => name.to_sym,
           :title => new_app.config['application']['name'],
-          :result_set_list => results.past_summary_results.test_results(new_app.db, new_app.fs_ip, results.test_list).sort_by {|r| puts r.start; r.start.to_s},
+          :result_set_list => results.past_summary_results.test_results(new_app.db, new_app.fs_ip, results.test_list).sort_by {|r| r.start.to_s},
           :plugin_list => plugins,
           :test_type => test
         }
@@ -573,27 +573,58 @@ class PerfApp < Sinatra::Base
         halt 404, "no plugin #{plugin} found" unless plugin_instance
         summary_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_summary_data(application, name, test, option, id, {:application_type => new_app.config['application']['type'].to_sym})
         detailed_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_detailed_data(application, name, test, option, id, {:application_type => new_app.config['application']['type'].to_sym})
+        summary_headers = nil
+        summary_header_descriptions = nil
+puts summary_plugin_data
         if summary_plugin_data and detailed_plugin_data
-          detailed_plugin_result = {}
-          detailed_plugin_data.each do |key, value|
-            detailed_plugin_result[key] = {}
-            detailed_plugin_result[key][:headers] = value[:headers]
-            detailed_plugin_result[key][:content] = {}
-            detailed_plugin_result[key][:description] = value[:description]
-            value[:content].each do |instance, data|
-              detailed_plugin_result[key][:content][instance] = 
-                plugin_instance.new(new_app.db, new_app.fs_ip).order_by_date(data)
-            end  
-          end
+          if new_app.config['application']['type'].to_sym == :comparison
+            summary_plugin_data[:id_results].each do |guid_results|
+              guid_results[:results].each do |metric, metric_data|
+                summary_headers = metric_data[:headers]
+                summary_header_descriptions = metric_data[:description]
+                break
+              end
+            end
+            detailed_plugin_result = []
+            detailed_plugin_data[:id_results].each do |guid_results|              
+              detailed_guid_results = {}
+              guid_results[:results].each do |key, value|
+                detailed_guid_results[key] = {}
+                detailed_guid_results[key][:headers] = value[:headers]
+                detailed_guid_results[key][:content] = {}
+                detailed_guid_results[key][:description] = value[:description]
             
-          erb PluginModule::PluginView.retrieve_view(
-            summary_plugin_data.map{|k,v|
+                value[:content].each do |instance, data|
+                  detailed_guid_results[key][:content][instance] = 
+                    plugin_instance.new(new_app.db, new_app.fs_ip).order_by_date(data)
+                end  
+              end
+              detailed_plugin_result << {:id => guid_results[:id], :results => detailed_guid_results}
+            end
+          else
+            detailed_plugin_result = {}
+            detailed_plugin_data.each do |key, value|
+              detailed_plugin_result[key] = {}
+              detailed_plugin_result[key][:headers] = value[:headers]
+              detailed_plugin_result[key][:content] = {}
+              detailed_plugin_result[key][:description] = value[:description]
+            
+              value[:content].each do |instance, data|
+                detailed_plugin_result[key][:content][instance] = 
+                  plugin_instance.new(new_app.db, new_app.fs_ip).order_by_date(data)
+              end  
+            end
+          end
+          plugin_type = new_app.config['application']['type'].to_sym == :comparison ? summary_plugin_data[:plugin_type] : summary_plugin_data.map{|k,v|
               v[:plugin_type]
-            }.first,new_app.config['application']['type'].to_sym), :locals => {
+            }.first
+          erb PluginModule::PluginView.retrieve_view(plugin_type,new_app.config['application']['type'].to_sym), :locals => {
             :application => app[:id],
             :sub_app_id => name.to_sym,
             :title => new_app.config['application']['name'],
             :summary_plugin_data => summary_plugin_data,
+            :summary_headers => summary_headers,
+            :summary_header_descriptions => summary_header_descriptions,
             :detailed_plugin_data => detailed_plugin_result,
             :detailed_unordered_plugin_data => detailed_plugin_data,
             :test_id => id,

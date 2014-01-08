@@ -2,7 +2,6 @@ module PluginModule
   class PastPluginResults
   
     def self.format_results(results,metric,temp_results, header_descriptions={}, plugin_type=:time_series)
-      puts results
       if results.length > 0
         temp_results[metric] = {}
         temp_results[metric][:content] = {}

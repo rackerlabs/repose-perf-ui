@@ -11,7 +11,6 @@ module SysstatsPluginModule
         test_type.chomp!("_test")
         @data_results = @store.hgetall("#{application}:#{name}:results:#{test_type}:#{id}:data")
         meta_result = @store.hget("#{application}:#{name}:results:#{test_type}:#{id}:meta", "test")
-        puts metric_name
         @data_results.each do |key, data_result|
           if key.start_with?("sysstats_plugin")
             #load the file

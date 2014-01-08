@@ -14,35 +14,60 @@ require 'yaml'
 require 'net/scp'
 require 'rest_client'
 
+RETRY_COUNT = 3
+
 def get_server_ips(lb_name, logger, env)
-  logger.debug "load balancer name: #{lb_name}"
-  lb_ip = env.lb_service.load_balancers.find do |lb| 
-    lb.name =~ /#{Regexp.escape(lb_name)}/ 
-  end.virtual_ips.find do |ip| 
-    ip.ip_version == 'IPV4' && ip.type == 'PUBLIC' 
-  end.address
+  run_succeeded = false
+  retry_counter = 0
+  while !run_succeeded && retry_counter < RETRY_COUNT
+    begin
+      logger.debug "load balancer name: #{lb_name}"
+      lb_ip = env.lb_service.load_balancers.find do |lb| 
+        lb.name =~ /#{Regexp.escape(lb_name)}/ 
+      end.virtual_ips.find do |ip| 
+        ip.ip_version == 'IPV4' && ip.type == 'PUBLIC' 
+      end.address
   
-  logger.debug "load balancer ip: #{lb_ip}"
+      logger.debug "load balancer ip: #{lb_ip}"
   
-  node_ips = env.lb_service.load_balancers.find do |lb| 
-    lb.name =~ /#{Regexp.escape(lb_name)}/ 
-  end.nodes.map do |ip| 
-    ip.address 
+      node_ips = env.lb_service.load_balancers.find do |lb| 
+        lb.name =~ /#{Regexp.escape(lb_name)}/ 
+      end.nodes.map do |ip| 
+        ip.address 
+      end
+      run_succeeded = true
+    rescue Exception => e
+      logger.info e
+      logger.info e.backtrace
+      retry_counter = retry_counter + 1  
+    end
   end
-  
   logger.debug "nodes: #{node_ips}"
   
   {:lb => lb_ip, :nodes => node_ips}
 end
 
 def get_test_ip(logger, env)
-  test_agent = env.service.servers.find {|server| server.name =~ /test_agent/}.ipv4_address
-  logger.info "test agent: #{test_agent}"
+  run_succeeded = false
+  retry_counter = 0
+  while !run_succeeded && retry_counter < RETRY_COUNT
+    begin
+      test_agent = env.service.servers.find {|server| server.name =~ /test_agent/}.ipv4_address
+      logger.info "test agent: #{test_agent}"
+      run_succeeded = true
+    rescue Exception => e
+      logger.info e
+      logger.info e.backtrace
+      retry_counter = retry_counter + 1  
+    end
+  end
   test_agent
 end
 
 environment_hash = {
- :atom_hopper => :iad
+ :atom_hopper => :iad,
+ :translation => :iad,
+ :identity => :iad
 }
 
 
@@ -116,6 +141,7 @@ EOS
   opt :flavor_type, "Flavor type", :type => :string
   opt :runner, "Runner", :type => :string
   opt :with_repose, "Boolean repose", :type => :boolean
+  opt :extra_ear, "Extra ears containing filters not in Repose", :type => :string
 end
 
 Trollop::die :action, "must be specified" unless opts[:action]
@@ -134,8 +160,19 @@ if opts[:action] == 'stop'
 
   test_agent = get_test_ip(logger, env)
 
-  Net::SSH.start(test_agent, 'root') do |ssh|
-    ssh.exec!("/home/apache/apache-jmeter-2.10/bin/shutdown.sh")
+  run_succeeded = false
+  retry_counter = 0
+  while !run_succeeded && retry_counter < RETRY_COUNT
+    begin
+      Net::SSH.start(test_agent, 'root') do |ssh|
+        ssh.exec!("/home/apache/apache-jmeter-2.10/bin/shutdown.sh")
+      end
+      run_succeeded = true
+    rescue Exception => e
+      logger.info e
+      logger.info e.backtrace
+      retry_counter = retry_counter + 1
+    end
   end
 
   if opts[:flavor_type] == 'performance' 
@@ -206,11 +243,6 @@ if opts[:action] == 'stop'
         "user" => "root",
         "path" => "/home/repose/logs/jmxdata.out"
       } 
-      sysstats_servers << {
-        "server" => server,
-        "user" => "root",
-        "path" => "/home/repose/logs/sysstats.log"
-      } 
     end
     request_body["plugins"] << 
       {
@@ -241,22 +273,16 @@ if opts[:action] == 'stop'
 
   server_ip_info[:nodes].each do |server|
     logger.info server
-    #logger.debug "scp root@#{server}:/home/repose/logs/sysstats.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/sysstats.log_#{server}"
-    #system "scp root@#{server}:/home/repose/logs/sysstats.log #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/sysstats.log_#{server}"
     logger.debug "with repose: #{opts[:with_repose]}"
     if opts[:with_repose]
       logger.info "stop jmxtrans"
       system "ssh root@#{server} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
-      system "ssh root@#{server} 'curl http://localhost:6666 -v'"      
-      #logger.debug "copying over from scp root@#{server}:/home/repose/logs/jmxdata.out to #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/jmxdata.out"
-      #system "scp root@#{server}:/home/repose/logs/jmxdata.out #{config['home_dir']}/files/apps/#{opts[:app]}/results/#{opts[:test_type]}/#{tmp_dir}/jmxdata.out_#{server}"
-
+      system "ssh root@#{server} -f 'killall java '"
       
       system "ssh root@#{server} 'rm -rf /home/repose/configs/* '" 
       system "ssh root@#{server} 'rm -rf /home/repose/usr/share/repose/repose-valve.jar '" 
       system "ssh root@#{server} 'rm -rf /home/repose/usr/share/repose/filters/* '" 
       system "ssh root@#{server} 'rm -rf /home/repose/logs/* '" 
-      system "ssh root@#{server} -f 'killall java '"
     end
     system "ssh root@#{server} -f 'killall node '"
     system "ssh root@#{server} -f 'killall sar '"
@@ -475,9 +501,20 @@ elsif opts[:action] == 'start'
         system "ssh root@#{server} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
         logger.debug "start jmxtrans"
         system "ssh root@#{server} -f 'cd /usr/share/jmxtrans ; ./jmxtrans.sh start #{plugin['name']} '" 
-      end
+      end if plugin_list_json
 
       if opts[:release]
+        if opts[:extra_ear]
+          opts[:extra_ear].split(',').each do |extra_ear|
+            Net::SCP.upload!(
+               server,
+              'root',
+              extra_ear,
+              "/home/repose/usr/share/repose/filters/#{File.basename(extra_ear)}",
+              {:recursive => true, :verbose => true }
+            )
+          end
+        end
         if opts[:release] == 'master'
           logger.info "download master version"
           
@@ -813,7 +850,7 @@ elsif opts[:action] == 'start'
       sleep(60)
       logger.info Net::SSH.start(test_agent,'root') {|ssh| ssh.exec!("lsof -i :4445")}
       total_running_time = 0
-      while Net::SSH.start(test_agent,'root') {|ssh| ssh.exec!("lsof -i :4445")} and total_running_time < 7200
+      while Net::SSH.start(test_agent,'root') {|ssh| ssh.exec!("lsof -i :4445")} and total_running_time < 3600
         sleep(60)
         total_running_time = total_running_time + 60
         logger.info Net::SSH.start(test_agent,'root') {|ssh| ssh.exec!("lsof -i :4445")}

@@ -24,7 +24,11 @@ module ReposeJmxPluginModule
         "content-normalization:Mean" => "",
         "content-normalization:75thPercentile" => "",
         "ip-identity:Mean" => "",
-        "ip-identity:75thPercentile" => ""
+        "ip-identity:75thPercentile" => "",
+        "default-router:75thPercentile" => "",
+        "default-router:Mean" => "",
+        "compression:75thPercentile" => "",
+        "compression:Mean" => ""
       }
     end
   
@@ -47,7 +51,11 @@ module ReposeJmxPluginModule
         "content-normalization:Mean" => [],
         "content-normalization:75thPercentile" => [],
         "ip-identity:Mean" => [],
-        "ip-identity:75thPercentile" => []
+        "ip-identity:75thPercentile" => [],
+        "default-router:75thPercentile" => [],
+        "default-router:Mean" => [],
+        "compression:75thPercentile" => [],
+        "compression:Mean" => []
       }
   
       @detailed_metric_list = {
@@ -68,7 +76,11 @@ module ReposeJmxPluginModule
         "content-normalization:Mean" => [],
         "content-normalization:75thPercentile" => [],
         "ip-identity:Mean" => [],
-        "ip-identity:75thPercentile" => []
+        "ip-identity:75thPercentile" => [],
+        "default-router:75thPercentile" => [],
+        "default-router:Mean" => [],
+        "compression:75thPercentile" => [],
+        "compression:Mean" => []
       }
       super(db, fs_ip, application, name, test_type, id, metric_id)
     end 

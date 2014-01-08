@@ -52,6 +52,8 @@ class ReposeJmxPlugin < PluginModule::Plugin
     metric = ReposeJmxPlugin.show_plugin_names.find {|i| i[:id] == id }
     results = {}
     if options && options[:application_type] == :comparison
+      results[:plugin_type] = metric[:type]
+      results[:id_results] = []
       store = Redis.new(@db)
       #get meta results and either 
       test_id.split('+').each do |guid|
@@ -59,7 +61,7 @@ class ReposeJmxPlugin < PluginModule::Plugin
         test_json = JSON.parse(meta_results['test'])
         if test_json['comparison_guid']
           #get the repose data here
-          results.merge!(PluginModule::PastPluginResults.format_results(
+          results[:id_results] << {:id => guid, :results => PluginModule::PastPluginResults.format_results(
             PluginModule::PluginResult.new(
               metric[:klass].new(
                 @db, @fs_ip, application, name,test.chomp('_test'), test_json['comparison_guid'], metric[:id]
@@ -69,7 +71,7 @@ class ReposeJmxPlugin < PluginModule::Plugin
             {}, 
             metric[:klass].metric_description,
             metric[:type]
-          )) if metric
+          )} if metric
         end
       end
     else
@@ -92,6 +94,8 @@ class ReposeJmxPlugin < PluginModule::Plugin
     metric = ReposeJmxPlugin.show_plugin_names.find {|i| i[:id] == id }
     results = {}
     if options && options[:application_type] == :comparison
+      results[:plugin_type] = metric[:type] if metric
+      results[:id_results] = []
       store = Redis.new(@db)
       #get meta results and either 
       test_id.split('+').each do |guid|
@@ -99,7 +103,7 @@ class ReposeJmxPlugin < PluginModule::Plugin
         test_json = JSON.parse(meta_results['test'])
         if test_json['comparison_guid']
           #get the repose data here
-          results.merge!(PluginModule::PastPluginResults.format_results(
+          results[:id_results] << {:id => guid, :results => PluginModule::PastPluginResults.format_results(
             PluginModule::PluginResult.new(
               metric[:klass].new(
                 @db, @fs_ip, application, name,test.chomp('_test'), test_json['comparison_guid'], metric[:id]
@@ -109,7 +113,7 @@ class ReposeJmxPlugin < PluginModule::Plugin
             {}, 
             metric[:klass].metric_description,
             metric[:type]
-          )) if metric
+          )} if metric
         end
       end
     else

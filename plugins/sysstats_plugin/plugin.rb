@@ -121,12 +121,14 @@ class SysstatsPlugin < PluginModule::Plugin
       metric = SysstatsPlugin.show_plugin_names.find {|i| i[:id] == id }
       results = {}
       if options && options[:application_type] == :comparison
+        results[:plugin_type] = metric[:type]
+        results[:id_results] = []
         store = Redis.new(@db)
         #get meta results and either 
         test_id.split('+').each do |guid|
           meta_results = store.hgetall("#{application}:#{name}:results:#{test.chomp('_test')}:#{guid}:meta")
           test_json = JSON.parse(meta_results['test'])
-          results.merge!(PluginModule::PastPluginResults.format_results(
+          results[:id_results] << {:id => guid, :results => PluginModule::PastPluginResults.format_results(
             PluginModule::PluginResult.new(
               metric[:klass].new(
                 @db, @fs_ip, application, name,test.chomp('_test'), guid, metric[:id]
@@ -136,7 +138,7 @@ class SysstatsPlugin < PluginModule::Plugin
             {}, 
             metric[:klass].metric_description,
             metric[:type]
-          )) if metric
+          )} if metric
         end
       else
         results = PluginModule::PastPluginResults.format_results(
@@ -150,7 +152,7 @@ class SysstatsPlugin < PluginModule::Plugin
           metric[:klass].metric_description,
           metric[:type]
         ) if metric
-      end 
+      end
       results
     end
 
@@ -159,15 +161,17 @@ class SysstatsPlugin < PluginModule::Plugin
   show all data and return in a list of hashes
 =end
     def show_detailed_data(application, name, test, id, test_id, options=nil)
-      metric = ReposeJmxPlugin.show_plugin_names.find {|i| i[:id] == id }
+      metric = SysstatsPlugin.show_plugin_names.find {|i| i[:id] == id }
       results = {}
       if options && options[:application_type] == :comparison
+        results[:plugin_type] = metric[:type] if metric
+        results[:id_results] = []
         store = Redis.new(@db)
         #get meta results and either 
         test_id.split('+').each do |guid|
           meta_results = store.hgetall("#{application}:#{name}:results:#{test.chomp('_test')}:#{guid}:meta")
           test_json = JSON.parse(meta_results['test'])
-          results.merge!(PluginModule::PastPluginResults.format_results(
+          results[:id_results] << {:id => guid, :results => PluginModule::PastPluginResults.format_results(
             PluginModule::PluginResult.new(
               metric[:klass].new(
                 @db, @fs_ip, application, name,test.chomp('_test'), guid, metric[:id]
@@ -177,7 +181,7 @@ class SysstatsPlugin < PluginModule::Plugin
             {}, 
             metric[:klass].metric_description,
             metric[:type]
-          )) if metric
+          )} if metric
         end
       else
         results = PluginModule::PastPluginResults.format_results(
@@ -191,7 +195,7 @@ class SysstatsPlugin < PluginModule::Plugin
           metric[:klass].metric_description,
           metric[:type]
         ) if metric
-      end 
+      end
       results
     end
 

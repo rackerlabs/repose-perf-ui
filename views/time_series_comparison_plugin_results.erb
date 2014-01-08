@@ -38,42 +38,51 @@
         </div>
         <div class="span11" style="overflow: auto;">
 	        <table class="table table-hover" style="max-width: none;">
-	<% summary_plugin_data.each do |key, value| %>
-	          <caption>Repose (Origin only)</caption>
+	          <caption>Comparison results</caption>
 	          <thead>
 	            <tr>
 	              <th>instance</th>
-	  <% value[:headers].each do |header| %>
-	              <th><span class="metric_desc" data-toggle="tooltip" title="<%= value[:description][header] %>" data-placement="bottom"><%= header %></span></th>
+	  <% summary_headers.each do |header| %>
+	              <th><span class="metric_desc" data-toggle="tooltip" title="<%= summary_header_descriptions[header] if summary_header_descriptions %>" data-placement="bottom"><%= header %></span></th>
 	  <% end %>
 	            </tr>
 	          </thead>
+<% summary_plugin_data[:id_results].each do |guid_results|
+     guid = guid_results[:id]
+     metric_results = guid_results[:results]
+     metric_results.each do |metric,value|
+%>
 	          <tbody>
 	  <% value[:content].each do |instance, data| %>
 	            <tr>
-	              <td><%= instance %></td>
+	              <td><%= guid %> - <%= instance %></td>
 	     <% data.each do |point| %>
 	              <td><%= point %></td>
 	     <% end %>
 	            </tr>
 	  <% end %>
 	          </tbody>
-	<% end %>
+<%   end 
+  end
+%>
 	        </table>
 	     </div>
       </div>
-<% detailed_plugin_data.each do |key, value| %>
-  <% value[:content].each do |instance, data| %>
+<% detailed_plugin_data.each do |guid_results| %>
+  <% guid_results[:results].each do |key, value| %>
+    <% value[:content].each do |instance, data| %>
       <div class="panel">
         <div class="panel-heading">
-          <h3 class="panel-title"><%= key %> - <%= instance %></h3>
+          <h3 class="panel-title"><%= guid_results[:id] %> - <%= key %> - <%= instance %></h3>
         </div>        
-        <div id="<%= key %>_<%= instance.gsub(/[.-]/,'_') %>" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+        <div id="<%= guid_results[:id].gsub(/[-]/,'_') %>_<%= key %>_<%= instance.gsub(/[.-]/,'_') %>" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
       </div>
+    <% end %>
   <% end %>
 <% end %>
-<% detailed_plugin_data.each do |key, value| %>
-  <% value[:content].each do |instance, data| %>
+<% detailed_plugin_data.each do |guid_results| %>
+  <% guid_results[:results].each do |key, value| %>
+    <% value[:content].each do |instance, data| %>
       <div class="panel panel-summary">
         <div class="panel-heading">
           <h3 class="panel-title">Detailed Test Results for <%= instance %></h3>
@@ -102,6 +111,7 @@
 	        </table>
 	     </div>
       </div>
+    <% end %>
   <% end %>
 <% end %>
     </div>
@@ -125,16 +135,17 @@
         window.prettyPrint && prettyPrint()
         $(".metric_desc").tooltip()
         $(".accordion-toggle").collapse();
-<% detailed_unordered_plugin_data.each do |key, value| %>
+<% detailed_unordered_plugin_data[:id_results].each do |guid_results|              
+   guid_results[:results].each do |key, value| %>
   <% value[:content].each do |instance, data| %>
-      var option_<%= key %>_<%= instance.gsub(/[.-]/,'_') %> = {
+      var option_<%= guid_results[:id].gsub(/[-]/,'_') %>_<%= key %>_<%= instance.gsub(/[.-]/,'_') %> = {
           chart: {
-            renderTo: '<%= key %>_<%= instance.gsub(/[.-]/,'_') %>',
+            renderTo: '<%= guid_results[:id].gsub(/[-]/,'_') %>_<%= key %>_<%= instance.gsub(/[.-]/,'_') %>',
             type: 'area',
             zoomType: 'x'
           },
           title: {
-            text: '<%= key %> <%= instance %>'
+            text: '<%= guid_results[:id] %> <%= key %> <%= instance %>'
           },
           yAxis:{
             title: {
@@ -151,11 +162,12 @@
           ]
       }
     <% data.each_index do |index| %>
-      option_<%= key %>_<%= instance.gsub(/[.-]/,'_') %>.series[<%= index %>].data = <%= data[index].map {|t| [t[:time],t[:value].to_f ]}.to_json %>;
+      option_<%= guid_results[:id].gsub(/[-]/,'_') %>_<%= key %>_<%= instance.gsub(/[.-]/,'_') %>.series[<%= index %>].data = <%= data[index].map {|t| [t[:time],t[:value].to_f ]}.to_json %>;
     <% end %>
-    var <%= key %>_<%= instance.gsub(/[.-]/,'_') %>_chart = new Highcharts.Chart(option_<%= key %>_<%= instance.gsub(/[.-]/,'_') %>);
-  <% end %>
-<% end %>
+var t_<%= guid_results[:id].gsub(/[-]/,'_') %>_<%= key %>_<%= instance.gsub(/[.-]/,'_') %>_chart = new Highcharts.Chart(option_<%= guid_results[:id].gsub(/[-]/,'_') %>_<%= key %>_<%= instance.gsub(/[.-]/,'_') %>);
+<% end 
+ end 
+ end %>
       });
     </script>
   </body>
