@@ -55,7 +55,7 @@ class ReposeJmxPlugin < PluginModule::Plugin
       results[:plugin_type] = metric[:type]
       results[:id_results] = []
       store = Redis.new(@db)
-      #get meta results and either 
+      #get meta results and either
       test_id.split('+').each do |guid|
         meta_results = store.hgetall("#{application}:#{name}:results:#{test.chomp('_test')}:#{guid}:meta")
         test_json = JSON.parse(meta_results['test'])

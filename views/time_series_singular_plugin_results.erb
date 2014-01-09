@@ -67,7 +67,7 @@
         <div class="panel-heading">
           <h3 class="panel-title"><%= key %> - <%= instance %></h3>
         </div>        
-        <div id="<%= key %>_<%= instance.gsub(/[.-\\ \(\[\^\/\?\#\]\+\)]/,'_') %>" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+        <div id="<%= key %>_<%= instance.gsub(/[.-\\ \(\[\^\/\?\#\]\+\)\-]/,'_') %>" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
       </div>
   <% end %>
 <% end %>
@@ -125,9 +125,9 @@
         $(".accordion-toggle").collapse();
 <% detailed_unordered_plugin_data.each do |key, value| %>
   <% value[:content].each do |instance, data| %>
-      var option_<%= key %>_<%= instance.gsub(/[.-\\ \(\[\^\/\?\#\]\+\)]/,'_') %> = {
+      var option_<%= key %>_<%= instance.gsub(/[.-\\ \(\[\^\/\?\#\]\+\)\-]/,'_') %> = {
           chart: {
-            renderTo: '<%= key %>_<%= instance.gsub(/[.-\\ \(\[\^\/\?\#\]\+\)]/,'_') %>',
+            renderTo: '<%= key %>_<%= instance.gsub(/[.-\\ \(\[\^\/\?\#\]\+\)\-]/,'_') %>',
             type: 'area',
             zoomType: 'xy'
           },
@@ -149,9 +149,9 @@
           ]
       }
     <% data.each_index do |index| %>
-      option_<%= key %>_<%= instance.gsub(/[.-\\ \(\[\^\/\?\#\]\+\)]/,'_') %>.series[<%= index %>].data = <%= data[index].map {|t| [t[:time],t[:value].to_f ]}.to_json %>;
+      option_<%= key %>_<%= instance.gsub(/[.-\\ \(\[\^\/\?\#\]\+\)\-]/,'_') %>.series[<%= index %>].data = <%= data[index].map {|t| [t[:time],t[:value].to_f ]}.to_json %>;
     <% end %>
-    var <%= key %>_<%= instance.gsub(/[.-\\ \(\[\^\/\?\#\]\+\)]/,'_') %>_chart = new Highcharts.Chart(option_<%= key %>_<%= instance.gsub(/[.-\\ \(\[\^\/\?\#\]\+\)]/,'_') %>);
+    var <%= key %>_<%= instance.gsub(/[.-\\ \(\[\^\/\?\#\]\+\)\-]/,'_') %>_chart = new Highcharts.Chart(option_<%= key %>_<%= instance.gsub(/[.-\\ \(\[\^\/\?\#\]\+\)\-]/,'_') %>);
   <% end %>
 <% end %>
       });
