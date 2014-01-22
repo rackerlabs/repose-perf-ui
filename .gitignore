@@ -16,3 +16,5 @@ Gemfile.lock
 hERmes_viewer/
 .metadata
 files/*
+.DS_Store
+bower_components
