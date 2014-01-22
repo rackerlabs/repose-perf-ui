@@ -575,44 +575,50 @@ class PerfApp < Sinatra::Base
         detailed_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_detailed_data(application, name, test, option, id, {:application_type => new_app.config['application']['type'].to_sym})
         summary_headers = nil
         summary_header_descriptions = nil
-puts summary_plugin_data
-        if summary_plugin_data and detailed_plugin_data
-          if new_app.config['application']['type'].to_sym == :comparison
+        #TODO: detailed data is not required for all plugin types.  have a condition to check if not available and then don't process it
+        begin
+        if summary_plugin_data && !summary_plugin_data.empty?
+          if new_app.config['application']['type'].to_sym == :comparison && summary_plugin_data[:plugin_type] == :time_series
             summary_plugin_data[:id_results].each do |guid_results|
               guid_results[:results].each do |metric, metric_data|
-                summary_headers = metric_data[:headers]
+                summary_headers = summary_headers ? (metric_data[:headers] | summary_headers) : metric_data[:headers]
                 summary_header_descriptions = metric_data[:description]
                 break
               end
             end
-            detailed_plugin_result = []
-            detailed_plugin_data[:id_results].each do |guid_results|              
-              detailed_guid_results = {}
-              guid_results[:results].each do |key, value|
-                detailed_guid_results[key] = {}
-                detailed_guid_results[key][:headers] = value[:headers]
-                detailed_guid_results[key][:content] = {}
-                detailed_guid_results[key][:description] = value[:description]
-            
+            if detailed_plugin_data
+              detailed_plugin_result = []
+              #TODO: this might be very time_series centric. Maybe should be moved out of here
+              detailed_plugin_data[:id_results].each do |guid_results|              
+                detailed_guid_results = {}
+                guid_results[:results].each do |key, value|
+                  detailed_guid_results[key] = {}
+                  detailed_guid_results[key][:headers] = value[:headers]
+                  detailed_guid_results[key][:content] = {}
+                  detailed_guid_results[key][:description] = value[:description]
+              
+                  value[:content].each do |instance, data|
+                    detailed_guid_results[key][:content][instance] = 
+                      plugin_instance.new(new_app.db, new_app.fs_ip).order_by_date(data)
+                  end  
+                end
+                detailed_plugin_result << {:id => guid_results[:id], :results => detailed_guid_results}
+              end
+            end
+          else
+            if detailed_plugin_data
+              detailed_plugin_result = {}
+              detailed_plugin_data.each do |key, value|
+                detailed_plugin_result[key] = {}
+                detailed_plugin_result[key][:headers] = value[:headers]
+                detailed_plugin_result[key][:content] = {}
+                detailed_plugin_result[key][:description] = value[:description]
+              
                 value[:content].each do |instance, data|
-                  detailed_guid_results[key][:content][instance] = 
+                  detailed_plugin_result[key][:content][instance] = 
                     plugin_instance.new(new_app.db, new_app.fs_ip).order_by_date(data)
                 end  
               end
-              detailed_plugin_result << {:id => guid_results[:id], :results => detailed_guid_results}
-            end
-          else
-            detailed_plugin_result = {}
-            detailed_plugin_data.each do |key, value|
-              detailed_plugin_result[key] = {}
-              detailed_plugin_result[key][:headers] = value[:headers]
-              detailed_plugin_result[key][:content] = {}
-              detailed_plugin_result[key][:description] = value[:description]
-            
-              value[:content].each do |instance, data|
-                detailed_plugin_result[key][:content][instance] = 
-                  plugin_instance.new(new_app.db, new_app.fs_ip).order_by_date(data)
-              end  
             end
           end
           plugin_type = new_app.config['application']['type'].to_sym == :comparison ? summary_plugin_data[:plugin_type] : summary_plugin_data.map{|k,v|
@@ -634,6 +640,9 @@ puts summary_plugin_data
           }
         else
           halt 404, "no metric data found for #{application}/#{name}/#{test}/#{id}/#{plugin}/#{option}"
+        end
+        rescue Exception => e
+          p e
         end
       else
         halt 404, "No sub application for #{name} found"
@@ -757,7 +766,7 @@ puts summary_plugin_data
         valid_comparison_id_list = []
         comparison_id_list.each do |id| 
           detailed_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_detailed_data(application, name, test, option, id)
-          if detailed_plugin_data and detailed_plugin_data[option.to_sym][:content].length > 0   
+          if detailed_plugin_data && !detailed_plugin_data.empty? && detailed_plugin_data[option.to_sym][:content].length > 0   
             detailed_plugin_data_list << {
               :id => id, 
               :data => detailed_plugin_data
@@ -783,7 +792,6 @@ puts summary_plugin_data
   post '/:application/results/:name/:test/compare-plugin' do |application, name, test|
     halt 400, "No tests were specified for comparison" unless params[:compare]
     halt 400, "No plugin was specified for comparison" unless params[:plugin_id]
-    comparison_id_list = params[:compare].split('+')
     plugin_id = params[:plugin_id]
 
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
@@ -801,24 +809,50 @@ puts summary_plugin_data
         halt 404, "No plugin by name of #{plugin} found" unless plugin_instance
         summary_plugin_data_list = [] 
         valid_comparison_id_list = []
-        comparison_id_list.each do |id| 
-          summary_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_summary_data(application, name, test, option, id)
-          if summary_plugin_data and summary_plugin_data[option.to_sym][:content].length > 0   
-            summary_plugin_data_list << {
-              :id => id, 
-              :data => summary_plugin_data,
-              :plugin_type => summary_plugin_data_list.map{|k,v|
-                v[:plugin_type]
-              }.first
-            }
-            valid_comparison_id_list << id
+        summary_headers = nil
+        summary_header_descriptions = nil
+        if new_app.config['application']['type'].to_sym == :comparison
+          summary_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_summary_data(application, name, test, option, params[:compare], {:application_type => new_app.config['application']['type'].to_sym})
+          if summary_plugin_data && !summary_plugin_data.empty?  
+            summary_plugin_data[:id_results].each do |guid_results|
+              guid_results[:results].each do |metric, metric_data|
+                summary_headers = summary_headers ? (metric_data[:headers] | summary_headers) : metric_data[:headers]
+                summary_header_descriptions = metric_data[:description]
+                break
+              end if guid_results[:results]
+              valid_comparison_id_list << guid_results[:id]
+            end
+            summary_plugin_data_list = summary_plugin_data[:id_results]
+            plugin_type = summary_plugin_data[:plugin_type]
+            params[:compare].split('+').each {|id| valid_comparison_id_list << id }
+          else
+            halt 404, "No data for #{plugin_id} found"
           end
-        end
+        else
+          params[:compare].split('+').each do |id| 
+            summary_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_summary_data(application, name, test, option, id)
+            if summary_plugin_data && !summary_plugin_data.empty? && summary_plugin_data[option.to_sym][:content].length > 0   
+              summary_plugin_data_list << {
+                :id => id, 
+                :results => summary_plugin_data
+              }
+              valid_comparison_id_list << id
+              plugin_type = summary_plugin_data.map{|k,v|
+                            v[:plugin_type]
+                          }.first   
+              summary_plugin_data.each do |key, content|
+                summary_headers = summary_headers ? (content[:headers] | summary_headers) : content[:headers]
+                summary_header_descriptions = content[:description]
+                break
+              end
+            end
+          end
+        end  
         
         #detailed_plugin_data = plugin_instance.new(new_app.db, new_app.fs_ip).show_detailed_data(application, name, test, option, id)
-        if summary_plugin_data_list and valid_comparison_id_list.length > 0
-          erb PluginModule::PluginView.retrieve_view(
-            summary_plugin_data_list.first[:plugin_type],
+        if valid_comparison_id_list.length > 0 && !summary_plugin_data_list.empty?
+          erb PluginModule::PluginView.retrieve_compare_view(
+            plugin_type,
             new_app.config['application']['type'].to_sym
             ), :locals => {
               :application => app[:id],
@@ -826,6 +860,8 @@ puts summary_plugin_data
               :title => new_app.config['application']['name'],
               :summary_plugin_data_list => summary_plugin_data_list,
               :test_type => test,
+              :summary_headers => summary_headers,
+              :summary_header_descriptions => summary_header_descriptions,
               :compare_guids => valid_comparison_id_list,
               :plugin_name => plugin,
               :plugin_id => plugin_id,

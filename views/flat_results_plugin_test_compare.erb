@@ -1,0 +1,192 @@
+<% 
+def create_data_list(hash, value_list, key)
+  if hash.is_a?(Hash)
+    if hash.empty?
+    else
+      hash.each do |hkey, value|
+        if key && !key.empty?
+          tmp_key = "#{key}->hash[#{hkey}]"
+        else
+          tmp_key = "hash[#{hkey}]"
+        end
+        value_list = create_data_list(value, value_list, tmp_key)
+      end
+    end
+  elsif hash.is_a?(Array)
+    if hash.empty?
+    else
+      hash.each do |value|
+        if key
+          tmp_key = "#{key}->list:"
+        else
+          tmp_key = "list:"
+        end
+        value_list = create_data_list(value, value_list, tmp_key)
+      end
+    end
+  else
+    if value_list.has_key?(key)
+      current_value = value_list[key]
+      if current_value.is_a?(Array)
+        current_value << hash.to_s
+        value_list[key] = current_value
+      else
+        value_list[key] = [current_value, hash.to_s]
+      end
+    else
+      value_list.merge!({key => hash.to_s})
+    end
+  end
+  value_list
+end
+
+def compare_hashes(hash_list)
+  result_hash = {}
+  hash_list.each_cons(2) do |hash_one, hash_two|
+    hash_one.merge(hash_two) do |key, hash_one_value, hash_two_value|
+      hash_one_int = hash_one_value.gsub(/[^0-9\.]/,'')
+      unless hash_two_value =~ /[a-zA-Z]+/ && hash_one_value =~ /[a-zA-Z]+/ || hash_two_value.empty? || hash_one_value.empty?
+        if result_hash.has_key?(key)
+          tmp_value = result_hash[key][:values]
+          if tmp_value.is_a?(Array)
+            tmp_value << hash_two_value
+            result_hash[key][:values] = tmp_value
+            result_hash[key][:difference] << (hash_two_value.gsub(/[^0-9\.]/,'').to_f - hash_one_value.gsub(/[^0-9\.]/,'').to_f)
+          else
+            result_hash[key][:values] = [tmp_value, hash_two_value]
+            result_hash[key][:difference] = [(hash_two_value.gsub(/[^0-9\.]/,'').to_f - hash_one_value.gsub(/[^0-9\.]/,'').to_f)]
+          end
+        else
+          result_hash.merge!(
+            {
+              key => 
+              {
+                :values => [hash_one_value, hash_two_value], 
+                :difference => [(hash_two_value.gsub(/[^0-9\.]/,'').to_f - hash_one_value.gsub(/[^0-9\.]/,'').to_f)]
+              }
+            }
+          )
+        end
+      else
+        #a string.  just append
+        if result_hash.has_key?(key)
+          tmp_value = result_hash[key][:values]
+          if tmp_value.is_a?(Array)
+            tmp_value << hash_two_value
+            result_hash[key][:values] = tmp_value
+          else
+            result_hash[key][:values] = [tmp_value, hash_two_value]
+          end
+        else
+          result_hash.merge!(
+            {
+              key => 
+              {
+                :values => [hash_one_value, hash_two_value]
+              }
+            }
+          )
+        end
+      end
+    end
+  end
+  result_hash
+end
+
+
+%>
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %> - Results - <%= test_type %> - Compare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/css/jquery.treetable.css" rel="stylesheet" media="screen">
+    <link href="/css/repose.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/<%= application %>"><%= title %></a>
+      <div class="nav-collapse collapse bs-navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/<%= application %>/tests">Running Tests</a></li>
+          <li><a href="/<%= application %>/applications">Applications</a></li>
+          <li class="active"><a href="/<%= application %>/results">Results</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container">
+      <ul class="breadcrumb">
+        <li><a href="/<%= application %>">Home</a></li>
+        <li><a href="/<%= application %>/results">Results</a></li>
+        <li><a href="/<%= application %>/results/<%= sub_app_id %>"><%= sub_app_id %></a></li>
+        <li><a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>"><%= test_type %></a></li>
+        <li class="active"><%= plugin_name %> - <%= option %> - Comparison</li>
+      </ul>
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Test Results</h3>
+        </div>
+        <div class="tree">
+        	<ul>
+<% 	summary_hash_list = summary_plugin_data_list.inject([]){|summary_hash_list, hash| summary_hash_list << create_data_list(hash[:results][:status][:content],{},"") }
+	results = compare_hashes(summary_hash_list)
+	results.each do |key, value|
+%>
+				<li>
+					<span class="badge badge-success"><i class="icon-minus-sign"></i>
+						<%= key.gsub(/hash\[(\w+)\]/,'\1').gsub(/->list:/,'') %>
+					</span>
+					<ul>
+<%
+		value[:values].each_with_index do |v, index|
+			if v && v.to_s.length > 0
+%>
+						<li>
+							<span class="badge badge-warning">
+								<i class="icon-minus-sign"></i><%= summary_plugin_data_list[index][:id] %>
+							</span> &ndash; <%= v %> 
+<%
+				if value.has_key?(:difference) && index > 0
+%>
+								&ndash; difference of <%= value[:difference][index-1] %>
+<%					
+				end
+%>							
+						</li>
+<%		
+			end	
+		end
+%>						
+					</ul>
+				</li>
+<%			
+	end  
+%>
+        	</ul>
+        </div>
+      </div>
+    </div>
+    <hr>
+    <footer>
+      <p>&copy; Rackspace Hosting 2013</p>
+    </footer>
+  </div> <!-- /container -->
+    <!-- JavaScript plugins (requires jQuery) -->
+    <!-- <script src="http://code.jquery.com/jquery.js"></script>-->
+    <script src="/js/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+    <script src="/js/respond.js"></script>
+    <script src="/js/jquery.treetable.js"></script>
+  </body>
+</html>

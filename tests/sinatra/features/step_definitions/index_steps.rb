@@ -167,7 +167,11 @@ Then /^the error should match the "([^\"]*)"$/ do |error|
 end
 
 Then /^the message should contain "([^\"]*)"$/ do |msg|
-  last_response.body.include?(msg).should be(true)
+  last_response.body.include?(msg.to_s).should be(true)
+end
+
+Then /^the message should not contain "([^\"]*)"$/ do |msg|
+  last_response.body.include?(msg.to_s).should be(false)
 end
 
 Then /^the file upload response should be ([^\"]*)$/ do |status|
@@ -215,7 +219,6 @@ Then(/^the "(.*?)" directory should contain "(.*?)" entries for "(.*?)" applicat
 end
 
 Then /^the response should be "([^\"]*)"$/ do |status|
-puts last_response.body
 	last_response.status.should == status.to_i
 end
 

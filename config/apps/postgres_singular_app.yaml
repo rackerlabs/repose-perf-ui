@@ -1,0 +1,15 @@
+---
+application:
+  name: Postgres singular App
+  description: test desc
+  location: apps/postgres_singular_app/bootstrap.rb
+  type: singular
+  plugins:
+  - location: plugins/postgres_plugin/plugin.rb
+  sub_apps:
+  - id: main
+    name: Main application
+    description: main desc
+  - id: main
+    name: Main application
+    description: main desc

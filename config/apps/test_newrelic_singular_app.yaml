@@ -1,0 +1,12 @@
+---
+application:
+  name: New Relic Singular App
+  description: 
+  location: apps/newrelic_singular_app/bootstrap.rb
+  type: singular
+  plugins: 
+   - location: plugins/newrelic_rest_plugin/plugin.rb
+  sub_apps:
+  - id: main
+    name: Main
+    description: main description

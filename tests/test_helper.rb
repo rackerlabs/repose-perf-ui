@@ -19,10 +19,9 @@ require './tests/Models/test_tests.rb'
 require './tests/Models/testlocation_tests.rb'
 =end
 
-system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/load_repose_plugin_results.feature tests/sinatra/features/sysstats_plugin_results.feature tests/sinatra/features/load_graphite_plugin_results.feature tests/sinatra/features/graphite_plugin_results.feature tests/sinatra/features/load_newrelic_plugin_results.feature tests/sinatra/features/newrelic_plugin_results.feature" # tests/sinatra/features/load_postgres_plugin_results.feature tests/sinatra/features/load_rest_plugin_results.feature"
+system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/load_repose_plugin_results.feature tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/sysstats_plugin_results.feature tests/sinatra/features/compare_sysstats_plugin_results.feature tests/sinatra/features/load_graphite_plugin_results.feature tests/sinatra/features/graphite_plugin_results.feature tests/sinatra/features/compare_graphite_plugin_results.feature tests/sinatra/features/load_newrelic_plugin_results.feature tests/sinatra/features/newrelic_plugin_results.feature tests/sinatra/features/compare_newrelic_plugin_results.feature tests/sinatra/features/load_jenkins_plugin_results.feature tests/sinatra/features/jenkins_plugin_results.feature tests/sinatra/features/compare_jenkins_plugin_results.feature"
 
-#tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/compare_sysstats_plugin_results.feature"
-
+#rest (before/after) then log4j (raw) then diff then email then 
 #rest, nagios, postgres, before/afters for graphite, new relic, nagios, postgres
 #week after that - 100% code coverage on unit + mongo
 #---- PRESENTATION WEEK!!!

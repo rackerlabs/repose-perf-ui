@@ -1,0 +1,12 @@
+---
+application:
+  name: Jenkins
+  description: test
+  location: apps/jenkins_singular_app/bootstrap.rb
+  type: singular
+  plugins:
+  - location: plugins/jenkins_rest_plugin/plugin.rb
+  sub_apps:
+  - id: main
+    name: Main application
+    description: main desc

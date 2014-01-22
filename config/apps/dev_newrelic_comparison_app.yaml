@@ -1,0 +1,12 @@
+---
+application:
+  name: New
+  description: test
+  location: apps/newrelic_comparison_app/bootstrap.rb
+  type: comparison
+  plugins:
+  - location: plugins/newrelic_rest_plugin/plugin.rb
+  sub_apps:
+  - id: main
+    name: Main application
+    description: main desc

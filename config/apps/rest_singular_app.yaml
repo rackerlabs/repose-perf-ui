@@ -1,0 +1,11 @@
+---
+application:
+  name: Rest Singular App
+  description: 
+  location: apps/rest_singular_app/bootstrap.rb
+  type: singular
+  plugins: []
+  sub_apps:
+  - id: main
+    name: main
+    description: main application
