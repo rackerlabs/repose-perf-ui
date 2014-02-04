@@ -1,0 +1,41 @@
+---
+request:
+- request_id: 1
+  method: POST
+  uri: /v1.0/${user}/instances
+  headers:
+  - Content-Type: application/json
+  body: ! "{\"instance\": {\"flavorRef\": \"https://apiclouddb.rackspace.net/v1.0/${user}/flavors/${flavor}\",\"name\": \"json_rack_instance\",\"volume\": {\"size\": 1}}}"
+- request_id: 2
+  method: GET
+  uri: /v1.0/${user}/flavors
+- request_id: 3
+  method: GET
+  uri: /v1.0/${user}/backups
+- request_id: 4
+  method: GET
+  uri: /v1.0/${user}/flavors/${flavor_id}
+- request_id: 5
+  method: GET
+  uri: /v1.0/${user}/instances
+- request_id: 6
+  method: GET
+  uri: /v1.0/${user}/instances/${instance_id}
+- request_id: 7
+  method: DELETE
+  uri: /v1.0/${user}/instances/${instance_id}
+response:
+- request_id: 1
+  response_code: 201
+- request_id: 2
+  response_code: 200
+- request_id: 3
+  response_code: 200
+- request_id: 4
+  response_code: 200
+- request_id: 5
+  response_code: 200
+- request_id: 6
+  response_code: 200
+- request_id: 7
+  response_code: 200
