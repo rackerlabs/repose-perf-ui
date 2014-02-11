@@ -3,7 +3,7 @@ Feature: File Plugin Page
 	As a performance test user
 	I want to view the large files
 
-	Scenario: Load file_singular_app main load test for key-three with graphite metrics
+	Scenario: Load file_singular_app main load test for key-three with file metrics
 		When I navigate to '/file_singular_app/results/main/load_test/id/key-three/plugin/FilePlugin/file'
 		Then the page response status code should be "200"
 		And the page should contain "instance"

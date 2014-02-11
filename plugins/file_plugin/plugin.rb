@@ -21,12 +21,17 @@ class FilePlugin < PluginModule::Plugin
   end
 
   def show_summary_data(application, name, test, id, test_id, options=nil)
-    #TODO: this is unique to jenkins logic.  Right now, it should simply show jenkins JSON result (2 if comparison).  
-    #TODO: Only summary data since there are no real details
+    # this is unique to file logic.  Right now, it should simply show file in 24 kb chunks.
+    # chunks are listed in options  
+    # Only summary data since there are no real details
     metric = FilePlugin.show_plugin_names.find {|i| i[:id] == id }
     results = {}
     if metric
       store = Redis.new(@db)
+      if options
+        options[:offset] ||= 0
+        options[:size] ||= 25600
+      end
       if options && options[:application_type] == :comparison
         results[:plugin_type] = metric[:type]
         results[:id_results] = []
@@ -48,42 +53,35 @@ class FilePlugin < PluginModule::Plugin
               )} if metric
             end
           end
-        else
-=begin
-          results[:id_results] = []
-          store = Redis.new(@db)
-          #get meta results and either 
-          test_id.split('+').each do |guid|
-            meta_results = store.hgetall("#{application}:#{name}:results:#{test.chomp('_test')}:#{guid}:meta")
-            if meta_results && !meta_results.empty?
-              test_json = JSON.parse(meta_results['test'])
-              results[:id_results] << {:id => guid, :results => PluginModule::PastPluginResults.format_results(
-                PluginModule::PluginResult.new(
-                  metric[:klass].new(
-                    @db, @fs_ip, application, name,test.chomp('_test'), guid, metric[:id]
-                  )
-                ).retrieve_average_results, 
-                metric[:id].to_sym, 
-                {}, 
-                metric[:klass].metric_description,
-                metric[:type]
-              )} if metric
-            end
-          end
-=end          
         end
       else
-        results = PluginModule::PastPluginResults.format_results(
-          PluginModule::PluginResult.new(
-            metric[:klass].new(
-              @db, @fs_ip, application, name,test.chomp('_test'), test_id, metric[:id]
-            )
-          ).retrieve_average_results, 
-          metric[:id].to_sym, 
-          {}, 
-          metric[:klass].metric_description,
-          metric[:type]
-        ) if metric
+        if options[:find]
+          results = PluginModule::PastPluginResults.format_results(
+            PluginModule::PluginResult.new(
+              metric[:klass].new(
+                @db, @fs_ip, application, name,test.chomp('_test'), test_id, metric[:id],
+                  nil, nil, options[:find]
+              )
+            ).retrieve_average_results, 
+            metric[:id].to_sym, 
+            {}, 
+            metric[:klass].metric_description,
+            metric[:type]
+          ) if metric
+        else
+          results = PluginModule::PastPluginResults.format_results(
+            PluginModule::PluginResult.new(
+              metric[:klass].new(
+                @db, @fs_ip, application, name,test.chomp('_test'), test_id, metric[:id],
+                  options[:offset], options[:size]
+              )
+            ).retrieve_average_results, 
+            metric[:id].to_sym, 
+            {}, 
+            metric[:klass].metric_description,
+            metric[:type]
+          ) if metric
+        end
       end
       results
     end
@@ -98,25 +96,25 @@ class FilePlugin < PluginModule::Plugin
   def store_data(application, sub_app, type, json_data, store, start_test_data, end_time, storage_info)
     begin
       if json_data.has_key?('plugins')
-        plugin_data = json_data['plugins'].find {|p| p['id'] == 'jenkins_rest_plugin'}
+        plugin_data = json_data['plugins'].find {|p| p['id'] == 'file_plugin'}
         if plugin_data
           plugin_type = plugin_data['type'] ? plugin_data['type'] : 'time_series'
           servers = plugin_data['servers']
           if servers
             servers.each do |server|
-              PluginModule::Adapters::JenkinsRestAdapter.new(store, 'jenkins_rest_plugin', server, storage_info).load(json_data['guid'], plugin_type, application, sub_app, type)
+              PluginModule::Adapters::RemoteServerAdapter.new(store, 'file_plugin', server, storage_info).load(json_data['guid'], plugin_type, application, sub_app, type)
             end
           else
             raise ArgumentError, "no server list specified"
           end
         else
-          raise ArgumentError, "jenkins_rest_plugin id not found"  
+          raise ArgumentError, "file_plugin id not found"  
         end
       end
       return nil
     rescue => e
       p e.backtrace
-      return {'jenkins_rest_plugin' => e.message}
+      return {'file_plugin' => e.message}
     end
   end
 end

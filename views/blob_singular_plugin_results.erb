@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %> - <%= plugin_name %> - <%= option %> - Past Results</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/css/jquery.treetable.css" rel="stylesheet" media="screen">
+    <link href="/css/prettify.css" rel="stylesheet" media="screen">
+    <style type="text/css">
+      .pagination span {
+        cursor: pointer;
+        color: #428bca;
+      }
+      .pagination span:hover{
+        background-color: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/<%= application %>"><%= title %></a>
+      <div class="nav-collapse collapse bs-navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/<%= application %>/tests">Running Tests</a></li>
+          <li><a href="/<%= application %>/applications">Applications</a></li>
+          <li class="active"><a href="/<%= application %>/results">Results</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container">
+      <ul class="breadcrumb">
+        <li><a href="/<%= application %>">Home</a></li>
+        <li><a href="/<%= application %>/results">Results</a></li>
+        <li><a href="/<%= application %>/results/<%= sub_app_id %>"><%= sub_app_id %></a></li>
+        <li><a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>"><%= test_type %></a></li>
+        <li class="active"><%= plugin_name %> - <%= option %></li>
+      </ul>
+      <% summary_plugin_data.each do |instance, content| %>
+        <% content[:content].each do |key, data| %>
+          <% data.each do |data_entry| %>
+            <% if data_entry %>
+            <div class="panel panel-summary">
+              <div class="panel-heading">
+                <h3 class="panel-title">Summary Test Results for <%= key %> - <%= data_entry[:dev_name] %></h3>
+                <ul class="pagination">
+                  <li>
+                    <span offset="0" chunk="<%= data_entry[:chunk] %>" key="<%= key %>" file="<%= data_entry[:dev_name].gsub(/[.-\\ \(\[\^\/\?\#\]\+\)\-]/,'_') %>">&lt;&lt;</span>
+                  </li>
+                <%
+                  total_pages = (data_entry[:size].to_f / data_entry[:chunk].to_f).ceil
+                  offset = 0
+                  total_pages.times do | page_number|
+                    page = page_number + 1
+                %>
+                  <li>
+                    <span offset="<%= offset %>" chunk="<%= data_entry[:chunk] %>" key="<%= key %>" file="<%= data_entry[:dev_name].gsub(/[.-\\ \(\[\^\/\?\#\]\+\)\-]/,'_') %>"><%= page %></span>
+                  </li>
+                <%    
+                    offset = offset + data_entry[:chunk].to_f if (offset + data_entry[:chunk].to_f) <= data_entry[:size].to_f
+                  end 
+                
+                %>
+                  <li>
+                    <span offset="<%= offset %>" chunk="<%= data_entry[:chunk] %>" key="<%= key %>" file="<%= data_entry[:dev_name].gsub(/[.-\\ \(\[\^\/\?\#\]\+\)\-]/,'_') %>">&gt;&gt;</span>
+                  </li>
+                </ul>
+                  <div class="form-group">
+                    <input instance="<%= key %>_<%= data_entry[:dev_name].gsub(/[.-\\ \(\[\^\/\?\#\]\+\)\-]/,'_') %>" type="text" class="form-control" placeholder="Search">
+                    <button key="<%=key %>" instance="<%= key %>_<%= data_entry[:dev_name].gsub(/[.-\\ \(\[\^\/\?\#\]\+\)\-]/,'_') %>" class="btn btn-default search_button">Search</button>
+                  </div>
+              </div>
+              <p id="<%= key %>_<%= data_entry[:dev_name].gsub(/[.-\\ \(\[\^\/\?\#\]\+\)\-]/,'_') %>">
+              <%= data_entry[:results] %>            
+              </p>
+            </div>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+    <hr>
+    <footer>
+      <p>&copy; Rackspace Hosting 2013</p>
+    </footer>
+  </div> <!-- /container -->
+    <!-- JavaScript plugins (requires jQuery) -->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+    <script src="/js/respond.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        
+        $('.pagination span').on('click',function(){
+          var that = this;
+          $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/id/' + $(this).attr('key') + '/plugin/<%= plugin_name %>/<%= option %>/' + $(this).attr('offset') + '/' + $(this).attr('chunk'), function(data) {
+            $('#' + $(that).attr('key') + '_' + $(that).attr('file')).html(data['results']['<%= option %>']['content'][$(that).attr('key')][0]['results']);
+          }); 
+        });
+        
+        $('.search_button').on('click', function(){
+          var that = this;
+          instance = $(that).attr('instance');
+          key = $(that).attr('key');
+          value = $("input[instance=" + instance).val();
+          $.getJSON('/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/id/' + $(this).attr('key') + '/plugin/<%= plugin_name %>/<%= option %>/find/' + value, function(data) {
+            console.log( data);
+            $('#' + $(that).attr('instance')).html(data['results']['<%= option %>']['content'][$(that).attr('key')][0]['results']);
+          }); 
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -3,7 +3,8 @@ module PluginModule
     def self.plugin_type_strategies
       {
         :time_series => TimeSeriesResultsStrategy,
-        :flat => FlatResultsStrategy
+        :flat => FlatResultsStrategy,
+        :blob => BlobResultsStrategy
       }
     end
     
@@ -73,5 +74,14 @@ module PluginModule
       temp_results
     end
   end
+
+class BlobResultsStrategy
+  def self.format_results(results,metric,temp_results, header_descriptions,plugin_type)
+    temp_results[metric] = {}
+    temp_results[metric][:content] = results
+    temp_results[metric][:plugin_type] = plugin_type
+    temp_results
+  end
+end
 
 end
