@@ -16,6 +16,8 @@ module ReposeJmxPluginModule
             json_file = JSON.parse(meta_result)
             entry = JSON.parse(data_result)['location']
             name = JSON.parse(data_result)['name']
+          puts key
+          puts "http://#{fs_ip}/#{entry}", name, id, json_file['start'], json_file['stop']
             results[json_file['name']] = populate_metric("http://#{fs_ip}/#{entry}", name, id, json_file['start'], json_file['stop']) if json_file
           end
         end
@@ -26,6 +28,7 @@ module ReposeJmxPluginModule
     end
   
     def initialize_metric(list,key, dev)
+puts list, key
       unless list[key].find{|key_data| key_data.has_key?(:dev_name) and key_data[:dev_name] == dev}
         list[key] << {:dev_name  => dev, :results => []}
       end

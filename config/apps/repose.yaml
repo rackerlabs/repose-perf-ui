@@ -16,9 +16,6 @@ application:
   - id: identity
     name: identity
     description: repose configuration for cloud identity
-  - id: identity
-    name: identity
-    description: repose configuration for cloud identity
   - id: translation
     name: translation
     description: repose configuration for translation

@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+source /usr/local/rvm/environments/ruby-2.0.0-p353
+cd /root/viewer/hERmes_viewer
+bundle install
+ruby -v
+which ruby
+echo "start load repose test"
+ruby nightly_test.rb --app repose --sub-app translation --action start --test-type load --length 60 --release master --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --with-repose true
+sleep 60m
+echo "stop load repose test"
+ruby nightly_test.rb --app repose --sub-app translation --action stop --test-type load --length 60 --release master --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --with-repose true
+
+echo "start load origin test"
+ruby nightly_test.rb --app repose --sub-app translation --action start --test-type load --length 60 --name "nightly test against master branch" --runner "jmeter" --flavor-type performance
+sleep 60m
+
+echo "stop load origin test"
+ruby nightly_test.rb --app repose --sub-app translation --action stop --test-type load --length 60 --name "nightly test against master branch" --runner "jmeter" --flavor-type performance
+echo "finished load test."
+
+echo "start stress repose test"
+ruby nightly_test.rb --app repose --sub-app translation --action start --test-type stress --release master --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --with-repose true
+
+echo "stop stress repose test"
+ruby nightly_test.rb --app repose --sub-app translation --action stop --test-type stress --release master --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --with-repose true
+
+echo "start stress origin test"
+ruby nightly_test.rb --app repose --sub-app translation --action start --test-type stress --name "nightly test against master branch" --runner "jmeter" --flavor-type performance
+
+echo "stop stress origin test"
+ruby nightly_test.rb --app repose --sub-app translation --action stop --test-type stress --name "nightly test against master branch" --runner "jmeter" --flavor-type performance
+echo "finished stress test."
+

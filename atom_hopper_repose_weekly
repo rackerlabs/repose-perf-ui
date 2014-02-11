@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+source /usr/local/rvm/environments/ruby-2.0.0-p353
+cd /root/viewer/hERmes_viewer
+bundle install
+ruby -v
+which ruby
+echo "start duration repose test"
+ruby nightly_test.rb --app repose --sub-app atom_hopper --action start --test-type duration --length 480 --release master --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --with-repose true
+sleep 480m
+echo "stop duration repose test"
+ruby nightly_test.rb --app repose --sub-app atom_hopper --action stop --test-type duration --length 480 --release master --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --with-repose true
+
+echo "start duration origin test"
+ruby nightly_test.rb --app repose --sub-app atom_hopper --action start --test-type duration --length 480 --name "nightly test against master branch" --runner "jmeter" --flavor-type performance
+sleep 480m
+
+echo "stop duration origin test"
+ruby nightly_test.rb --app repose --sub-app atom_hopper --action stop --test-type duration --length 480 --name "nightly test against master branch" --runner "jmeter" --flavor-type performance
+echo "finished duration test."

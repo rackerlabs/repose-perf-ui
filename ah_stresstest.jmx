@@ -1,0 +1,620 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="2.4" jmeter="2.9 r1437961">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="atom hopper" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <BSFPreProcessor guiclass="TestBeanGUI" testclass="BSFPreProcessor" testname="BSF PreProcessor" enabled="false">
+        <stringProp name="filename"></stringProp>
+        <stringProp name="parameters"></stringProp>
+        <stringProp name="script">CacheManager.clear();</stringProp>
+        <stringProp name="scriptLanguage">javascript</stringProp>
+      </BSFPreProcessor>
+      <hashTree/>
+      <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="port" elementType="Argument">
+            <stringProp name="Argument.name">port</stringProp>
+            <stringProp name="Argument.value">${__P(port,8080)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">port of the Atom Hopper server</stringProp>
+          </elementProp>
+          <elementProp name="protocol" elementType="Argument">
+            <stringProp name="Argument.name">protocol</stringProp>
+            <stringProp name="Argument.value">${__P(protocol,http)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">protocol of the Atom Hopper server (http/https)</stringProp>
+          </elementProp>
+          <elementProp name="host" elementType="Argument">
+            <stringProp name="Argument.name">host</stringProp>
+            <stringProp name="Argument.value">${__P(host, 162.209.124.158)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">hostname/VIP of the Atom Hopper server</stringProp>
+          </elementProp>
+          <elementProp name="feed" elementType="Argument">
+            <stringProp name="Argument.name">feed</stringProp>
+            <stringProp name="Argument.value">${__P(feed,demo/events)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+            <stringProp name="Argument.desc">feed to test against</stringProp>
+          </elementProp>
+          <elementProp name="token" elementType="Argument">
+            <stringProp name="Argument.name">token</stringProp>
+            <stringProp name="Argument.value">valid-admin-token</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="startdelay" elementType="Argument">
+            <stringProp name="Argument.name">startdelay</stringProp>
+            <stringProp name="Argument.value">${__P(startdelay,10)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="rampup" elementType="Argument">
+            <stringProp name="Argument.name">rampup</stringProp>
+            <stringProp name="Argument.value">${__P(rampup,10)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="duration" elementType="Argument">
+            <stringProp name="Argument.name">duration</stringProp>
+            <stringProp name="Argument.value">${__P(duration,300)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="rampup_threads" elementType="Argument">
+            <stringProp name="Argument.name">rampup_threads</stringProp>
+            <stringProp name="Argument.value">${__P(rampup_threads,10)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="maxthreads" elementType="Argument">
+            <stringProp name="Argument.name">maxthreads</stringProp>
+            <stringProp name="Argument.value">${__P(maxthreads,500)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </Arguments>
+      <hashTree/>
+      <kg.apc.jmeter.threads.SteppingThreadGroup guiclass="kg.apc.jmeter.threads.SteppingThreadGroupGui" testclass="kg.apc.jmeter.threads.SteppingThreadGroup" testname="jp@gc - Stepping Thread Group" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <stringProp name="ThreadGroup.num_threads">${maxthreads}</stringProp>
+        <stringProp name="Threads initial delay">${startdelay}</stringProp>
+        <stringProp name="Start users count">${rampup_threads}</stringProp>
+        <stringProp name="Start users count burst">${rampup}</stringProp>
+        <stringProp name="Start users period">${duration}</stringProp>
+        <stringProp name="Stop users count">${rampup}</stringProp>
+        <stringProp name="Stop users period">1</stringProp>
+        <stringProp name="flighttime">${duration}</stringProp>
+        <stringProp name="rampUp">${rampup}</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <intProp name="LoopController.loops">-1</intProp>
+        </elementProp>
+      </kg.apc.jmeter.threads.SteppingThreadGroup>
+      <hashTree>
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path"></stringProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+          <stringProp name="HTTPSampler.concurrentPool">4</stringProp>
+        </ConfigTestElement>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Content-Type</stringProp>
+              <stringProp name="Header.value">application/atom+xml</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+        <RandomController guiclass="RandomControlGui" testclass="RandomController" testname="Random Controller" enabled="true">
+          <intProp name="InterleaveControl.style">1</intProp>
+        </RandomController>
+        <hashTree>
+          <BSFPreProcessor guiclass="TestBeanGUI" testclass="BSFPreProcessor" testname="preprocessor generate random id" enabled="false">
+            <stringProp name="scriptLanguage">javascript</stringProp>
+            <stringProp name="parameters">5</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="script">var num_id = args[0];
+
+function randomString(len, charSet) {
+    charSet = charSet || &apos;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&apos;;
+    var randomString = &apos;&apos;;
+    for (var i = 0; i &lt; len; i++) {
+    	var randomPoz = Math.floor(Math.random() * charSet.length);
+    	randomString += charSet.substring(randomPoz,randomPoz+1);
+    }
+    return randomString;
+}
+
+var p1 = &quot;&quot;;
+var p2 = &quot;&quot;;
+var p3 = &quot;&quot;;
+var p4 = &quot;&quot;;
+var p5 = &quot;&quot;;
+var id = &quot;&quot;;
+var str = &quot;abcdf1234567890&quot;;
+for(i=0; i &lt;= num_id; i++)
+{
+	p1 = randomString(8, str);
+	p2 = randomString(4, str);
+	p3 = randomString(4, str);
+	p4 = randomString(4, str);
+	p5 = randomString(12, str);
+
+	id = p1+&quot;-&quot;+p2+&quot;-&quot;+p3+&quot;-&quot;+p4+&quot;-&quot;+p5;
+	if (i== 0)
+	{
+		vars.put(&quot;random_id&quot;,  id);
+	}
+	else
+	{
+		vars.put(&quot;random_id_&quot;+i,  id);
+	}
+}</stringProp>
+          </BSFPreProcessor>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST sites-metered-entry" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">&lt;atom:entry xmlns=&quot;http://docs.rackspace.com/core/event&quot; xmlns:atom=&quot;http://www.w3.org/2005/Atom&quot;&#xd;
+            xmlns:m=&quot;http://docs.rackspace.com/usage/sites/metered&quot;&gt;&#xd;
+    &lt;atom:title type=&quot;text&quot;&gt;Sites&lt;/atom:title&gt;&#xd;
+    &lt;atom:author&gt;&lt;atom:name&gt;Atom Hopper Team&lt;/atom:name&gt;&lt;/atom:author&gt;&#xd;
+    &lt;atom:category label=&quot;atom-hopper-test&quot; term=&quot;atom-hopper-test&quot; /&gt;&#xd;
+    &lt;atom:updated&gt;2012-06-14T09:46:31.867-05:00&lt;/atom:updated&gt;&#xd;
+    &lt;atom:content type=&quot;application/xml&quot;&gt;&#xd;
+        &lt;event startTime=&quot;2012-06-14T10:19:52Z&quot;&#xd;
+               endTime=&quot;2012-06-14T11:19:52Z&quot;&#xd;
+               type=&quot;USAGE&quot;&#xd;
+               resourceId=&quot;1234&quot; resourceName=&quot;my.site.com&quot;&#xd;
+               id=&quot;${random_id_1}&quot;&#xd;
+               tenantId=&quot;12882&quot; version=&quot;1&quot;&gt;&#xd;
+            &lt;m:product serviceCode=&quot;CloudSites&quot; version=&quot;1&quot;&#xd;
+                       resourceType=&quot;SITE&quot; bandWidthOut=&quot;998798976&quot;&#xd;
+                       requestCount=&quot;1000&quot; computeCycles=&quot;299&quot;/&gt;&#xd;
+        &lt;/event&gt;&#xd;
+    &lt;/atom:content&gt;&#xd;
+&lt;/atom:entry&gt;</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">${feed}</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <stringProp name="HTTPSampler.implementation">Java</stringProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Should return a 201 response code" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49587">201</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">8</intProp>
+              <stringProp name="Assertion.scope">all</stringProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Regular Expression Extractor" enabled="false">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">id</stringProp>
+              <stringProp name="RegexExtractor.regex">&lt;id&gt;(.*)&lt;/id&gt;</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">null</stringProp>
+              <stringProp name="RegexExtractor.match_number">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST sites-mssql-entry" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">&lt;atom:entry xmlns=&quot;http://docs.rackspace.com/core/event&quot; xmlns:atom=&quot;http://www.w3.org/2005/Atom&quot;&#xd;
+            xmlns:db=&quot;http://docs.rackspace.com/usage/sites/db&quot;&gt;&#xd;
+    &lt;atom:title type=&quot;text&quot;&gt;Sites&lt;/atom:title&gt;&#xd;
+    &lt;atom:author&gt;&lt;atom:name&gt;Atom Hopper Team&lt;/atom:name&gt;&lt;/atom:author&gt;&#xd;
+    &lt;atom:category label=&quot;atom-hopper-test&quot; term=&quot;atom-hopper-test&quot; /&gt;&#xd;
+    &lt;atom:updated&gt;2012-06-14T09:46:31.867-05:00&lt;/atom:updated&gt;&#xd;
+    &lt;atom:content type=&quot;application/xml&quot;&gt;&#xd;
+        &lt;event eventTime=&quot;2012-06-14T10:19:52Z&quot;&#xd;
+               region=&quot;DFW&quot; dataCenter=&quot;DFW1&quot; type=&quot;USAGE_SNAPSHOT&quot;&#xd;
+               resourceId=&quot;db:mssqldb&quot;&#xd;
+               id=&quot;${random_id_2}&quot;&#xd;
+               tenantId=&quot;12882&quot; version=&quot;1&quot;&gt;&#xd;
+            &lt;db:product serviceCode=&quot;CloudSites&quot; version=&quot;1&quot;&#xd;
+                        resourceType=&quot;MSSQL&quot; storage=&quot;3939&quot;/&gt;&#xd;
+        &lt;/event&gt;&#xd;
+    &lt;/atom:content&gt;&#xd;
+&lt;/atom:entry&gt;</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">${feed}</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <stringProp name="HTTPSampler.implementation">Java</stringProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response header" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-533327525">201 Created</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_headers</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">2</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Regular Expression Extractor" enabled="false">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">id</stringProp>
+              <stringProp name="RegexExtractor.regex">&lt;id&gt;(.*)&lt;/id&gt;</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">null</stringProp>
+              <stringProp name="RegexExtractor.match_number">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST sites-netapp-entry" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">&lt;atom:entry xmlns=&quot;http://docs.rackspace.com/core/event&quot; xmlns:atom=&quot;http://www.w3.org/2005/Atom&quot;&#xd;
+            xmlns:sitesn=&quot;http://docs.rackspace.com/usage/sites/netapp&quot;&gt;&#xd;
+    &lt;atom:title type=&quot;text&quot;&gt;Sites Netapp&lt;/atom:title&gt;&#xd;
+    &lt;atom:author&gt;&lt;atom:name&gt;Atom Hopper Team&lt;/atom:name&gt;&lt;/atom:author&gt;&#xd;
+    &lt;atom:category label=&quot;atom-hopper-test&quot; term=&quot;atom-hopper-test&quot; /&gt;&#xd;
+    &lt;atom:updated&gt;2012-06-14T09:46:31.867-05:00&lt;/atom:updated&gt;&#xd;
+    &lt;atom:content type=&quot;application/xml&quot;&gt;&#xd;
+        &lt;event eventTime=&quot;2012-06-14T10:19:52Z&quot;&#xd;
+               region=&quot;DFW&quot; dataCenter=&quot;DFW1&quot; type=&quot;USAGE_SNAPSHOT&quot;&#xd;
+               id=&quot;${random_id_3}&quot; tenantId=&quot;12882&quot; version=&quot;1&quot;&gt;&#xd;
+            &lt;sitesn:product serviceCode=&quot;CloudSites&quot; version=&quot;1&quot; groupName=&quot;foo&quot;&#xd;
+                            storage=&quot;1888272&quot; numFiles=&quot;1028&quot; volume=&quot;c&quot;/&gt;&#xd;
+        &lt;/event&gt;&#xd;
+    &lt;/atom:content&gt;&#xd;
+&lt;/atom:entry&gt;</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">${feed}</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <stringProp name="HTTPSampler.implementation">Java</stringProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response header" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-533327525">201 Created</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_headers</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">2</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response msg" enabled="false">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-636418010">If SslMode in ON then bandWidthIn, bandWidthOut, and avgConcurrentConnections should all be 0</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">true</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Regular Expression Extractor" enabled="false">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">id</stringProp>
+              <stringProp name="RegexExtractor.regex">&lt;id&gt;(.*)&lt;/id&gt;</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">null</stringProp>
+              <stringProp name="RegexExtractor.match_number">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+            <BSFAssertion guiclass="TestBeanGUI" testclass="BSFAssertion" testname="BSF Assertion" enabled="false">
+              <stringProp name="scriptLanguage">javascript</stringProp>
+              <stringProp name="parameters">expectcode msg</stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="script">if (&quot;${feed}&quot;== &quot;sites/events&quot;)
+{
+	try
+	{
+		eval(&apos;var respcode = &apos; + prev.getResponseCode());
+		if (respcode == 201) 
+		{
+      			prev.setSuccessful(true);
+           			eval(&apos;var respmsg = &apos; + prev.getResponseMessage());
+			prev.setResponseMessage(respmsg);	
+      		}
+		else
+		{
+			prev.setSuccessful(false);
+			prev.setResponseMessage(&quot;Unexpected response.&quot;);
+		}
+
+	}
+	catch(e)
+	{}	
+}
+else
+{
+	try
+	{
+		eval(&apos;var respcode = &apos; + prev.getResponseCode());
+		if (respcode == 400) 
+		{
+      			prev.setSuccessful(true);
+           			eval(&apos;var response = &apos; + prev.getResponseDataAsString());
+			prev.setResponseMessage(response.message);	
+      		}
+		else
+		{
+			prev.setSuccessful(false);
+			prev.setResponseMessage(&quot;Unexpected response.&quot;);
+		}
+
+	}
+	catch(e)
+	{}	
+}</stringProp>
+            </BSFAssertion>
+            <hashTree/>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST sites-ssl-entry" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">&lt;atom:entry xmlns=&quot;http://docs.rackspace.com/core/event&quot; xmlns:atom=&quot;http://www.w3.org/2005/Atom&quot;&#xd;
+            xmlns:m=&quot;http://docs.rackspace.com/usage/sites/metered&quot;&gt;&#xd;
+    &lt;atom:title type=&quot;text&quot;&gt;Sites&lt;/atom:title&gt;&#xd;
+    &lt;atom:author&gt;&lt;atom:name&gt;Atom Hopper Team&lt;/atom:name&gt;&lt;/atom:author&gt;&#xd;
+    &lt;atom:category label=&quot;atom-hopper-test&quot; term=&quot;atom-hopper-test&quot; /&gt;&#xd;
+    &lt;atom:updated&gt;2012-06-14T09:46:31.867-05:00&lt;/atom:updated&gt;&#xd;
+    &lt;atom:content type=&quot;application/xml&quot;&gt;&#xd;
+        &lt;event&#xd;
+            xmlns=&quot;http://docs.rackspace.com/core/event&quot;&#xd;
+            xmlns:s=&quot;http://docs.rackspace.com/usage/sites/ssl&quot;&#xd;
+            eventTime=&quot;2012-06-14T10:19:52Z&quot;&#xd;
+            type=&quot;USAGE_SNAPSHOT&quot;&#xd;
+            resourceId=&quot;my.site.com&quot; resourceName=&quot;my.site.com&quot;&#xd;
+            id=&quot;${random_id_4}&quot;&#xd;
+            tenantId=&quot;12882&quot; version=&quot;1&quot;&gt;&#xd;
+            &lt;s:product serviceCode=&quot;CloudSites&quot; version=&quot;1&quot;&#xd;
+                       resourceType=&quot;SITE&quot; SSLenabled=&quot;true&quot;/&gt;&#xd;
+        &lt;/event&gt;&#xd;
+    &lt;/atom:content&gt;&#xd;
+&lt;/atom:entry&gt;</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">${feed}</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <stringProp name="HTTPSampler.implementation">Java</stringProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response header" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-533327525">201 Created</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_headers</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">2</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response msg" enabled="false">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="-636418010">If SslMode in ON then bandWidthIn, bandWidthOut, and avgConcurrentConnections should all be 0</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+              <boolProp name="Assertion.assume_success">true</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Regular Expression Extractor" enabled="false">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">id</stringProp>
+              <stringProp name="RegexExtractor.regex">&lt;id&gt;(.*)&lt;/id&gt;</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">null</stringProp>
+              <stringProp name="RegexExtractor.match_number">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+            <BSFAssertion guiclass="TestBeanGUI" testclass="BSFAssertion" testname="BSF Assertion" enabled="false">
+              <stringProp name="scriptLanguage">javascript</stringProp>
+              <stringProp name="parameters">expectcode msg</stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="script">if (&quot;${feed}&quot;== &quot;sites/events&quot;)
+{
+	try
+	{
+		eval(&apos;var respcode = &apos; + prev.getResponseCode());
+		if (respcode == 201) 
+		{
+      			prev.setSuccessful(true);
+           			eval(&apos;var respmsg = &apos; + prev.getResponseMessage());
+			prev.setResponseMessage(respmsg);	
+      		}
+		else
+		{
+			prev.setSuccessful(false);
+			prev.setResponseMessage(&quot;Unexpected response.&quot;);
+		}
+
+	}
+	catch(e)
+	{}	
+}
+else
+{
+	try
+	{
+		eval(&apos;var respcode = &apos; + prev.getResponseCode());
+		if (respcode == 400) 
+		{
+      			prev.setSuccessful(true);
+           			eval(&apos;var response = &apos; + prev.getResponseDataAsString());
+			prev.setResponseMessage(response.message);	
+      		}
+		else
+		{
+			prev.setSuccessful(false);
+			prev.setResponseMessage(&quot;Unexpected response.&quot;);
+		}
+
+	}
+	catch(e)
+	{}	
+}</stringProp>
+            </BSFAssertion>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Get the feed ${host}:${port}/${feed}" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="limit" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">1000</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">limit</stringProp>
+              </elementProp>
+              <elementProp name="marker" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">last</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">marker</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          <stringProp name="HTTPSampler.protocol">${protocol}</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">${feed}/</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+          <boolProp name="HTTPSampler.monitor">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Should return a 200 Response code" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="49586">200</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">8</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+        </hashTree>
+        <kg.apc.jmeter.reporters.AutoStop guiclass="kg.apc.jmeter.reporters.AutoStopGui" testclass="kg.apc.jmeter.reporters.AutoStop" testname="jp@gc - AutoStop Listener" enabled="false">
+          <stringProp name="avg_response_time">1000</stringProp>
+          <stringProp name="avg_response_time_length">10</stringProp>
+          <stringProp name="error_rate">50</stringProp>
+          <stringProp name="error_rate_length">10</stringProp>
+          <stringProp name="avg_response_latency">1000</stringProp>
+          <stringProp name="avg_response_latency_length">10</stringProp>
+        </kg.apc.jmeter.reporters.AutoStop>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Content-Type</stringProp>
+              <stringProp name="Header.value">application/atom+xml</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">X-Auth-Token</stringProp>
+              <stringProp name="Header.value">${token}${user}</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+        <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+          <collectionProp name="Arguments.arguments">
+            <elementProp name="user" elementType="Argument">
+              <stringProp name="Argument.name">user</stringProp>
+              <stringProp name="Argument.value">${__Random(1,10000000)}</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+          </collectionProp>
+        </Arguments>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

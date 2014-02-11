@@ -1,0 +1,9 @@
+---
+- name: repose
+  sub_app:
+  - name: atom_hopper
+    test_type: []
+  - name: identity
+    test_type: []
+  - name: translation
+    test_type: []

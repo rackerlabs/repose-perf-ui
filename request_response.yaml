@@ -1,0 +1,75 @@
+---
+request:
+- request_id: 1
+  method: POST
+  uri: demo/events
+  headers:
+  - Content-Type: application/atom+xml
+  body: ! "<atom:entry xmlns=\"http://docs.rackspace.com/core/event\" xmlns:atom=\"http://www.w3.org/2005/Atom\"\n
+    \           xmlns:m=\"http://docs.rackspace.com/usage/sites/metered\">\n    <atom:title
+    type=\"text\">Sites</atom:title>\n    <atom:author><atom:name>Atom Hopper Team</atom:name></atom:author>\n
+    \   <atom:category label=\"atom-hopper-test\" term=\"atom-hopper-test\" />\n    <atom:updated>2012-06-14T09:46:31.867-05:00</atom:updated>\n
+    \   <atom:content type=\"application/xml\">\n        <event startTime=\"2012-06-14T10:19:52Z\"\n
+    \              endTime=\"2012-06-14T11:19:52Z\"\n               type=\"USAGE\"\n
+    \              resourceId=\"1234\" resourceName=\"my.site.com\"\n               id=\"${random_id_1}\"\n
+    \              tenantId=\"12882\" version=\"1\">\n            <m:product serviceCode=\"CloudSites\"
+    version=\"1\"\n                       resourceType=\"SITE\" bandWidthOut=\"998798976\"\n
+    \                      requestCount=\"1000\" computeCycles=\"299\"/>\n        </event>\n
+    \   </atom:content>\n</atom:entry>"
+- request_id: 2
+  method: POST
+  uri: demo/events
+  headers:
+  - Content-Type: application/atom+xml
+  body: ! "<atom:entry xmlns=\"http://docs.rackspace.com/core/event\" xmlns:atom=\"http://www.w3.org/2005/Atom\"\n
+    \           xmlns:m=\"http://docs.rackspace.com/usage/sites/metered\">\n    <atom:title
+    type=\"text\">Sites</atom:title>\n    <atom:author><atom:name>Atom Hopper Team</atom:name></atom:author>\n
+    \   <atom:category label=\"atom-hopper-test\" term=\"atom-hopper-test\" />\n    <atom:updated>2012-06-14T09:46:31.867-05:00</atom:updated>\n
+    \   <atom:content type=\"application/xml\">\n        <event eventTime=\"2012-06-14T10:19:52Z\"\n
+    \              region=\"DFW\" dataCenter=\"DFW1\" type=\"USAGE_SNAPSHOT\"\n               resourceId=\"db:mssqldb\"\n
+    \              id=\"${random_id_2}\"\n               tenantId=\"12882\" version=\"1\">\n
+    \           <db:product serviceCode=\"CloudSites\" version=\"1\"\n                        resourceType=\"MSSQL\"
+    storage=\"3939\"/>\n        </event>\n    </atom:content>\n</atom:entry>"
+- request_id: 3
+  method: POST
+  uri: demo/events
+  headers:
+  - Content-Type: application/atom+xml
+  body: ! "<atom:entry xmlns=\"http://docs.rackspace.com/core/event\" xmlns:atom=\"http://www.w3.org/2005/Atom\"\n
+    \           xmlns:m=\"http://docs.rackspace.com/usage/sites/metered\">\n    <atom:title
+    type=\"text\">Sites</atom:title>\n    <atom:author><atom:name>Atom Hopper Team</atom:name></atom:author>\n
+    \   <atom:category label=\"atom-hopper-test\" term=\"atom-hopper-test\" />\n    <atom:updated>2012-06-14T09:46:31.867-05:00</atom:updated>\n
+    \   <atom:content type=\"application/xml\">\n        <event eventTime=\"2012-06-14T10:19:52Z\"\n
+    \              region=\"DFW\" dataCenter=\"DFW1\" type=\"USAGE_SNAPSHOT\"\n               id=\"${random_id_3}\"
+    tenantId=\"12882\" version=\"1\">\n            <sitesn:product serviceCode=\"CloudSites\"
+    version=\"1\" groupName=\"foo\"\n                            storage=\"1888272\"
+    numFiles=\"1028\" volume=\"c\"/>\n        </event>\n    </atom:content>\n</atom:entry>"
+- request_id: 4
+  method: POST
+  uri: demo/events
+  headers:
+  - Content-Type: application/atom+xml
+  body: ! "<atom:entry xmlns=\"http://docs.rackspace.com/core/event\" xmlns:atom=\"http://www.w3.org/2005/Atom\"\n
+    \           xmlns:m=\"http://docs.rackspace.com/usage/sites/metered\">\n    <atom:title
+    type=\"text\">Sites</atom:title>\n    <atom:author><atom:name>Atom Hopper Team</atom:name></atom:author>\n
+    \   <atom:category label=\"atom-hopper-test\" term=\"atom-hopper-test\" />\n    <atom:updated>2012-06-14T09:46:31.867-05:00</atom:updated>\n
+    \   <atom:content type=\"application/xml\">\n        <event\n            xmlns=\"http://docs.rackspace.com/core/event\"\n
+    \           xmlns:s=\"http://docs.rackspace.com/usage/sites/ssl\"\n            eventTime=\"2012-06-14T10:19:52Z\"\n
+    \           type=\"USAGE_SNAPSHOT\"\n            resourceId=\"my.site.com\" resourceName=\"my.site.com\"\n
+    \           id=\"${random_id_4}\"\n            tenantId=\"12882\" version=\"1\">\n
+    \           <s:product serviceCode=\"CloudSites\" version=\"1\"\n                       resourceType=\"SITE\"
+    SSLenabled=\"true\"/>\n        </event>\n    </atom:content>\n</atom:entry>"
+- request_id: 5
+  method: GET
+  uri: demo/events?limit=1000&marker=last
+response:
+- request_id: 1
+  response_code: 201
+- request_id: 2
+  response_code: 201
+- request_id: 3
+  response_code: 201
+- request_id: 4
+  response_code: 201
+- request_id: 5
+  response_code: 200

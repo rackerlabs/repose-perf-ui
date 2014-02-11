@@ -67,7 +67,10 @@ end
 environment_hash = {
  :atom_hopper => :iad,
  :translation => :iad,
- :identity => :iad
+ :identity => :iad,
+ :dbaas => :iad,
+ :auto_scale => :dfw,
+ :psl => :dfw
 }
 
 
@@ -267,7 +270,12 @@ if opts[:action] == 'stop'
 
   logger.info "http://localhost/#{opts[:app]}/applications/#{opts[:sub_app]}/#{opts[:test_type]}/stop"
   logger.info request_body.to_json
-  response = RestClient::Request.execute(:method => :post, :url => "http://localhost/#{opts[:app]}/applications/#{opts[:sub_app]}/#{opts[:test_type]}/stop", :timeout => -1,  :payload => request_body.to_json)
+  begin
+    response = RestClient::Request.execute(:method => :post, :url => "http://localhost/#{opts[:app]}/applications/#{opts[:sub_app]}/#{opts[:test_type]}/stop", :timeout => -1,  :payload => request_body.to_json)
+  rescue Exception => e
+    p e.backtrace
+  end
+
   logger.debug response
   logger.debug response.code
 
@@ -373,6 +381,8 @@ elsif opts[:action] == 'start'
   if opts[:with_repose] and opts[:release] and opts[:release] == 'master'
     system "cd ~/repose_repo/repose ; git pull origin master; mvn clean install -DskipTests; "
   end
+
+  is_started_successfully = false
 
   server_ip_info[:nodes].each do |server|
     if opts[:with_repose]
@@ -653,8 +663,9 @@ elsif opts[:action] == 'start'
        
       
       is_valid = false
+      execution_tries = 0
       response = nil
-      until is_valid
+      until is_valid || execution_tries > 100
         begin
           logger.info "execute: http://#{server}:7070 for test"
           response = Net::HTTP.get_response(URI("http://#{server}:7070"))
@@ -663,6 +674,7 @@ elsif opts[:action] == 'start'
           logger.info "response - no exception: #{response_code}"
           is_valid = response_code.to_i < 500
         rescue Exception => msg
+          is_started_successfully = false
           logger.info "response - exception: #{response}"
           if response
             response_code = response.code
@@ -672,8 +684,12 @@ elsif opts[:action] == 'start'
           logger.info "connection exception: #{msg}"
         end
         sleep 1
+        execution_tries = execution_tries + 1
         response = nil
       end
+      logger.info "is valid: #{is_valid}"
+      is_started_successfully = true if is_valid
+      raise ArgumentError, "unable to start repose on #{server}" unless is_started_successfully
     end
   end
 

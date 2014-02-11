@@ -1,12 +1,27 @@
+---
 application:
   name: Repose
-  description: repose application -- best proxy i the world
+  description: Repose is an open-source RESTful HTTP reverse proxy that is highly
+    scalable and extensible. It provides solutions to API processing tasks such as
+    rate limiting, client authentication, versioning, and logging.
   location: apps/repose/bootstrap.rb
-  type: singular
+  type: comparison
   plugins:
-   - location: plugins/repose_jmx_plugin/plugin.rb
-  sub_apps: 
-   - 
-     id: main
-     name: Main application
-     description: This is the base configuration for Repose
+  - location: plugins/repose_jmx_plugin/plugin.rb
+  - location: plugins/sysstats_plugin/plugin.rb
+  sub_apps:
+  - id: atom_hopper
+    name: Atom Hopper setup
+    description: Setup of Repose for atom hopper application.
+  - id: identity
+    name: identity
+    description: repose configuration for cloud identity
+  - id: identity
+    name: identity
+    description: repose configuration for cloud identity
+  - id: translation
+    name: translation
+    description: repose configuration for translation
+  - id: dbaas
+    name: Cloud Databases
+    description: Repose setup with DBaaS configurations
