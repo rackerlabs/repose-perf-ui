@@ -3,9 +3,10 @@ require 'logging'
 require 'redis'
 require File.expand_path("apps/bootstrap.rb", Dir.pwd)
 
+module SnapshotComparer
 module Apps
   class SysstatsBootstrap < Bootstrap
- 
+
 
     def initialize(environment = :production, redis_info = nil, logger = nil)
       if environment == :production
@@ -15,7 +16,8 @@ module Apps
       elsif environment == :development
         @config = YAML.load_file(File.expand_path("config/apps/dev_sysstats.yaml", Dir.pwd))
       end
-      super(redis_info, logger)      
+      super(redis_info, logger)
     end
   end
+end
 end

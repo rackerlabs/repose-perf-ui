@@ -2,9 +2,11 @@ require 'json'
 require 'yaml'
 require_relative 'models.rb'
 
-class Result
+module SnapshotComparer
+module Models
+  class Result
 
-  attr_reader :start, :length, :avg, :throughput, :errors, :id, :name, :description, :status 
+  attr_reader :start, :length, :avg, :throughput, :errors, :id, :name, :description, :status
   attr_accessor :jmx_results, :network_results
 
   def initialize(start, length, avg, throughput, errors, name, description, id, status = :completed)
@@ -41,4 +43,5 @@ class DetailedResult
     @errors = errors
   end
 end
-
+end
+end

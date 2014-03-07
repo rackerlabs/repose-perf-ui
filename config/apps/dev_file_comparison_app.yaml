@@ -1,0 +1,15 @@
+---
+application:
+  name: File
+  description: test
+  location: apps/file_comparison_app/bootstrap.rb
+  type: comparison
+  plugins:
+  - location: plugins/file_plugin/plugin.rb
+  sub_apps:
+  - id: main
+    name: Main setup
+    description: Setup of main application.
+  - id: main
+    name: Main setup
+    description: Setup of main application.

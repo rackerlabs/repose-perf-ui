@@ -145,9 +145,9 @@
                 <label for="branch">Branch</label>
                 <input type="text" class="form-control" name="branch" id="branch" placeholder="master">
               </div>
-            </div>        	
+            </div>
           </div>
-          <button type="submit" class="btn btn-default">Schedule</button>
+          <button type="submit" id="schedule_test" name="schedule_test" class="btn btn-default">Schedule</button>
         </form>
       </div>
     </div>
@@ -168,7 +168,6 @@
       $(document).ready(function() {
       	$('#git_repo').hide();
       	$('#custom_test_type').hide();
-        
         $('#test_type').on('change',function(){
         	if($(this).val() === 'custom'){
         		//show git repo stuff
@@ -179,7 +178,6 @@
           console.log($(this));
           console.log($(this).val());
         });
-        
         $('#versions').on('change',function(){
         	if($(this).val() === 'git'){
         		//show git repo stuff

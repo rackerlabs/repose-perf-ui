@@ -119,4 +119,3 @@ class FilePlugin < PluginModule::Plugin
           )
   end
 end
-

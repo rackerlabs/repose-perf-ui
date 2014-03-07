@@ -7,629 +7,519 @@ Feature: File Plugin Page
 		When I post to "/file_comparison_app/results/main/load_test/compare-plugin" with:
 		"""
 		  {
-			"compare":"key-one+key-four+key-two+key-five", 
+			"compare":"key-one+key-four+key-two+key-five",
 			"plugin_id": "FilePlugin|||file"
 		  }
 		"""
 		Then the response should be "200"
-		And the message should contain "http-logging:Mean"
-		And the message should contain "key-four"
-		And the message should contain "key-five"
-		And the message should contain "jmxdata.out_162.209.124.158"
-		And the message should contain "2.1691480572391195"
-		And the message should contain "2.243839219398397"
-		And the message should contain "2.1691480572391195"
-		And the message should contain "2.2863381843067287"
-		And the message should contain "1.6917195328155799"
-		And the message should contain "translation:75thPercentile"
-		And the message should contain "instance"
-		
+		And the message should contain "No comparison available for this plugin"
+
 	Scenario: Compare file_comparison_app (overhead) main load test key-one, key-two, key-five, key-four for filter jmx metrics graph data
 		When I post to "/file_comparison_app/results/main/load_test/compare-plugin/metric" with:
 		"""
 		  {
-			"compare":"key-one,key-four,key-two,key-five", 
+			"compare":"key-one,key-four,key-two,key-five",
 			"plugin": "FilePlugin|||file"
 		  }
 		"""
-		Then the response should be "200"
-		And response should be a json
-		And there should be "4" records in response
-	
+		Then the response should be "404"
+
 	Scenario: Compare file_comparison_app (overhead) main load test key-one and key-two and key-three for file metrics
 		When I post to "/file_comparison_app/results/main/load_test/compare-plugin" with:
 		"""
 		  {
-			"compare":"key-one+key-four+key-two+key-five+key-three", 
+			"compare":"key-one+key-four+key-two+key-five+key-three",
 			"plugin_id": "FilePlugin|||file"
 		  }
 		"""
 		Then the response should be "200"
-		And the message should contain "http-logging:Mean"
-		And the message should contain "key-four"
-		And the message should contain "key-five"
-		And the message should contain "jmxdata.out_162.209.124.158"
-		And the message should contain "2.1691480572391195"
-		And the message should contain "2.243839219398397"
-		And the message should contain "2.1691480572391195"
-		And the message should contain "2.2863381843067287"
-		And the message should contain "1.6917195328155799"
-		And the message should contain "translation:75thPercentile"
-		And the message should contain "instance"
-		
+		And the message should contain "No comparison available for this plugin"
+
 	Scenario: Compare file_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for filter jmx metrics graph data
 		When I post to "/file_comparison_app/results/main/load_test/compare-plugin/metric" with:
 		"""
 		  {
-			"compare":"key-one,key-four,key-three,key-two,key-five", 
+			"compare":"key-one,key-four,key-three,key-two,key-five",
 			"plugin": "FilePlugin|||file"
 		  }
 		"""
-		Then the response should be "200"
-		And response should be a json
-		And there should be "5" records in response
+		Then the response should be "404"
 
 	Scenario: Compare file_comparison_app (overhead) main load test key-one and key-two and invalid-key-three for file metrics
 		When I post to "/file_comparison_app/results/main/load_test/compare-plugin" with:
 		"""
 		  {
-			"compare":"key-one+key-four+key-two+key-five+invalid-key-three", 
+			"compare":"key-one+key-four+key-two+key-five+invalid-key-three",
 			"plugin_id": "FilePlugin|||file"
 		  }
 		"""
 		Then the response should be "200"
-		And the message should contain "http-logging:Mean"
-		And the message should contain "key-four"
-		And the message should contain "key-five"
-		And the message should contain "jmxdata.out_162.209.124.158"
-		And the message should contain "2.1691480572391195"
-		And the message should contain "2.243839219398397"
-		And the message should contain "2.1691480572391195"
-		And the message should contain "2.2863381843067287"
-		And the message should contain "1.6917195328155799"
-		And the message should contain "translation:75thPercentile"
-		And the message should contain "instance"
-		
+		And the message should contain "No comparison available for this plugin"
+
 	Scenario: Compare file_comparison_app (overhead) main load test key-one, key-two, key-five, invalid-key-three, key-four for filter jmx metrics graph data
 		When I post to "/file_comparison_app/results/main/load_test/compare-plugin/metric" with:
 		"""
 		  {
-			"compare":"key-one,key-four,invalid-key-three,key-two,key-five", 
+			"compare":"key-one,key-four,invalid-key-three,key-two,key-five",
 			"plugin": "FilePlugin|||file"
 		  }
 		"""
-		Then the response should be "200"
-		And response should be a json
-		And there should be "4" records in response
+		Then the response should be "404"
 
 	Scenario: Compare file_comparison_app (overhead) main load test invalid-key-one and key-one and invalid-key-three for file metrics
 		When I post to "/file_comparison_app/results/main/load_test/compare-plugin" with:
 		"""
 		  {
-			"compare":"invalid-key-one+key-one+invalid-key-three", 
+			"compare":"invalid-key-one+key-one+invalid-key-three",
 			"plugin_id": "FilePlugin|||file"
 		  }
 		"""
-		Then the response should be "404"
-		And the error should match the "No data for FilePlugin|||file found"
-		
+		Then the response should be "200"
+		And the message should contain "No comparison available for this plugin"
+
 	Scenario: Compare file_comparison_app (overhead) main load test key-one, invalid-key-two, invalid-key-three for filter jmx metrics graph data
 		When I post to "/file_comparison_app/results/main/load_test/compare-plugin/metric" with:
 		"""
 		  {
-			"compare":"invalid-key-one,key-four,invalid-key-five", 
+			"compare":"invalid-key-one,key-four,invalid-key-five",
 			"plugin": "FilePlugin|||file"
 		  }
 		"""
-		Then the response should be "200"
-		And response should be a json
-		And there should be "1" records in response
+		Then the response should be "404"
 
 	Scenario: Compare file_comparison_app (overhead) main load test key-one and key-two for gc jmx metrics
 		When I post to "/file_comparison_app/results/main/load_test/compare-plugin" with:
 		"""
 		  {
-			"compare":"key-one+key-four+key-two+key-five", 
+			"compare":"key-one+key-four+key-two+key-five",
 			"plugin_id": "FilePlugin|||gc"
 		  }
 		"""
-		Then the response should be "200"
-		And the message should contain "PSMarkSweep.CollectionTime"
-		And the message should contain "key-four"
-		And the message should contain "key-five"
-		And the message should contain "jmxdata.out_162.209.124.158"
-		And the message should contain "jmxdata.out_162.209.124.167"
-		And the message should contain "0.0"
-		And the message should contain "0.25"
-		And the message should contain "79.25"
-		And the message should contain "1157.25"
-		And the message should contain "421.75"
-		And the message should contain "1134.0"
-		And the message should contain "instance"
-		
+		Then the response should be "404"
+		And the message should contain "No data for FilePlugin|||gc found"
+
 	Scenario: Compare file_comparison_app (overhead) main load test key-one, key-two, key-five, key-four for gc jmx metrics graph data
 		When I post to "/file_comparison_app/results/main/load_test/compare-plugin/metric" with:
 		"""
 		  {
-			"compare":"key-one,key-four,key-two,key-five", 
+			"compare":"key-one,key-four,key-two,key-five",
 			"plugin": "FilePlugin|||gc"
 		  }
 		"""
-		Then the response should be "200"
-		And response should be a json
-		And there should be "4" records in response
+		Then the response should be "404"
 
 	Scenario: Compare file_comparison_app (overhead) main load test key-one and key-two for jvm_memory jmx metrics
 		When I post to "/file_comparison_app/results/main/load_test/compare-plugin" with:
 		"""
 		  {
-			"compare":"key-one+key-four+key-two+key-five", 
+			"compare":"key-one+key-four+key-two+key-five",
 			"plugin_id": "FilePlugin|||jvm_memory"
 		  }
 		"""
-		Then the response should be "200"
-		And the message should contain "HeapMemoryUsage.committed"
-		And the message should contain "key-four"
-		And the message should contain "key-five"
-		And the message should contain "jmxdata.out_162.209.124.158"
-		And the message should contain "jmxdata.out_162.209.124.167"
-		And the message should contain "386301952.0"
-		And the message should contain "231901507.0"
-		And the message should contain "388587520.0"
-		And the message should contain "192118440.0"
-		And the message should contain "3491561472.0"
-		And the message should contain "245467264.0"
-		And the message should contain "instance"
-		
+		Then the response should be "404"
+		And the message should contain "No data for FilePlugin|||jvm_memory found"
+
 	Scenario: Compare file_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for jvm_memory jmx metrics graph data
 		When I post to "/file_comparison_app/results/main/load_test/compare-plugin/metric" with:
 		"""
 		  {
-			"compare":"key-one,key-four,key-three,key-two,key-five", 
+			"compare":"key-one,key-four,key-three,key-two,key-five",
 			"plugin": "FilePlugin|||jvm_memory"
 		  }
 		"""
-		Then the response should be "200"
-		And response should be a json
-		And there should be "5" records in response
+		Then the response should be "404"
 
 	Scenario: Compare file_comparison_app (overhead) main load test key-one and key-two for jvm_threads jmx metrics
 		When I post to "/file_comparison_app/results/main/load_test/compare-plugin" with:
 		"""
 		  {
-			"compare":"key-one+key-four+key-two+key-five", 
+			"compare":"key-one+key-four+key-two+key-five",
 			"plugin_id": "FilePlugin|||jvm_threads"
 		  }
 		"""
-		Then the response should be "200"
-		And the message should contain "PeakThreadCount"
-		And the message should contain "key-four"
-		And the message should contain "key-five"
-		And the message should contain "jmxdata.out_162.209.124.158"
-		And the message should contain "jmxdata.out_162.209.124.167"
-		And the message should contain "41.875"
-		And the message should contain "17.5"
-		And the message should contain "41.125"
-		And the message should contain "44.875"
-		And the message should contain "44.25"
-		And the message should contain "41.0"
-		And the message should contain "instance"
-		
+		Then the response should be "404"
+		And the message should contain "No data for FilePlugin|||jvm_threads found"
+
 	Scenario: Compare file_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for jvm_threads jmx metrics graph data
 		When I post to "/file_comparison_app/results/main/load_test/compare-plugin/metric" with:
 		"""
 		  {
-			"compare":"key-one,key-four,key-three,key-two,key-five", 
+			"compare":"key-one,key-four,key-three,key-two,key-five",
 			"plugin": "FilePlugin|||jvm_threads"
 		  }
 		"""
-		Then the response should be "200"
-		And response should be a json
-		And there should be "5" records in response
+		Then the response should be "404"
 
 	Scenario: Compare file_comparison_app (overhead) main load test key-one and key-two for logs jmx metrics
 		When I post to "/file_comparison_app/results/main/load_test/compare-plugin" with:
 		"""
 		  {
-			"compare":"key-one+key-four+key-two+key-five", 
-			"plugin_id": "FilePlugin|||logs"
-		  }
-		"""
-		Then the response should be "404"
-		And the error page should match the "No data for FilePlugin|||logs found"
-		
-	Scenario: Compare file_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for logs jmx metrics graph data
-		When I post to "/file_comparison_app/results/main/load_test/compare-plugin/metric" with:
-		"""
-		  {
-			"compare":"key-one,key-four,key-three,key-two,key-five", 
-			"plugin": "FilePlugin|||logs"
-		  }
-		"""
-		Then the response should be "404"
-		And response should be a json
-		And there should be "1" records in response
-		And "fail" json record should equal to "no data for FilePlugin|||logs found" 
-
-	Scenario: Compare file_comparison_app (overhead) main load test key-one and key-two for unknown jmx metrics
-		When I post to "/file_comparison_app/results/main/load_test/compare-plugin" with:
-		"""
-		  {
-			"compare":"key-one+key-two", 
-			"plugin_id": "FilePlugin|||unknown"
-		  }
-		"""
-		Then the response should be "404"
-		And the error should match the "No data for FilePlugin|||unknown found"
-		
-	Scenario: Compare file_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for unknown jmx metrics graph data
-		When I post to "/file_comparison_app/results/main/load_test/compare-plugin/metric" with:
-		"""
-		  {
-			"compare":"key-one,key-four,key-three,key-two,key-five", 
-			"plugin": "FilePlugin|||unknown"
-		  }
-		"""
-		Then the response should be "404"
-		And there should be "1" records in response
-		And "fail" json record should equal to "no data for FilePlugin|||unknown found" 
-
-	Scenario: Compare file_comparison_app (overhead) main load test key-one and key-two for jmx threads none metrics
-		When I post to "/file_comparison_app/results/main/load_test/compare-plugin" with:
-		"""
-		  {
-			"compare":"key-one+key-two", 
-			"plugin_id": "unknown|||file"
-		  }
-		"""
-		Then the response should be "404"
-		And the error should match the "No plugin by name of unknown found"
-		
-	Scenario: Compare file_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for filter unknown graph data
-		When I post to "/file_comparison_app/results/main/load_test/compare-plugin/metric" with:
-		"""
-		  {
-			"compare":"key-one,key-four,key-three,key-two,key-five", 
-			"plugin": "unknown|||file"
-		  }
-		"""
-		Then the response should be "404"
-		And there should be "1" records in response
-		And "fail" json record should equal to "No plugin by name of unknown found" 
-
-	Scenario: Compare file_comparison_app (overhead) main invalid test key-one and key-two for jvm_threads jmx metrics
-		When I post to "/file_comparison_app/results/main/invalid/compare-plugin" with:
-		"""
-		  {
-			"compare":"key-one+key-two", 
-			"plugin_id": "FilePlugin|||file"
-		  }
-		"""
-		Then the response should be "404"
-		And the error should match the "No application by name of file_comparison_app/invalid found"
-		
-	Scenario: Compare file_comparison_app (overhead) main invalid test key-one, key-two, key-five, key-three, key-four for filter jmx metrics graph data
-		When I post to "/file_comparison_app/results/main/invalid/compare-plugin/metric" with:
-		"""
-		  {
-			"compare":"key-one,key-four,key-three,key-two,key-five", 
-			"plugin": "FilePlugin|||file"
-		  }
-		"""
-		Then the response should be "404"
-		And there should be "1" records in response
-		And "fail" json record should equal to "No application by name of file_comparison_app/invalid found" 
-
-	Scenario: Compare file_comparison_app (overhead) invalid load test key-one and key-two for jvm_threads jmx metrics
-		When I post to "/file_comparison_app/results/invalid/load_test/compare-plugin" with:
-		"""
-		  {
-			"compare":"key-one+key-two", 
-			"plugin_id": "FilePlugin|||file"
-		  }
-		"""
-		Then the response should be "404"
-		And the error should match the "No sub application for invalid found"
-		
-	Scenario: Compare file_comparison_app (overhead) invalid load test key-one, key-two, key-five, key-three, key-four for filter jmx metrics graph data
-		When I post to "/file_comparison_app/results/invalid/load_test/compare-plugin/metric" with:
-		"""
-		  {
-			"compare":"key-one,key-four,key-three,key-two,key-five", 
-			"plugin": "FilePlugin|||file"
-		  }
-		"""
-		Then the response should be "404"
-		And there should be "1" records in response
-		And "fail" json record should equal to "No sub application for invalid found" 
-
-	Scenario: Compare invalid main load test key-one and key-two for jvm_threads jmx metrics
-		When I post to "/invalid/results/main/load_test/compare-plugin" with:
-		"""
-		  {
-			"compare":"key-one+key-two", 
-			"plugin_id": "FilePlugin|||file"
-		  }
-		"""
-		Then the response should be "404"
-		And the error should match the "No application by name of invalid/load_test found"
-		
-	Scenario: Compare file_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for filter jmx metrics graph data
-		When I post to "/invalid/results/main/load_test/compare-plugin/metric" with:
-		"""
-		  {
-			"compare":"key-one,key-four,key-three,key-two,key-five", 
-			"plugin": "FilePlugin|||file"
-		  }
-		"""
-		Then the response should be "404"
-		And there should be "1" records in response
-		And "fail" json record should equal to "No application by name of invalid/load_test found" 
-
-	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for file metrics
-		When I post to "/file_singular_app/results/main/load_test/compare-plugin" with:
-		"""
-		  {
-			"compare":"key-one+key-two", 
-			"plugin_id": "FilePlugin|||file"
-		  }
-		"""
-		Then the response should be "200"
-		And the message should contain "http-logging:Mean"
-		And the message should contain "key-one"
-		And the message should contain "key-two"
-		And the message should contain "2.222388633250659"
-		And the message should contain "2.2863381843067287"
-		And the message should contain "1.6917195328155799"
-		And the message should contain "translation:75thPercentile"
-		And the message should contain "instance"
-		
-	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for file metrics for graph data
-		When I post to "/file_singular_app/results/main/load_test/compare-plugin/metric" with:
-		"""
-		  {
-			"compare":"key-one,key-two", 
-			"plugin": "FilePlugin|||file"
-		  }
-		"""
-		Then the response should be "200"
-		And response should be a json
-		And there should be "2" records in response
-
-	Scenario: Compare file_singular_app (singular) main load test key-one and key-two and key-three for file metrics
-		When I post to "/file_singular_app/results/main/load_test/compare-plugin" with:
-		"""
-		  {
-			"compare":"key-one+key-two+key-three", 
-			"plugin_id": "FilePlugin|||file"
-		  }
-		"""
-		Then the response should be "200"
-		And the message should contain "http-logging:Mean"
-		And the message should contain "key-one"
-		And the message should contain "key-two"
-		And the message should contain "key-three"
-		And the message should contain "2.222388633250659"
-		And the message should contain "2.2863381843067287"
-		And the message should contain "1.6917195328155799"
-		And the message should contain "translation:75thPercentile"
-		And the message should contain "instance"
-		
-	Scenario: Compare file_singular_app (singular) main load test key-one and key-two and key-three for file metrics for graph data
-		When I post to "/file_singular_app/results/main/load_test/compare-plugin/metric" with:
-		"""
-		  {
-			"compare":"key-one,key-three,key-two", 
-			"plugin": "FilePlugin|||file"
-		  }
-		"""
-		Then the response should be "200"
-		And response should be a json
-		And there should be "3" records in response
-
-	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for gc jmx metrics
-		When I post to "/file_singular_app/results/main/load_test/compare-plugin" with:
-		"""
-		  {
-			"compare":"key-one+key-two", 
-			"plugin_id": "FilePlugin|||gc"
-		  }
-		"""
-		Then the response should be "200"
-		And the message should contain "key-one"
-		And the message should contain "key-two"
-		And the message should contain "79.25"
-		And the message should contain "0.25"
-		And the message should contain "1134.0"
-		And the message should contain "PSMarkSweep.CollectionTime"
-		And the message should contain "instance"
-		
-	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for gc jmx metrics for graph data
-		When I post to "/file_singular_app/results/main/load_test/compare-plugin/metric" with:
-		"""
-		  {
-			"compare":"key-one,key-three,key-two", 
-			"plugin": "FilePlugin|||gc"
-		  }
-		"""
-		Then the response should be "200"
-		And response should be a json
-		And there should be "3" records in response
-
-	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for jvm_memory jmx metrics
-		When I post to "/file_singular_app/results/main/load_test/compare-plugin" with:
-		"""
-		  {
-			"compare":"key-one+key-two", 
-			"plugin_id": "FilePlugin|||jvm_memory"
-		  }
-		"""
-		Then the response should be "200"
-		And the message should contain "key-one"
-		And the message should contain "key-two"
-		And the message should contain "386301952.0"
-		And the message should contain "231901507.0"
-		And the message should contain "3491561472.0"
-		And the message should contain "HeapMemoryUsage.committed"
-		And the message should contain "instance"
-		
-	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for jvm_memory jmx metrics for graph data
-		When I post to "/file_singular_app/results/main/load_test/compare-plugin/metric" with:
-		"""
-		  {
-			"compare":"key-one,key-three,key-two", 
-			"plugin": "FilePlugin|||jvm_memory"
-		  }
-		"""
-		Then the response should be "200"
-		And response should be a json
-		And there should be "3" records in response
-
-	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for jvm_threads jmx metrics
-		When I post to "/file_singular_app/results/main/load_test/compare-plugin" with:
-		"""
-		  {
-			"compare":"key-one+key-two", 
-			"plugin_id": "FilePlugin|||jvm_threads"
-		  }
-		"""
-		Then the response should be "200"
-		And the message should contain "key-one"
-		And the message should contain "key-two"
-		And the message should contain "41.75"
-		And the message should contain "17.5"
-		And the message should contain "41.0"
-		And the message should contain "PeakThreadCount"
-		And the message should contain "instance"
-		
-	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for jvm_threads jmx metrics for graph data
-		When I post to "/file_singular_app/results/main/load_test/compare-plugin/metric" with:
-		"""
-		  {
-			"compare":"key-one,key-three,key-two", 
-			"plugin": "FilePlugin|||jvm_threads"
-		  }
-		"""
-		Then the response should be "200"
-		And response should be a json
-		And there should be "3" records in response
-
-	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for logs jmx metrics
-		When I post to "/file_singular_app/results/main/load_test/compare-plugin" with:
-		"""
-		  {
-			"compare":"key-one+key-two", 
+			"compare":"key-one+key-four+key-two+key-five",
 			"plugin_id": "FilePlugin|||logs"
 		  }
 		"""
 		Then the response should be "404"
 		And the error should match the "No data for FilePlugin|||logs found"
-		
-	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for logs jmx metrics for graph data
-		When I post to "/file_singular_app/results/main/load_test/compare-plugin/metric" with:
+
+	Scenario: Compare file_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for logs jmx metrics graph data
+		When I post to "/file_comparison_app/results/main/load_test/compare-plugin/metric" with:
 		"""
 		  {
-			"compare":"key-one,key-four,key-three,key-two,key-five", 
+			"compare":"key-one,key-four,key-three,key-two,key-five",
 			"plugin": "FilePlugin|||logs"
 		  }
 		"""
 		Then the response should be "404"
 		And response should be a json
 		And there should be "1" records in response
-		And "fail" json record should equal to "no data for FilePlugin|||logs found" 
+		And "fail" json record should equal to "no data for FilePlugin|||logs found"
 
-	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for unknown jmx metrics
-		When I post to "/file_singular_app/results/main/load_test/compare-plugin" with:
+	Scenario: Compare file_comparison_app (overhead) main load test key-one and key-two for unknown jmx metrics
+		When I post to "/file_comparison_app/results/main/load_test/compare-plugin" with:
 		"""
 		  {
-			"compare":"key-one+key-two", 
+			"compare":"key-one+key-two",
 			"plugin_id": "FilePlugin|||unknown"
 		  }
 		"""
 		Then the response should be "404"
 		And the error should match the "No data for FilePlugin|||unknown found"
-		
+
+	Scenario: Compare file_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for unknown jmx metrics graph data
+		When I post to "/file_comparison_app/results/main/load_test/compare-plugin/metric" with:
+		"""
+		  {
+			"compare":"key-one,key-four,key-three,key-two,key-five",
+			"plugin": "FilePlugin|||unknown"
+		  }
+		"""
+		Then the response should be "404"
+		And there should be "1" records in response
+		And "fail" json record should equal to "no data for FilePlugin|||unknown found"
+
+	Scenario: Compare file_comparison_app (overhead) main load test key-one and key-two for jmx threads none metrics
+		When I post to "/file_comparison_app/results/main/load_test/compare-plugin" with:
+		"""
+		  {
+			"compare":"key-one+key-two",
+			"plugin_id": "unknown|||file"
+		  }
+		"""
+		Then the response should be "404"
+		And the error should match the "No plugin by name of unknown found"
+
+	Scenario: Compare file_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for filter unknown graph data
+		When I post to "/file_comparison_app/results/main/load_test/compare-plugin/metric" with:
+		"""
+		  {
+			"compare":"key-one,key-four,key-three,key-two,key-five",
+			"plugin": "unknown|||file"
+		  }
+		"""
+		Then the response should be "404"
+		And there should be "1" records in response
+		And "fail" json record should equal to "No plugin by name of unknown found"
+
+	Scenario: Compare file_comparison_app (overhead) main invalid test key-one and key-two for jvm_threads jmx metrics
+		When I post to "/file_comparison_app/results/main/invalid/compare-plugin" with:
+		"""
+		  {
+			"compare":"key-one+key-two",
+			"plugin_id": "FilePlugin|||file"
+		  }
+		"""
+		Then the response should be "404"
+		And the error should match the "No application by name of file_comparison_app/invalid found"
+
+	Scenario: Compare file_comparison_app (overhead) main invalid test key-one, key-two, key-five, key-three, key-four for filter jmx metrics graph data
+		When I post to "/file_comparison_app/results/main/invalid/compare-plugin/metric" with:
+		"""
+		  {
+			"compare":"key-one,key-four,key-three,key-two,key-five",
+			"plugin": "FilePlugin|||file"
+		  }
+		"""
+		Then the response should be "404"
+		And there should be "1" records in response
+		And "fail" json record should equal to "No application by name of file_comparison_app/invalid found"
+
+	Scenario: Compare file_comparison_app (overhead) invalid load test key-one and key-two for jvm_threads jmx metrics
+		When I post to "/file_comparison_app/results/invalid/load_test/compare-plugin" with:
+		"""
+		  {
+			"compare":"key-one+key-two",
+			"plugin_id": "FilePlugin|||file"
+		  }
+		"""
+		Then the response should be "404"
+		And the error should match the "No sub application for invalid found"
+
+	Scenario: Compare file_comparison_app (overhead) invalid load test key-one, key-two, key-five, key-three, key-four for filter jmx metrics graph data
+		When I post to "/file_comparison_app/results/invalid/load_test/compare-plugin/metric" with:
+		"""
+		  {
+			"compare":"key-one,key-four,key-three,key-two,key-five",
+			"plugin": "FilePlugin|||file"
+		  }
+		"""
+		Then the response should be "404"
+		And there should be "1" records in response
+		And "fail" json record should equal to "No sub application for invalid found"
+
+	Scenario: Compare invalid main load test key-one and key-two for jvm_threads jmx metrics
+		When I post to "/invalid/results/main/load_test/compare-plugin" with:
+		"""
+		  {
+			"compare":"key-one+key-two",
+			"plugin_id": "FilePlugin|||file"
+		  }
+		"""
+		Then the response should be "404"
+		And the error should match the "No application by name of invalid/load_test found"
+
+	Scenario: Compare file_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for filter jmx metrics graph data
+		When I post to "/invalid/results/main/load_test/compare-plugin/metric" with:
+		"""
+		  {
+			"compare":"key-one,key-four,key-three,key-two,key-five",
+			"plugin": "FilePlugin|||file"
+		  }
+		"""
+		Then the response should be "404"
+		And there should be "1" records in response
+		And "fail" json record should equal to "No application by name of invalid/load_test found"
+
+	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for file metrics
+		When I post to "/file_singular_app/results/main/load_test/compare-plugin" with:
+		"""
+		  {
+			"compare":"key-one+key-two",
+			"plugin_id": "FilePlugin|||file"
+		  }
+		"""
+		Then the response should be "200"
+		And the message should contain "No comparison available for this plugin"
+
+	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for file metrics for graph data
+		When I post to "/file_singular_app/results/main/load_test/compare-plugin/metric" with:
+		"""
+		  {
+			"compare":"key-one,key-two",
+			"plugin": "FilePlugin|||file"
+		  }
+		"""
+		Then the response should be "404"
+		And response should be a json
+		And there should be "1" records in response
+
+	Scenario: Compare file_singular_app (singular) main load test key-one and key-two and key-three for file metrics
+		When I post to "/file_singular_app/results/main/load_test/compare-plugin" with:
+		"""
+		  {
+			"compare":"key-one+key-two+key-three",
+			"plugin_id": "FilePlugin|||file"
+		  }
+		"""
+		Then the response should be "200"
+		And the message should contain "No comparison available for this plugin"
+
+	Scenario: Compare file_singular_app (singular) main load test key-one and key-two and key-three for file metrics for graph data
+		When I post to "/file_singular_app/results/main/load_test/compare-plugin/metric" with:
+		"""
+		  {
+			"compare":"key-one,key-three,key-two",
+			"plugin": "FilePlugin|||file"
+		  }
+		"""
+		Then the response should be "404"
+		And response should be a json
+		And there should be "1" records in response
+
+	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for gc jmx metrics
+		When I post to "/file_singular_app/results/main/load_test/compare-plugin" with:
+		"""
+		  {
+			"compare":"key-one+key-two",
+			"plugin_id": "FilePlugin|||gc"
+		  }
+		"""
+		Then the response should be "404"
+		And the message should contain "No data for FilePlugin|||gc found"
+
+	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for gc jmx metrics for graph data
+		When I post to "/file_singular_app/results/main/load_test/compare-plugin/metric" with:
+		"""
+		  {
+			"compare":"key-one,key-three,key-two",
+			"plugin": "FilePlugin|||gc"
+		  }
+		"""
+		Then the response should be "404"
+		And response should be a json
+		And there should be "1" records in response
+
+	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for jvm_memory jmx metrics
+		When I post to "/file_singular_app/results/main/load_test/compare-plugin" with:
+		"""
+		  {
+			"compare":"key-one+key-two",
+			"plugin_id": "FilePlugin|||jvm_memory"
+		  }
+		"""
+		Then the response should be "404"
+		And the message should contain "No data for FilePlugin|||jvm_memory found"
+
+	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for jvm_memory jmx metrics for graph data
+		When I post to "/file_singular_app/results/main/load_test/compare-plugin/metric" with:
+		"""
+		  {
+			"compare":"key-one,key-three,key-two",
+			"plugin": "FilePlugin|||jvm_memory"
+		  }
+		"""
+		Then the response should be "404"
+		And response should be a json
+		And there should be "1" records in response
+
+	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for jvm_threads jmx metrics
+		When I post to "/file_singular_app/results/main/load_test/compare-plugin" with:
+		"""
+		  {
+			"compare":"key-one+key-two",
+			"plugin_id": "FilePlugin|||jvm_threads"
+		  }
+		"""
+		Then the response should be "404"
+		And the message should contain "No data for FilePlugin|||jvm_threads found"
+
+	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for jvm_threads jmx metrics for graph data
+		When I post to "/file_singular_app/results/main/load_test/compare-plugin/metric" with:
+		"""
+		  {
+			"compare":"key-one,key-three,key-two",
+			"plugin": "FilePlugin|||jvm_threads"
+		  }
+		"""
+		Then the response should be "404"
+		And response should be a json
+		And there should be "1" records in response
+
+	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for logs jmx metrics
+		When I post to "/file_singular_app/results/main/load_test/compare-plugin" with:
+		"""
+		  {
+			"compare":"key-one+key-two",
+			"plugin_id": "FilePlugin|||logs"
+		  }
+		"""
+		Then the response should be "404"
+		And the error should match the "No data for FilePlugin|||logs found"
+
+	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for logs jmx metrics for graph data
+		When I post to "/file_singular_app/results/main/load_test/compare-plugin/metric" with:
+		"""
+		  {
+			"compare":"key-one,key-four,key-three,key-two,key-five",
+			"plugin": "FilePlugin|||logs"
+		  }
+		"""
+		Then the response should be "404"
+		And response should be a json
+		And there should be "1" records in response
+		And "fail" json record should equal to "no data for FilePlugin|||logs found"
+
+	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for unknown jmx metrics
+		When I post to "/file_singular_app/results/main/load_test/compare-plugin" with:
+		"""
+		  {
+			"compare":"key-one+key-two",
+			"plugin_id": "FilePlugin|||unknown"
+		  }
+		"""
+		Then the response should be "404"
+		And the error should match the "No data for FilePlugin|||unknown found"
+
 	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for unknown jmx metrics for graph data
 		When I post to "/file_singular_app/results/main/load_test/compare-plugin/metric" with:
 		"""
 		  {
-			"compare":"key-one,key-four,key-three,key-two,key-five", 
+			"compare":"key-one,key-four,key-three,key-two,key-five",
 			"plugin": "FilePlugin|||unknown"
 		  }
 		"""
 		Then the response should be "404"
 		And response should be a json
 		And there should be "1" records in response
-		And "fail" json record should equal to "no data for FilePlugin|||unknown found" 
+		And "fail" json record should equal to "no data for FilePlugin|||unknown found"
 
 	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for jmx threads none metrics
 		When I post to "/file_singular_app/results/main/load_test/compare-plugin" with:
 		"""
 		  {
-			"compare":"key-one+key-two", 
+			"compare":"key-one+key-two",
 			"plugin_id": "unknown|||file"
 		  }
 		"""
 		Then the response should be "404"
 		And the error should match the "No plugin by name of unknown found"
-		
+
 	Scenario: Compare file_singular_app (singular) main load test key-one and key-two for file none metrics for graph data
 		When I post to "/file_singular_app/results/main/load_test/compare-plugin/metric" with:
 		"""
 		  {
-			"compare":"key-one,key-four,key-three,key-two,key-five", 
+			"compare":"key-one,key-four,key-three,key-two,key-five",
 			"plugin": "unknown|||file"
 		  }
 		"""
 		Then the response should be "404"
 		And response should be a json
 		And there should be "1" records in response
-		And "fail" json record should equal to "No plugin by name of unknown found" 
+		And "fail" json record should equal to "No plugin by name of unknown found"
 
 	Scenario: Compare file_singular_app (singular) main invalid test key-one and key-two for jvm_threads jmx metrics
 		When I post to "/file_singular_app/results/main/invalid/compare-plugin" with:
 		"""
 		  {
-			"compare":"key-one+key-two", 
+			"compare":"key-one+key-two",
 			"plugin_id": "FilePlugin|||file"
 		  }
 		"""
 		Then the response should be "404"
 		And the error should match the "No application by name of file_singular_app/invalid found"
-		
+
 	Scenario: Compare file_singular_app (singular) main invalid test key-one and key-two for file metrics for graph data
 		When I post to "/file_singular_app/results/main/invalid/compare-plugin/metric" with:
 		"""
 		  {
-			"compare":"key-one,key-four,key-three,key-two,key-five", 
+			"compare":"key-one,key-four,key-three,key-two,key-five",
 			"plugin": "FilePlugin|||file"
 		  }
 		"""
 		Then the response should be "404"
 		And response should be a json
 		And there should be "1" records in response
-		And "fail" json record should equal to "No application by name of file_singular_app/invalid found" 
-		
+		And "fail" json record should equal to "No application by name of file_singular_app/invalid found"
+
 	Scenario: Compare file_singular_app (singular) invalid load test key-one and key-two for jvm_threads jmx metrics
 		When I post to "/file_singular_app/results/invalid/load_test/compare-plugin" with:
 		"""
 		  {
-			"compare":"key-one+key-two", 
+			"compare":"key-one+key-two",
 			"plugin_id": "FilePlugin|||file"
 		  }
 		"""
 		Then the response should be "404"
 		And the error should match the "No sub application for invalid found"
-		
+
 	Scenario: Compare file_singular_app (singular) invalid load test key-one and key-two for file metrics for graph data
 		When I post to "/file_singular_app/results/invalid/load_test/compare-plugin/metric" with:
 		"""
 		  {
-			"compare":"key-one,key-four,key-three,key-two,key-five", 
+			"compare":"key-one,key-four,key-three,key-two,key-five",
 			"plugin": "FilePlugin|||file"
 		  }
 		"""
 		Then the response should be "404"
 		And response should be a json
 		And there should be "1" records in response
-		And "fail" json record should equal to "No sub application for invalid found" 		
+		And "fail" json record should equal to "No sub application for invalid found"

@@ -4,16 +4,17 @@ require File.expand_path("Models/plugins/plugin.rb", Dir.pwd)
 require 'yaml'
 require 'redis'
 
+module SnapshotComparer
 module Apps
   class Bootstrap
     attr_reader :config, :db, :fs_ip, :storage_info
     @@applications ||= []
     @@test_list ||= []
-    
+
     class << self
       attr_accessor :env
     end
-    
+
     def self.main_config(environment)
       if environment == :production
         @env = "config/config.yaml"
@@ -67,7 +68,7 @@ module Apps
         :autobench => Models::AutoBenchRunner.new
       }
     end
-    
+
     def self.backend_connect(redis_info = nil)
       if redis_info
         raise ArgumentError, "required information was not provided to connect to backend data store" unless redis_info[:host]
@@ -80,33 +81,33 @@ module Apps
       end
       db
     end
-    
+
     def self.backend_fs
       config = YAML.load_file(File.expand_path(self.env, Dir.pwd))
-      fs_ip = config['file_store']      
+      fs_ip = config['file_store']
     end
-    
+
     def self.storage_info
       config = YAML.load_file(File.expand_path(self.env, Dir.pwd))
       storage_info = config['storage_info']
     end
 
-    
+
     def self.initialize_results
       {
         :comparison => {
-          :klass => Results::ComparisonResults.new,
+          :klass => Models::ComparisonResults.new,
           :summary_view => :comparison_summary_results,
           :detailed_view => :comparison_detailed_results
         },
         :singular => {
-          :klass => Results::SingularResults.new,
+          :klass => Models::SingularResults.new,
           :summary_view => :singular_summary_results,
           :detailed_view => :singular_detailed_results
         }
       }
     end
-    
+
     def self.test_list()
       if @@test_list.empty?
         config = YAML.load_file(File.expand_path(self.env, Dir.pwd))
@@ -118,7 +119,7 @@ module Apps
 
     def initialize(redis_info, logger)
       @logger = logger ? logger : Bootstrap.logger
-      @logger.debug "loaded config: #{@config}" if @config  
+      @logger.debug "loaded config: #{@config}" if @config
 
       if redis_info
         raise ArgumentError, "required information missing from your storage connection." unless redis_info.has_key?(:host)
@@ -126,9 +127,9 @@ module Apps
       @db = Bootstrap.backend_connect(redis_info)
       @logger.debug "loaded backend: #{@db.inspect}" if @db
       @fs_ip = Bootstrap.backend_fs
-      @logger.debug "loaded ip: #{@fs_ip}" if @fs_ip     
+      @logger.debug "loaded ip: #{@fs_ip}" if @fs_ip
       @storage_info = Bootstrap.storage_info
-      @logger.debug "loaded storage info: #{@storage_info}" if @storage_info 
+      @logger.debug "loaded storage info: #{@storage_info}" if @storage_info
     end
 
     def load_plugins
@@ -141,27 +142,27 @@ module Apps
           #File.dirname(full_path)[File.dirname(full_path).rindex('/')+1..-1]
           plugin_key_list << entry.split('/')[entry.split('/').length - 2]
           @logger.debug "entry: #{entry}"
-          plugin = File.expand_path(entry, Dir.pwd) 
-          @logger.debug "plugin: #{plugin}" 
+          plugin = File.expand_path(entry, Dir.pwd)
+          @logger.debug "plugin: #{plugin}"
           require plugin unless File.directory?(plugin)
         end
       end
-      plugin_key_list.map {|p| PluginModule::Plugin.plugin_list[p.to_sym]} 
+      plugin_key_list.map {|p| PluginModule::Plugin.plugin_list[p.to_sym]}
     end
 
-    def start_test_recording(application, sub_app = 'main', type = 'load', json_data = {}, timestamp = nil)
+    def start_test_recording(application, sub_app = 'main', type = 'load', json_data = {}, timestamp = nil, guid = nil)
       @logger.debug "starting test recording"
       start_time = timestamp ? timestamp : Time.now.to_i
       #store the start time in Redis
       store = Redis.new(@db)
-      start_test = {} 
+      start_test = {}
       begin
         raise ArgumentError, "invalid comparison guid" if json_data.has_key?('comparison_guid') and !store.lrange("#{application}:#{sub_app}:results:#{type}",0, -1).include?(json_data['comparison_guid'])
-        
+
         id = "#{application}:test:#{sub_app}:#{type}:start"
         @logger.debug "id: #{id}"
         unless store.get(id)
-          guid = SecureRandom.uuid
+          guid = SecureRandom.uuid unless guid
           start_test = {:guid => guid, :time => start_time }.merge(json_data).to_json
           @logger.debug "start test guid: #{start_test}"
           store.set(id, start_test)
@@ -174,7 +175,7 @@ module Apps
       ensure
         store.quit
       end
-      start_test 
+      start_test
     end
 
     def stop_test_recording(application, sub_app = 'main', type = 'load', json_data = nil, timestamp = nil)
@@ -199,7 +200,7 @@ module Apps
           @logger.debug "start: #{start_test['time']}, stop: #{end_time}"
           plugin_result = plugin.new(@db, @fs_ip).store_data(application, sub_app, type, json_data, store, start_test, end_time, storage_info)
           plugin_result_list << plugin_result if plugin_result
-        end 
+        end
         store.del(id)
         result = {"result" => "OK"}
         result["with_errors"] = plugin_result_list if plugin_result_list.length > 0
@@ -213,13 +214,13 @@ module Apps
         store.quit
       end
     end
-    
+
     def retrieve_sub_apps_for_running_tests
       app_list = @config['application']['sub_apps']
       app_list << {'id' => 'custom', 'name' => 'Custom setup', 'description' => 'This is a custom setup for executing tests.'} unless app_list.find {|a| a['id'] == 'custom'}
-      app_list  
+      app_list
     end
-    
+
     def highlight_currently_running_tests(application, sub_app)
       running_tests = {}
       Apps::Bootstrap.test_list.each do |test, detail|
@@ -238,7 +239,7 @@ module Apps
       end
       running_tests
     end
-    
+
     def retrieve_running_test_info(application, name, test)
       store = Redis.new(@db)
       begin
@@ -259,7 +260,7 @@ module Apps
       end
       json_result
     end
-    
+
     def create_tmp_dir(guid)
       @logger.debug "in create tmp dir"
       FileUtils.mkpath "/tmp/#{guid}/data"
@@ -267,7 +268,7 @@ module Apps
       FileUtils.mkpath "/tmp/#{guid}/configs"
       @logger.debug "out of create tmp dir"
     end
-    
+
     def copy_meta_data(application, sub_app, type, store, guid, storage_info, fs_ip)
       @logger.debug "in copy meta data with: #{application}, #{sub_app}, #{type}, #{store}, #{guid}, #{storage_info}, #{fs_ip}"
       @logger.debug "store meta request and response"
@@ -287,7 +288,7 @@ module Apps
           script_result_json['name'] = script_json_info['name']
           script_result_json['type'] = script_json_info['type']
           script_result_json['location'] = "/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/#{guid}/meta/#{script_json_info['name']}"
- 
+
           @logger.debug "add script: #{script_result_json} to file store"
           f = open("/tmp/#{guid}/meta/#{script_result_json['name']}", 'w')
           begin
@@ -303,14 +304,14 @@ module Apps
 
           result = script_result_json.to_json
           store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:meta", "script", result)
-    
+
           runner_data = store.hget("#{application}:#{sub_app}:tests:setup:meta", "test_#{type}_#{script_result_json['type']}")
           store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:meta", "test_#{type}_#{script_result_json['type']}", runner_data)
         end
       end
       @logger.debug "finish copy_meta_data"
     end
-    
+
     def copy_meta_test(application, sub_app, type, json_data, start_test, end_time, runner, store)
       @logger.debug "in copy meta test.  Add to cache store"
       test_info = store.hget("#{application}:#{sub_app}:tests:setup:meta", "common")
@@ -319,19 +320,19 @@ module Apps
       else
         test_json_info = {}
       end
-      
+
       test_json_info['runner'] = runner
       test_json_info['start'] = start_test['time']
       test_json_info['stop'] = end_time
       test_json_info['description'] = start_test['description']
       test_json_info['name'] = start_test['name']
       test_json_info['comparison_guid'] = start_test['comparison_guid'] if start_test['comparison_guid']
-      
+
       test_json_info_result = test_json_info.to_json
 
       store.hset("#{application}:#{sub_app}:results:#{type}:#{json_data['guid']}:meta", "test", test_json_info_result)
     end
-        
+
     def store_data(application, sub_app, type, json_data, store, storage_info, start_test, end_time, fs_ip)
       @logger.debug "in store data.  Push to cache store"
       store.rpush("#{application}:#{sub_app}:results:#{type}", json_data['guid'])
@@ -347,10 +348,10 @@ module Apps
  copy script to /application/sub_app/results/type/guid/meta folder (NEED application, sub_app, type, json_data) -- DONE
  update the following data with the values coming from the start_test entry
  - application:sub_app:results:type:guid:meta test (NEED application, sub_app, type, json_data, start_test, end_time)
-=end      
+=end
       copy_meta_test(application, sub_app, type, json_data, start_test, end_time, start_test['runner'], store)
-      
-      @logger.debug "get runner and store results"      
+
+      @logger.debug "get runner and store results"
       source_result_info = json_data['servers']['results']
       runner = Apps::Bootstrap.runner_list[start_test['runner'].to_sym]
       @logger.debug "store results"
@@ -372,29 +373,29 @@ module Apps
         end
 
         Net::SCP.upload!(
-          storage_info['destination'], 
-          storage_info['user'], 
-          "/tmp/#{json_data['guid']}", 
-          "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}", 
+          storage_info['destination'],
+          storage_info['user'],
+          "/tmp/#{json_data['guid']}",
+          "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}",
           {:recursive => true, :verbose => true }
         )
-      end      
+      end
     end
-    
+
     def copy_configs(application, sub_app, type, guid, source_config_info, storage_info, store)
 =begin
- get configs from user's servers.config 
+ get configs from user's servers.config
  add entry application:sub_app:results:type:guid:configs with the json path
-=end  
+=end
       Net::SCP.download!(
-        source_config_info['server'], 
-        source_config_info['user'], 
-        source_config_info['path'], 
-        "/tmp/#{guid}/configs/", 
+        source_config_info['server'],
+        source_config_info['user'],
+        source_config_info['path'],
+        "/tmp/#{guid}/configs/",
         {:recursive => true,
           :verbose => :debug}
-      ) 
-      
+      )
+
       #iterate through configs and add to redis
       Dir.glob("/tmp/#{guid}/configs/**/*") do |entry|
         unless File.directory?(entry)
@@ -406,6 +407,7 @@ module Apps
           store.rpush("#{application}:#{sub_app}:results:#{type}:#{guid}:configs", result)
         end
       end
-    end    
+    end
   end
+end
 end

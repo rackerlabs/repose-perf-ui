@@ -24,8 +24,6 @@ module PluginModule
         tmp_dir = "/tmp/#{guid}/data/#{@plugin_id}/"
         FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
         
-        puts "http://#{@remote_host}/job/#{@remote_job}/#{@remote_build}/api/json?pretty=true"
-        
         File.open("#{tmp_dir}/jenkinsdata.out_#{@remote_host}_#{@remote_job}_#{@remote_build}", 'w') do |f|
           f.write(RestClient.get "http://#{@remote_host}/job/#{@remote_job}/#{@remote_build}/api/json?pretty=true")
         end

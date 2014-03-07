@@ -1,10 +1,10 @@
-require 'rubygems' 
-require 'bundler'  
+require 'rubygems'
+require 'bundler'
 
-Bundler.require  
+Bundler.require
 
 require './main.rb'
 
 set :environment, :test
- 
-run PerfApp
+
+run SnapshotComparer::PerfApp

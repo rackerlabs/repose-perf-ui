@@ -295,10 +295,10 @@ Feature: Load Jenkins Plugin Page
 		And response should be a json
 		And "result" json record should equal to "OK"
 		And the "results" json entry for "data" hash key in redis should exist
-		And "with_errors" list has "jenkins_rest_plugin" record, which should equal to "404 Resource Not Found"
 		And the "jenkins_rest_plugin|flat|jenkinsdata.out_jenkins.ohthree.com_Gabe-Compute-Preprod-Smoke_1" json entry for "data" hash key in redis should not exist
+		And the "jenkins_rest_plugin|time_series|jenkinsdata.out_jenkins.ohthree.com_Gabe-Compute-Preprod-Smoke_1" json entry for "data" hash key in redis should exist
 		And the "data" directory should contain "summary.log" result file
-		And the "data/jenkins_rest_plugin" directory should not contain "jenkinsdata.out_jenkins.ohthree.com_Gabe-Compute-Preprod-Smoke_1" result file
+		And the "data/jenkins_rest_plugin" directory should contain "jenkinsdata.out_jenkins.ohthree.com_Gabe-Compute-Preprod-Smoke_1" result file
 		And the "request" json entry for "meta" hash key in redis should exist
 		And the "response" json entry for "meta" hash key in redis should exist
 		And the "script" json entry for "meta" hash key in redis should exist

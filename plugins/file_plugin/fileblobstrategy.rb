@@ -2,21 +2,21 @@ require_relative 'abstractstrategy.rb'
 
 module FilePluginModule
   class FileBlobStrategy < FilePluginModule::AbstractStrategy
-  
-    attr_accessor :average_metric_list,:detailed_metric_list 
-    
+
+    attr_accessor :average_metric_list,:detailed_metric_list
+
     def self.metric_description
       {
       }
     end
-  
+
     def initialize(db, fs_ip, application, name, test_type, id, metric_id, offset, size, find_criteria = nil)
       @average_metric_list = {}
-  
+
       @detailed_metric_list = {}
       super(db, fs_ip, application, name, test_type, id, metric_id, offset, size, find_criteria)
-    end 
-  
+    end
+
     def populate_metric(entry, name, id, offset, size, find_criteria)
       file_size = 0
       if find_criteria

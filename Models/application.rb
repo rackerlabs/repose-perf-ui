@@ -1,3 +1,4 @@
+module SnapshotComparer
 module Models
 	class Application
 	  attr_reader :id, :description, :name
@@ -13,4 +14,5 @@ module Models
 	  end
 
 	end
+end
 end

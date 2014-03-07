@@ -20,7 +20,7 @@ class SysstatsPlugin < PluginModule::Plugin
       [:linux]
     end
 =begin
-	parse data will be called on every collection to load data from 
+	parse data will be called on every collection to load data from
 =end
     def parse_data
     end
@@ -116,7 +116,7 @@ class SysstatsPlugin < PluginModule::Plugin
         }
       ]
     end
-    
+
     def show_summary_data(application, name, test, id, test_id, options=nil)
       metric = SysstatsPlugin.show_plugin_names.find {|i| i[:id] == id }
       results = {}
@@ -124,7 +124,7 @@ class SysstatsPlugin < PluginModule::Plugin
         results[:plugin_type] = metric[:type]
         results[:id_results] = []
         store = Redis.new(@db)
-        #get meta results and either 
+        #get meta results and either
         test_id.split('+').each do |guid|
           meta_results = store.hgetall("#{application}:#{name}:results:#{test.chomp('_test')}:#{guid}:meta")
           test_json = JSON.parse(meta_results['test'])
@@ -133,9 +133,9 @@ class SysstatsPlugin < PluginModule::Plugin
               metric[:klass].new(
                 @db, @fs_ip, application, name,test.chomp('_test'), guid, metric[:id]
               )
-            ).retrieve_average_results, 
-            metric[:id].to_sym, 
-            {}, 
+            ).retrieve_average_results,
+            metric[:id].to_sym,
+            {},
             metric[:klass].metric_description,
             metric[:type]
           )} if metric
@@ -146,9 +146,9 @@ class SysstatsPlugin < PluginModule::Plugin
             metric[:klass].new(
               @db, @fs_ip, application, name,test.chomp('_test'), test_id, metric[:id]
             )
-          ).retrieve_average_results, 
-          metric[:id].to_sym, 
-          {}, 
+          ).retrieve_average_results,
+          metric[:id].to_sym,
+          {},
           metric[:klass].metric_description,
           metric[:type]
         ) if metric
@@ -167,7 +167,7 @@ class SysstatsPlugin < PluginModule::Plugin
         results[:plugin_type] = metric[:type] if metric
         results[:id_results] = []
         store = Redis.new(@db)
-        #get meta results and either 
+        #get meta results and either
         test_id.split('+').each do |guid|
           meta_results = store.hgetall("#{application}:#{name}:results:#{test.chomp('_test')}:#{guid}:meta")
           test_json = JSON.parse(meta_results['test'])
@@ -176,9 +176,9 @@ class SysstatsPlugin < PluginModule::Plugin
               metric[:klass].new(
                 @db, @fs_ip, application, name,test.chomp('_test'), guid, metric[:id]
               )
-            ).retrieve_detailed_results, 
-            metric[:id].to_sym, 
-            {}, 
+            ).retrieve_detailed_results,
+            metric[:id].to_sym,
+            {},
             metric[:klass].metric_description,
             metric[:type]
           )} if metric
@@ -189,9 +189,9 @@ class SysstatsPlugin < PluginModule::Plugin
             metric[:klass].new(
               @db, @fs_ip, application, name,test.chomp('_test'), test_id, metric[:id]
             )
-          ).retrieve_detailed_results, 
-          metric[:id].to_sym, 
-          {}, 
+          ).retrieve_detailed_results,
+          metric[:id].to_sym,
+          {},
           metric[:klass].metric_description,
           metric[:type]
         ) if metric
@@ -213,11 +213,11 @@ class SysstatsPlugin < PluginModule::Plugin
 =begin
  1. get request for sysstats.log
  2. ssh into box and execute command passed into the block sar -b -f #{sysstats_file} >> output.txt
- 3. upload sysstats file with passed in variable sysstats_plugin|plugin_name|IP redis and save as sysstats_pluginname.out_IP 
+ 3. upload sysstats file with passed in variable sysstats_plugin|plugin_name|IP redis and save as sysstats_pluginname.out_IP
 =end
     def store_data(application, sub_app, type, json_data, store, start_test_data, end_time, storage_info)
       begin
-        #iterate through all valid data and add each file separately (parse out on the server).  
+        #iterate through all valid data and add each file separately (parse out on the server).
         if json_data.has_key?('plugins')
           plugin_data = json_data['plugins'].find {|p| p['id'] == 'sysstats_plugin'}
           if plugin_data
@@ -225,39 +225,39 @@ class SysstatsPlugin < PluginModule::Plugin
             servers = plugin_data['servers']
             if servers
               servers.each do |server|
-                
+
 =begin
-  execute 
+  execute
     Net::SCP.download!(
-    @remote_host, 
-    @remote_user, 
-    @remote_path, 
-    tmp_dir, 
+    @remote_host,
+    @remote_user,
+    @remote_path,
+    tmp_dir,
     {:recursive => true,
       :verbose => :debug}
-  ) 
- 
+  )
+
 =end
                 SysstatsPlugin.show_plugin_names.each do |plugin|
                   tmp_server = {
                     'server' => server['server'],
                     'user' => server['user'],
-                    'path' => File.join(File.dirname(server['path']), "sysstats_#{plugin[:id]}.out_#{server['server']}") 
+                    'path' => File.join(File.dirname(server['path']), "sysstats_#{plugin[:id]}.out")
                   }
                   PluginModule::Adapters::RemoteServerAdapter.new(
-                    store, 
-                    'sysstats_plugin', 
-                    tmp_server, 
+                    store,
+                    'sysstats_plugin',
+                    tmp_server,
                     storage_info).load(
-                      json_data['guid'], 
-                      plugin_type, 
-                      application, 
-                      sub_app, 
+                      json_data['guid'],
+                      plugin_type,
+                      application,
+                      sub_app,
                       type) do
                         Net::SSH.start(server['server'], server['user']) do |ssh|
                           # capture all stderr and stdout output from a remote process
-                          ssh.exec!("#{plugin[:execution]} -f #{server['path']} >> #{File.join(File.dirname(server['path']), "sysstats_#{plugin[:id]}.out_#{server['server']}")}")
-                        end                      
+                          ssh.exec!("#{plugin[:execution]} -f #{server['path']} >> #{File.join(File.dirname(server['path']), "sysstats_#{plugin[:id]}.out")}")
+                        end
                       end
                 end
               end
@@ -265,7 +265,7 @@ class SysstatsPlugin < PluginModule::Plugin
               raise ArgumentError, "no server list specified"
             end
           else
-            raise ArgumentError, "sysstats_plugin id not found"  
+            raise ArgumentError, "sysstats_plugin id not found"
           end
         end
         return nil
@@ -273,6 +273,6 @@ class SysstatsPlugin < PluginModule::Plugin
         return {'sysstats_plugin' => e.message}
       end
     end
-      
+
 
   end

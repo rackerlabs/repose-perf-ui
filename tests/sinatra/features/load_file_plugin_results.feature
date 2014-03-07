@@ -33,7 +33,12 @@ Feature: Load File Plugin Page
 				    "server":"localhost",
 				    "user":"dimi5963",
 				    "path":"/Users/dimi5963/projects/hERmes_viewer/hERmes_viewer/tests/files/data/jmxdata.out_162.209.99.50"
-				  }		            
+			  	},
+			  	{
+				    "server":"162.209.124.167",
+				    "user":"root",
+				    "path":"/home/repose/logs/repose.log"
+			  	}
 		        ]
 		      }
 		    ]
@@ -43,9 +48,11 @@ Feature: Load File Plugin Page
 		And response should be a json
 		And "result" json record should equal to "OK"
 		And the "results" json entry for "data" hash key in redis should exist
-		And the "file_plugin|blob|jmxdata.out_162.209.99.50" json entry for "data" hash key in redis should exist
+		And the "file_plugin|blob|jmxdata.out_162.209.99.50_localhost" json entry for "data" hash key in redis should exist
+		And the "file_plugin|blob|repose.log_162.209.124.167" json entry for "data" hash key in redis should exist
 		And the "data" directory should contain "summary.log" result file
-		And the "data/file_plugin" directory should contain "jmxdata.out_162.209.99.50" result file
+		And the "data/file_plugin" directory should contain "jmxdata.out_162.209.99.50_localhost" result file
+		And the "data/file_plugin" directory should contain "repose.log_162.209.124.167" result file
 		And the "request" json entry for "meta" hash key in redis should exist
 		And the "response" json entry for "meta" hash key in redis should exist
 		And the "script" json entry for "meta" hash key in redis should exist
@@ -83,7 +90,7 @@ Feature: Load File Plugin Page
 				    "server":"localhost",
 				    "user":"dimi5963",
 				    "path":"/Users/dimi5963/projects/hERmes_viewer/hERmes_viewer/tests/files/data/jmxdata.out_162.209.99.50"
-				  }		            
+				  }
 		        ]
 		      }
 		    ]
@@ -133,7 +140,7 @@ Feature: Load File Plugin Page
 				    "server":"invalid",
 				    "user":"dimi5963",
 				    "path":"/Users/dimi5963/projects/hERmes_viewer/hERmes_viewer/tests/files/data/jmxdata.out_162.209.99.50"
-				  }		            
+				  }
 		        ]
 		      }
 		    ]
@@ -143,7 +150,7 @@ Feature: Load File Plugin Page
 		And response should be a json
 		And "result" json record should equal to "OK"
 		And the "results" json entry for "data" hash key in redis should exist
-		And "with_errors" list has "file_plugin" record, which should equal to "Operation timed out - connect(2)"
+		And "with_errors" list has "file_plugin" record, which should equal to "getaddrinfo: nodename nor servname provided, or not known"
 		And the "file_plugin|blob|jmxdata.out_162.209.99.50" json entry for "data" hash key in redis should not exist
 		And the "data" directory should contain "summary.log" result file
 		And the "data/file_plugin" directory should not contain "jmxdata.out_162.209.99.50" result file

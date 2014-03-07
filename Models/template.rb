@@ -1,3 +1,4 @@
+module SnapshotComparer
 class Template
   attr_accessor :template
 
@@ -39,4 +40,5 @@ class JmeterTemplate < Template
     @host = host
     @template = template
   end
+end
 end

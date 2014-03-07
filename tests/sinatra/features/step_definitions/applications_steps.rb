@@ -9,10 +9,10 @@ Transform /^(-?\d+)$/ do |number|
 end
 
 Given(/^"(.*?)" request exists in "(.*?)" "(.*?)" application$/) do |count, application, name|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  storage_info = Apps::Bootstrap.storage_info
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-  if app 
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
+  app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
     current_request_count = JSON.parse(Redis.new(new_app.db).get("#{application}:#{name}:tests:setup:request_response:request")).length
     if new_app
@@ -28,10 +28,10 @@ Given(/^"(.*?)" request exists in "(.*?)" "(.*?)" application$/) do |count, appl
 end
 
 Given(/^"(.*?)" response exists in "(.*?)" "(.*?)" application$/) do |count, application, name|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  storage_info = Apps::Bootstrap.storage_info
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-  if app 
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
+  app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
     current_response_count = JSON.parse(Redis.new(new_app.db).get("#{application}:#{name}:tests:setup:request_response:response")).length
     if new_app
@@ -47,10 +47,10 @@ Given(/^"(.*?)" response exists in "(.*?)" "(.*?)" application$/) do |count, app
 end
 
 Given(/^"(\d+)" config files exist in "(.*?)" "(.*?)" application$/) do |count, application, name|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  storage_info = Apps::Bootstrap.storage_info
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-  if app 
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
+  app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
     current_config_count = Redis.new(new_app.db).lrange("#{application}:#{name}:setup:configs", 0, -1).length
     if new_app
@@ -66,10 +66,10 @@ Given(/^"(\d+)" config files exist in "(.*?)" "(.*?)" application$/) do |count, 
 end
 
 Given(/^"(.*?)" config file exists in "(.*?)" "(.*?)" application$/) do |config_name, application, name|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  storage_info = Apps::Bootstrap.storage_info
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-  if app 
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
+  app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
     if new_app
       config_json = {
@@ -87,10 +87,10 @@ Given(/^"(.*?)" config file exists in "(.*?)" "(.*?)" application$/) do |config_
 end
 
 Given(/^"(.*?)" "(.*?)" "(.*?)" test files exist in "(.*?)" "(.*?)" application$/) do |count, runner, test_type, application, name|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  storage_info = Apps::Bootstrap.storage_info
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-  if app 
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
+  app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
     test_file_json = {
       "type" => runner,
@@ -113,10 +113,10 @@ Given(/^"(.*?)" "(.*?)" "(.*?)" test files exist in "(.*?)" "(.*?)" application$
 end
 
 Given(/^"(.*?)" "(.*?)" test file exists in "(.*?)" "(.*?)" application$/) do |runner, test_type, application, name|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  storage_info = Apps::Bootstrap.storage_info
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-  if app 
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
+  app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
     if new_app
       test_file_json = {
@@ -135,19 +135,19 @@ Given(/^"(.*?)" "(.*?)" test file exists in "(.*?)" "(.*?)" application$/) do |r
 end
 
 Then(/^the "(.*?)" directory should contain "(.*?)" file$/) do |directory, name|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  storage_info = Apps::Bootstrap.storage_info
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
   puts `ls "#{storage_info['path']}/#{storage_info['prefix']}/#{directory}/"`
   File.exists?("#{storage_info['path']}/#{storage_info['prefix']}/#{directory}/#{name}").should be(true)
 end
 
 Then(/^remove "(.*?)" config from "(.*?)" "(.*?)"$/) do |config_name, application, name|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  storage_info = Apps::Bootstrap.storage_info
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == set_app}
-  if app 
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
+  app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == set_app}
+  if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
-    if new_app 
+    if new_app
       config_json = JSON.parse(Redis.new(new_app.db).lrange("#{application}:#{name}:setup:configs", 0, -1).find do |c|
         temp = JSON.parse(c)
         temp['name'] == config_name
@@ -156,16 +156,16 @@ Then(/^remove "(.*?)" config from "(.*?)" "(.*?)"$/) do |config_name, applicatio
       config_location = config_json['location']
       FileUtils.rm_rf("#{storage_info['path']}/#{config_location}")
     end
-  end   
+  end
 end
 
 Then(/^remove "(.*?)" "(.*?)" "(.*?)" test file for "(.*?)" "(.*?)"$/) do |file_name, runner, test_type, application, name|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  storage_info = Apps::Bootstrap.storage_info
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-  if app 
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
+  app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
-    if new_app 
+    if new_app
       test_file_json = {
         "type" => runner,
         "test" => test_type,
@@ -176,57 +176,57 @@ Then(/^remove "(.*?)" "(.*?)" "(.*?)" test file for "(.*?)" "(.*?)"$/) do |file_
       test_file_location = test_file_json['location']
       FileUtils.rm_rf("#{storage_info['path']}/#{test_file_location}")
     end
-  end   
+  end
 end
 
 Then(/^remove "(.*?)" "(.*?)" from redis "(.*?)" key for "(.*?)"$/) do |key, id, redis_key, application|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  storage_info = Apps::Bootstrap.storage_info
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-  if app 
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
+  app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
-    if new_app 
+    if new_app
       list = Redis.new(new_app.db).get(redis_key)
       tmp = JSON.parse(list)
       list_json = tmp.delete_if {|k| k[key] == id}
       Redis.new(new_app.db).set(redis_key, list_json.to_json)
     end
-  end   
+  end
 end
 
 Then(/^the "(.*?)" json list should have "(.*?)" entries in redis for "(.*?)"$/) do |redis_key, count, application|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  storage_info = Apps::Bootstrap.storage_info
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-  if app 
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
+  app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
-    if new_app 
+    if new_app
       list = Redis.new(new_app.db).get(redis_key)
       JSON.parse(list).length.should == count.to_i
     end
-  end   
+  end
 end
 
 Then(/^the "(.*?)" json list should contain "(.*?)" key with "(.*?)" value in redis for "(.*?)"$/) do |redis_key, key, value, application|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  storage_info = Apps::Bootstrap.storage_info
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-  if app 
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
+  app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
-    if new_app 
+    if new_app
       list = JSON.parse(Redis.new(new_app.db).get(redis_key))
       list.find {|e| e[key] == value}.should_not be_nil
     end
-  end   
+  end
 end
 
 Then(/^update "(.*?)" "(.*?)" from redis "(.*?)" key for "(.*?)":$/) do |key, value, redis_key, application, updated_data|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  storage_info = Apps::Bootstrap.storage_info
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-  if app 
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
+  app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
-    if new_app 
+    if new_app
       list = JSON.parse(Redis.new(new_app.db).get(redis_key))
       element = list.find {|e| e[key].to_i == value.to_i }
       element = JSON.parse(updated_data)
@@ -234,19 +234,19 @@ Then(/^update "(.*?)" "(.*?)" from redis "(.*?)" key for "(.*?)":$/) do |key, va
       list << element
       Redis.new(new_app.db).set(redis_key, list.to_json)
     end
-  end   
+  end
 end
 
 Then(/^add "(.*?)" "(.*?)" from redis "(.*?)" key for "(.*?)":$/) do |key, value, redis_key, application, updated_data|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  storage_info = Apps::Bootstrap.storage_info
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-  if app 
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
+  app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
-    if new_app 
+    if new_app
       list = JSON.parse(Redis.new(new_app.db).get(redis_key))
       list << JSON.parse(updated_data)
       Redis.new(new_app.db).set(redis_key, list.to_json)
     end
-  end   
+  end
 end

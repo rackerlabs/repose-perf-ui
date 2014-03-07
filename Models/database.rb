@@ -1,5 +1,6 @@
 require 'sqlite3'
 
+module SnapshotComparer
 module Models
   class Database
 
@@ -21,7 +22,7 @@ module Models
 
     def load_apps(app_list = {})
       app_list.each do |key, value|
-        @db.execute "insert into applications (app_id, name, description) values (?,?,?)",key.to_s, value.name, value.description 
+        @db.execute "insert into applications (app_id, name, description) values (?,?,?)",key.to_s, value.name, value.description
       end if app_list
     end
 
@@ -29,8 +30,9 @@ module Models
       applications = {}
       @db.execute "select * from applications" do |row|
          applications.merge!({row['app_id'].to_sym => Models::Application.new(row['id'], row['name'], row['description'])})
-      end    
+      end
       applications
     end
   end
+end
 end

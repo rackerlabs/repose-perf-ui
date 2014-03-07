@@ -4,7 +4,7 @@ require_relative './../../Models/plugins/adapters/newrelic.rb'
 require_relative 'newrelictimeseriesstrategy.rb'
 
 class NewrelicRestPlugin < PluginModule::Plugin
-  
+
   def self.supported_os_list
     [:linux,:macosx,:windows]
   end
@@ -28,7 +28,7 @@ class NewrelicRestPlugin < PluginModule::Plugin
         results[:plugin_type] = metric[:type]
         results[:id_results] = []
         store = Redis.new(@db)
-        #get meta results and either 
+        #get meta results and either
         test_id.split('+').each do |guid|
           meta_results = store.hgetall("#{application}:#{name}:results:#{test.chomp('_test')}:#{guid}:meta")
           if meta_results && !meta_results.empty?
@@ -38,9 +38,9 @@ class NewrelicRestPlugin < PluginModule::Plugin
                 metric[:klass].new(
                   @db, @fs_ip, application, name,test.chomp('_test'), guid, metric[:id]
                 )
-              ).retrieve_average_results, 
-              metric[:id].to_sym, 
-              {}, 
+              ).retrieve_average_results,
+              metric[:id].to_sym,
+              {},
               metric[:klass].metric_description,
               metric[:type]
             )} if metric
@@ -52,9 +52,9 @@ class NewrelicRestPlugin < PluginModule::Plugin
             metric[:klass].new(
               @db, @fs_ip, application, name,test.chomp('_test'), test_id, metric[:id]
             )
-          ).retrieve_average_results, 
-          metric[:id].to_sym, 
-          {}, 
+          ).retrieve_average_results,
+          metric[:id].to_sym,
+          {},
           metric[:klass].metric_description,
           metric[:type]
         ) if metric
@@ -73,9 +73,9 @@ class NewrelicRestPlugin < PluginModule::Plugin
         metric[:klass].new(
           @db, @fs_ip, application, name, test.chomp('_test'), test_id, metric[:id]
         )
-      ).retrieve_detailed_results, 
-      metric[:id].to_sym, 
-      {}, 
+      ).retrieve_detailed_results,
+      metric[:id].to_sym,
+      {},
       metric[:klass].metric_description,
       metric[:type]
     ) if metric
@@ -83,16 +83,16 @@ class NewrelicRestPlugin < PluginModule::Plugin
 
   def order_by_date(content_instance_list)
     result = {}
-    content_instance_list.each do |metric_entry_list| 
+    content_instance_list.each do |metric_entry_list|
       metric_entry_list.each do |entry|
-        time = entry[:time].is_a?(String) ? DateTime.strptime(entry[:time].to_s.chop.chop.chop,'%s') : DateTime.strptime(entry[:time].to_s,'%s') 
+        time = entry[:time].is_a?(String) ? DateTime.strptime(entry[:time].to_s.chop.chop.chop,'%s') : DateTime.strptime(entry[:time].to_s,'%s')
         result[time] = [] unless result[time]
-        result[time] << entry[:value] 
+        result[time] << entry[:value]
       end
     end if content_instance_list
     result
   end
-  
+
   def store_data(application, sub_app, type, json_data, store, start_test_data, end_time, storage_info)
     begin
       if json_data.has_key?('plugins')
@@ -103,13 +103,14 @@ class NewrelicRestPlugin < PluginModule::Plugin
           servers = plugin_data['fields']
           if servers
             servers.each do |server|
+              puts "start time: #{start_test_data['time']} and stop time: #{end_time}"
               PluginModule::Adapters::NewrelicRestAdapter.new(store, 'newrelic_rest_plugin', server, storage_info).load(json_data['guid'], plugin_type, application, sub_app, type, start_test_data['time'], end_time)
             end
           else
             raise ArgumentError, "no server list specified"
           end
         else
-          raise ArgumentError, "newrelic_rest_plugin id not found"  
+          raise ArgumentError, "newrelic_rest_plugin id not found"
         end
       end
       return nil

@@ -1,3 +1,4 @@
+module SnapshotComparer
 module Models
 	class Request
 
@@ -10,4 +11,5 @@ module Models
 	    @body = body
 	  end
 	end
+end
 end

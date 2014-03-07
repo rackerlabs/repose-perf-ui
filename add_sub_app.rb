@@ -64,11 +64,11 @@ Trollop::die :request, "must be specified" unless opts[:request]
 logger.debug opts
 
 #1. in config/apps append to <app>.yaml, dev_<app>.yaml, test_<app>.yaml
-=begin 
-  
+=begin
+
 application:
-  sub_apps: 
-   - 
+  sub_apps:
+   -
      id: <sub_app>
      name: <name>
      description: <description>
@@ -83,7 +83,7 @@ application:
 
    redis.hmset "<app>:<sub_app>:tests:setup:script" type jmeter test "{\"name\":\"<file_name>\",\"location\":\"/storage_info[prefix]/<app>/<sub_app>/setup/meta/<file_name>\"}"
    upload to storage_info[user]@storage_info[destination]:storage_info[path]/storage_info[prefix]/<app>/<sub_app>/setup/meta/<file_name>
-   
+
    redis.hmset "<app>:<sub_app>:setup:meta" test_load_jmeter "{ \"host\":"", \"startdelay\":10, \"rampup\":10, \"duration\":3600, \"rampdown\":10, \"throughput\":500}" test_stress_jmeter "{ \"host\":"", \"startdelay\":10, \"rampup\":5, \"duration\":300, \"rampup_threads\":5, \"maxthreads\":500}"
 =end
 
@@ -99,17 +99,17 @@ logger.info "yaml content: #{sub_app_yaml_content.to_yaml}"
 
 yaml_content = YAML.load_file(File.expand_path("config/apps/#{opts[:app]}.yaml", Dir.pwd))
 yaml_content['application']['sub_apps'] = [] unless yaml_content['application']['sub_apps']
-yaml_content['application']['sub_apps'] << sub_app_yaml_content 
+yaml_content['application']['sub_apps'] << sub_app_yaml_content
 File.open(File.expand_path("config/apps/#{opts[:app]}.yaml", Dir.pwd), 'w') {|f| f.write yaml_content.to_yaml }
 
 yaml_content = YAML.load_file(File.expand_path("config/apps/dev_#{opts[:app]}.yaml", Dir.pwd))
 yaml_content['application']['sub_apps'] = [] unless yaml_content['application']['sub_apps']
-yaml_content['application']['sub_apps'] << sub_app_yaml_content 
+yaml_content['application']['sub_apps'] << sub_app_yaml_content
 File.open(File.expand_path("config/apps/dev_#{opts[:app]}.yaml", Dir.pwd), 'w') {|f| f.write yaml_content.to_yaml }
 
 yaml_content = YAML.load_file(File.expand_path("config/apps/test_#{opts[:app]}.yaml", Dir.pwd))
 yaml_content['application']['sub_apps'] = [] unless yaml_content['application']['sub_apps']
-yaml_content['application']['sub_apps'] << sub_app_yaml_content 
+yaml_content['application']['sub_apps'] << sub_app_yaml_content
 File.open(File.expand_path("config/apps/test_#{opts[:app]}.yaml", Dir.pwd), 'w') {|f| f.write yaml_content.to_yaml }
 
 logger.info "now get into redis"
@@ -131,15 +131,15 @@ Dir.glob("#{opts[:configs]}/**/*").each do |f|
           ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}")
       end
       Net::SCP.upload!(
-          config['storage_info']['destination'], 
-          config['storage_info']['user'], 
-          f, 
+          config['storage_info']['destination'],
+          config['storage_info']['user'],
+          f,
           "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/configs/#{directory_to_save}"
         )
     end
   end
 end if opts[:configs]
-  
+
 logger.info "now add the meta info"
 redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "test_load_jmeter", "{ \"host\":\"localhost\", \"startdelay\":10, \"rampup\":10, \"duration\":3600, \"rampdown\":10, \"throughput\":500}", "test_stress_jmeter", "{ \"host\":\"localhost\", \"startdelay\":10, \"rampup\":5, \"duration\":300, \"rampup_threads\":5, \"maxthreads\":500}")
 
@@ -151,7 +151,7 @@ logger.info "now create test script for: #{opts[:test]}"
   else
     test_location = opts[:test]
   end
-  
+
   redis.rpush("#{opts[:app]}:#{opts[:sub_app]}:tests:setup:script", "{\"type\":\"jmeter\", \"test\":\"#{test_type}\", \"name\":\"#{File.basename(test_location)}\",\"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}/#{File.basename(test_location)}\"}")
 
   if config['storage_info']['destination'] == 'localhost'
@@ -162,9 +162,9 @@ logger.info "now create test script for: #{opts[:test]}"
         ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}")
     end
     Net::SCP.upload!(
-        config['storage_info']['destination'], 
-        config['storage_info']['user'], 
-        test_location, 
+        config['storage_info']['destination'],
+        config['storage_info']['user'],
+        test_location,
         "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/#{test_type}/"
       )
   end
@@ -185,9 +185,9 @@ main_responders.split(',').each do |main_responder|
         ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/")
     end
     Net::SCP.upload!(
-        config['storage_info']['destination'], 
-        config['storage_info']['user'], 
-        main_responder, 
+        config['storage_info']['destination'],
+        config['storage_info']['user'],
+        main_responder,
         "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/"
       )
   end
@@ -196,7 +196,7 @@ end if main_responders
 if secondary_responders
   secondary_responders.split(',').each do |secondary_responder|
     redis.hmset("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "responder|secondary|#{File.basename(secondary_responder)}", "{\"name\":\"#{File.basename(secondary_responder)}\", \"location\":\"/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/#{File.basename(secondary_responder)}\"}")
-  
+
     if config['storage_info']['destination'] == 'localhost'
       FileUtils.mkdir_p "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/"
       FileUtils.cp(secondary_responder, "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/")
@@ -205,9 +205,9 @@ if secondary_responders
           ssh.exec!("mkdir -p #{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/")
       end
       Net::SCP.upload!(
-          config['storage_info']['destination'], 
-          config['storage_info']['user'],  
-          secondary_responder, 
+          config['storage_info']['destination'],
+          config['storage_info']['user'],
+          secondary_responder,
           "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/secondary/"
         )
     end
@@ -215,7 +215,7 @@ if secondary_responders
 end
 
 
-  
+
 logger.info "finally log the request and response"
 request_response = YAML.load_file(opts[:request])
 redis.set("#{opts[:app]}:#{opts[:sub_app]}:tests:setup:request_response:request", request_response["request"].to_json)

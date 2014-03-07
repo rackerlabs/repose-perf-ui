@@ -1,7 +1,7 @@
 When(/^I upload "(.*?)" config file to "(.*?)" "(.*?)" application$/) do |config_name, application, name|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-  if app 
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
     fs_ip = new_app.fs_ip
   end
@@ -23,9 +23,9 @@ When(/^I remove "(.*?)" config file$/) do |config_name|
 end
 
 When(/^I remove "(.*?)" test file from "(.*?)" "(.*?)" application$/) do |file_name, application, name|
-  Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
-  app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-  if app 
+  SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
+  app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+  if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
     fs_ip = new_app.fs_ip
   end

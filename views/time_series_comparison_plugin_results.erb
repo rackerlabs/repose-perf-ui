@@ -32,6 +32,14 @@
         <li><a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>"><%= test_type %></a></li>
         <li class="active"><%= plugin_name %> - <%= option %></li>
       </ul>
+<% if summary_plugin_data[:id_results].empty? %>
+      <div class="panel panel-danger">
+        <div class="panel-heading">
+          <h3 class="panel-title">No data is present</h3>
+        </div>
+        <div />
+      </div>
+<% else %>
       <div class="panel panel-summary">
         <div class="panel-heading">
           <h3 class="panel-title">Summary Test Results</h3>
@@ -62,19 +70,20 @@
 	            </tr>
 	  <% end %>
 	          </tbody>
-<%   end 
+<%   end
   end
 %>
 	        </table>
 	     </div>
       </div>
+<% end %>
 <% detailed_plugin_data.each do |guid_results| %>
   <% guid_results[:results].each do |key, value| %>
     <% value[:content].each do |instance, data| %>
       <div class="panel">
         <div class="panel-heading">
           <h3 class="panel-title"><%= guid_results[:id] %> - <%= key %> - <%= instance %></h3>
-        </div>        
+        </div>
         <div id="<%= guid_results[:id].gsub(/[-]/,'_') %>_<%= key %>_<%= instance.gsub(/[.-]/,'_') %>" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
       </div>
     <% end %>
@@ -135,7 +144,7 @@
         window.prettyPrint && prettyPrint()
         $(".metric_desc").tooltip()
         $(".accordion-toggle").collapse();
-<% detailed_unordered_plugin_data[:id_results].each do |guid_results|              
+<% detailed_unordered_plugin_data[:id_results].each do |guid_results|
    guid_results[:results].each do |key, value| %>
   <% value[:content].each do |instance, data| %>
       var option_<%= guid_results[:id].gsub(/[-]/,'_') %>_<%= key %>_<%= instance.gsub(/[.-]/,'_') %> = {
@@ -165,8 +174,8 @@
       option_<%= guid_results[:id].gsub(/[-]/,'_') %>_<%= key %>_<%= instance.gsub(/[.-]/,'_') %>.series[<%= index %>].data = <%= data[index].map {|t| [t[:time],t[:value].to_f ]}.to_json %>;
     <% end %>
 var t_<%= guid_results[:id].gsub(/[-]/,'_') %>_<%= key %>_<%= instance.gsub(/[.-]/,'_') %>_chart = new Highcharts.Chart(option_<%= guid_results[:id].gsub(/[-]/,'_') %>_<%= key %>_<%= instance.gsub(/[.-]/,'_') %>);
-<% end 
- end 
+<% end
+ end
  end %>
       });
     </script>

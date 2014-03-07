@@ -19,7 +19,7 @@ class ReposeJmxPlugin < PluginModule::Plugin
         :id => 'filters',
         :name => 'Filter breakdown',
         :klass => ReposeJmxPluginModule::FilterStrategy,
-        :type => :time_series
+        :type => :stacked_time_series
       },
       {
         :id => 'gc',
@@ -38,12 +38,6 @@ class ReposeJmxPlugin < PluginModule::Plugin
         :name => 'JVM Threads',
         :klass => ReposeJmxPluginModule::JvmThreadStrategy,
         :type => :time_series
-      },
-      {
-        :id => 'logs',
-        :name => 'Repose logs',
-        :klass => ReposeJmxPluginModule::ReposeLogStrategy,
-        :type => :blob
       }
     ]
   end
@@ -68,9 +62,9 @@ class ReposeJmxPlugin < PluginModule::Plugin
                   metric[:klass].new(
                     @db, @fs_ip, application, name,test.chomp('_test'), test_json['comparison_guid'], metric[:id]
                   )
-                ).retrieve_average_results, 
-                metric[:id].to_sym, 
-                {}, 
+                ).retrieve_average_results,
+                metric[:id].to_sym,
+                {},
                 metric[:klass].metric_description,
                 metric[:type]
               )} if metric
@@ -83,14 +77,14 @@ class ReposeJmxPlugin < PluginModule::Plugin
             metric[:klass].new(
               @db, @fs_ip, application, name,test.chomp('_test'), test_id, metric[:id]
             )
-          ).retrieve_average_results, 
-          metric[:id].to_sym, 
-          {}, 
+          ).retrieve_average_results,
+          metric[:id].to_sym,
+          {},
           metric[:klass].metric_description,
           metric[:type]
         ) if metric
       end
-    end 
+    end
     results
   end
 
@@ -101,23 +95,25 @@ class ReposeJmxPlugin < PluginModule::Plugin
       results[:plugin_type] = metric[:type] if metric
       results[:id_results] = []
       store = Redis.new(@db)
-      #get meta results and either 
+      #get meta results and either
       test_id.split('+').each do |guid|
         meta_results = store.hgetall("#{application}:#{name}:results:#{test.chomp('_test')}:#{guid}:meta")
-        test_json = JSON.parse(meta_results['test'])
-        if test_json['comparison_guid']
-          #get the repose data here
-          results[:id_results] << {:id => guid, :results => PluginModule::PastPluginResults.format_results(
-            PluginModule::PluginResult.new(
-              metric[:klass].new(
-                @db, @fs_ip, application, name,test.chomp('_test'), test_json['comparison_guid'], metric[:id]
-              )
-            ).retrieve_detailed_results, 
-            metric[:id].to_sym, 
-            {}, 
-            metric[:klass].metric_description,
-            metric[:type]
-          )} if metric
+        unless meta_results.empty?
+          test_json = JSON.parse(meta_results['test'])
+          if test_json['comparison_guid']
+            #get the repose data here
+            results[:id_results] << {:id => guid, :results => PluginModule::PastPluginResults.format_results(
+              PluginModule::PluginResult.new(
+                metric[:klass].new(
+                  @db, @fs_ip, application, name,test.chomp('_test'), test_json['comparison_guid'], metric[:id]
+                )
+              ).retrieve_detailed_results,
+              metric[:id].to_sym,
+              {},
+              metric[:klass].metric_description,
+              metric[:type]
+            )} if metric
+          end
         end
       end
     else
@@ -126,28 +122,28 @@ class ReposeJmxPlugin < PluginModule::Plugin
           metric[:klass].new(
             @db, @fs_ip, application, name,test.chomp('_test'), test_id, metric[:id]
           )
-        ).retrieve_detailed_results, 
-        metric[:id].to_sym, 
-        {}, 
+        ).retrieve_detailed_results,
+        metric[:id].to_sym,
+        {},
         metric[:klass].metric_description,
         metric[:type]
       ) if metric
-    end 
+    end
     results
   end
 
   def order_by_date(content_instance_list)
     result = {}
-    content_instance_list.each do |metric_entry_list| 
+    content_instance_list.each do |metric_entry_list|
       metric_entry_list.each do |entry|
-        time = DateTime.strptime(entry[:time].chop.chop.chop,'%s') 
+        time = DateTime.strptime(entry[:time].chop.chop.chop,'%s')
         result[time] = [] unless result[time]
-        result[time] << entry[:value] 
+        result[time] << entry[:value]
       end
     end if content_instance_list
     result
   end
-  
+
   def store_data(application, sub_app, type, json_data, store, start_test_data, end_time, storage_info)
     begin
       if json_data.has_key?('plugins')
@@ -163,7 +159,7 @@ class ReposeJmxPlugin < PluginModule::Plugin
             raise ArgumentError, "no server list specified"
           end
         else
-          raise ArgumentError, "repose_jmx_plugin id not found"  
+          raise ArgumentError, "repose_jmx_plugin id not found"
         end
       end
       return nil

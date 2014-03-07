@@ -1,3 +1,4 @@
+module SnapshotComparer
 module Models
 	class Response
 	  include Models
@@ -8,4 +9,5 @@ module Models
 	    @response_code = response_code
 	  end
 	end
+end
 end

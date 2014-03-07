@@ -2,94 +2,66 @@ require_relative 'abstractstrategy.rb'
 
 module ReposeJmxPluginModule
   class FilterStrategy < ReposeJmxPluginModule::AbstractStrategy
-  
-    attr_accessor :average_metric_list,:detailed_metric_list 
-    
+
+    attr_accessor :average_metric_list,:detailed_metric_list
+
     def self.metric_description
       {
-        "http-logging:Mean" => "",
-        "dist-datastore:Mean" => "",
-        "rate-limiting:Mean" => "",
         "http-logging:75thPercentile" => "",
         "dist-datastore:75thPercentile" => "",
         "rate-limiting:75thPercentile" => "",
         "route:75thPercentile" => "",
-        "route:Mean" => "",
         "api-validator:75thPercentile" => "",
-        "api-validator:Mean" => "",
         "client-auth:75thPercentile" => "",
-        "client-auth:Mean" => "",
         "translation:75thPercentile" => "",
-        "translation:Mean" => "",
         "content-normalization:Mean" => "",
         "content-normalization:75thPercentile" => "",
-        "ip-identity:Mean" => "",
         "ip-identity:75thPercentile" => "",
         "default-router:75thPercentile" => "",
-        "default-router:Mean" => "",
-        "compression:75thPercentile" => "",
-        "compression:Mean" => ""
+        "compression:75thPercentile" => ""
       }
     end
-  
+
     def initialize(db, fs_ip, application, name, test_type, id, metric_id)
       @average_metric_list = {
-        "http-logging:Mean" => [],
-        "dist-datastore:Mean" => [],
-        "rate-limiting:Mean" => [],
         "http-logging:75thPercentile" => [],
         "dist-datastore:75thPercentile" => [],
         "rate-limiting:75thPercentile" => [],
         "route:75thPercentile" => [],
-        "route:Mean" => [],
         "api-validator:75thPercentile" => [],
-        "api-validator:Mean" => [],
         "client-auth:75thPercentile" => [],
-        "client-auth:Mean" => [],
         "translation:75thPercentile" => [],
-        "translation:Mean" => [],
         "content-normalization:Mean" => [],
         "content-normalization:75thPercentile" => [],
-        "ip-identity:Mean" => [],
         "ip-identity:75thPercentile" => [],
         "default-router:75thPercentile" => [],
-        "default-router:Mean" => [],
-        "compression:75thPercentile" => [],
-        "compression:Mean" => []
+        "compression:75thPercentile" => []
       }
-  
+
       @detailed_metric_list = {
         "http-logging:75thPercentile" => [],
         "dist-datastore:75thPercentile" => [],
         "rate-limiting:75thPercentile" => [],
-        "http-logging:Mean" => [],
-        "dist-datastore:Mean" => [],
-        "rate-limiting:Mean" => [],
         "route:75thPercentile" => [],
-        "route:Mean" => [],
         "api-validator:75thPercentile" => [],
-        "api-validator:Mean" => [],
         "client-auth:75thPercentile" => [],
-        "client-auth:Mean" => [],
         "translation:75thPercentile" => [],
-        "translation:Mean" => [],
         "content-normalization:Mean" => [],
         "content-normalization:75thPercentile" => [],
-        "ip-identity:Mean" => [],
         "ip-identity:75thPercentile" => [],
         "default-router:75thPercentile" => [],
-        "default-router:Mean" => [],
-        "compression:75thPercentile" => [],
-        "compression:Mean" => []
+        "compression:75thPercentile" => []
       }
       super(db, fs_ip, application, name, test_type, id, metric_id)
-    end 
-  
+    end
+
     def populate_metric(entry, name, id, start, stop)
       open(entry).readlines.each do |line|
         line.scan(/^localhost.*JmxReporter\$Timer\.(.*)\.(\w+)\s+(\d*\.?\d+?)\s+(\d+)$/).map do |metric, counter, value, timestamp|
-          initialize_metric(@detailed_metric_list,"#{metric}:#{counter}", name)
-          @detailed_metric_list["#{metric}:#{counter}"].find {|key_data| key_data[:dev_name] == name}[:results] << {:time => timestamp, :value => value}
+          if(@detailed_metric_list["#{metric}:#{counter}"])
+            initialize_metric(@detailed_metric_list,"#{metric}:#{counter}", name)
+            @detailed_metric_list["#{metric}:#{counter}"].find {|key_data| key_data[:dev_name] == name}[:results] << {:time => timestamp, :value => value}
+          end
         end
       end
       @detailed_metric_list.each do |key, v|

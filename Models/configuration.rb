@@ -1,18 +1,17 @@
 require 'htmlentities'
 require 'base64'
 
+module SnapshotComparer
 module Models
-  
   class Configuration
-    include ResultModule
-    
+
     attr_reader :db, :fs_ip
-    
+
     def initialize(db, fs_ip)
       @db = db
       @fs_ip = fs_ip
     end
-    
+
     def _get_result(store, application, name, test_type, id)
       config_list = {}
 
@@ -35,7 +34,7 @@ module Models
           id.split('+').each {|guid| config_list[guid] = _get_result(store, application,name,test_type, guid)}
         else
           config_list = _get_result(store, application,name,test_type, id)
-        end 
+        end
       ensure
         store.quit
       end
@@ -59,16 +58,16 @@ module Models
       end
       config_list
     end
-    
+
     def add_config(application, name, storage_info, config_name, config_body)
       store = Redis.new(@db)
-      
+
       existing_config = store.lrange("#{application}:#{name}:setup:configs", 0, -1).find do |config|
         config_name == JSON.parse(config)['name'] || File.basename(JSON.parse(config)['location']) == config_name
       end
-      
+
       raise ArgumentError, "file already exists" if existing_config
-      
+
       config_json = {
         "name" => config_name.gsub('.','_').gsub('-','_').gsub('/','_'),
         "location" => "/#{storage_info['prefix']}/#{application}/#{name}/setup/configs/#{config_name}"
@@ -86,26 +85,26 @@ module Models
           end
           FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
           Net::SCP.upload!(
-            config['storage_info']['destination'], 
-            config['storage_info']['user'], 
-            "/tmp/#{guid}/#{config_name}", 
-            "#{storage_info['path']}/#{config_json['location']}", 
+            config['storage_info']['destination'],
+            config['storage_info']['user'],
+            "/tmp/#{guid}/#{config_name}",
+            "#{storage_info['path']}/#{config_json['location']}",
             {:recursive => true,
               :verbose => Logger::DEBUG}
-          ) 
+          )
           FileUtils.rm_rf("/tmp/#{guid}")
-        end       
+        end
         store.rpush("#{application}:#{name}:setup:configs", config_json.to_json)
       end
     end
-    
+
     def remove_config(application, name, storage_info, config_name)
       store = Redis.new(@db)
       actual_config = JSON.parse(store.lrange("#{application}:#{name}:setup:configs", 0, -1).find do |c|
         temp = JSON.parse(c)
         temp['name'] == config_name
       end)
-      
+
       begin
         if storage_info['destination'] == 'localhost'
           FileUtils.remove_file "#{storage_info['path']}/#{actual_config['location']}"
@@ -113,9 +112,10 @@ module Models
           Net::SSH.start(test_agent, 'root') do |ssh|
             ssh.exec!("rm #{storage_info['path']}/#{actual_config['location']}")
           end
-        end       
+        end
         store.lrem("#{application}:#{name}:setup:configs", 1, actual_config.to_json)
       end
     end
   end
+end
 end

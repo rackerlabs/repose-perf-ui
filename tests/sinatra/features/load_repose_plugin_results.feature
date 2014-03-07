@@ -32,12 +32,12 @@ Feature: Load Repose Plugin Page
 				    "server":"localhost",
 				    "user":"dimi5963",
 				    "path":"/Users/dimi5963/projects/hERmes_viewer/hERmes_viewer/tests/files/data/jmxdata.out_162.209.99.50"
-				  },		            
+				  },
   				  {
 				    "server":"localhost",
 				    "user":"dimi5963",
 				    "path":"/Users/dimi5963/projects/hERmes_viewer/hERmes_viewer/tests/files/data/jmxdata.out_162.209.103.227"
-				  }		            
+				  }
 		        ]
 		      }
 		    ]
@@ -47,11 +47,11 @@ Feature: Load Repose Plugin Page
 		And response should be a json
 		And "result" json record should equal to "OK"
 		And the "results" json entry for "data" hash key in redis should exist
-		And the "repose_jmx_plugin|time_series|jmxdata.out_162.209.99.50" json entry for "data" hash key in redis should exist
-		And the "repose_jmx_plugin|time_series|jmxdata.out_162.209.103.227" json entry for "data" hash key in redis should exist
+		And the "repose_jmx_plugin|time_series|jmxdata.out_162.209.99.50_localhost" json entry for "data" hash key in redis should exist
+		And the "repose_jmx_plugin|time_series|jmxdata.out_162.209.103.227_localhost" json entry for "data" hash key in redis should exist
 		And the "data" directory should contain "summary.log" result file
-		And the "data/repose_jmx_plugin" directory should contain "jmxdata.out_162.209.99.50" result file
-		And the "data/repose_jmx_plugin" directory should contain "jmxdata.out_162.209.103.227" result file
+		And the "data/repose_jmx_plugin" directory should contain "jmxdata.out_162.209.99.50_localhost" result file
+		And the "data/repose_jmx_plugin" directory should contain "jmxdata.out_162.209.103.227_localhost" result file
 		And the "request" json entry for "meta" hash key in redis should exist
 		And the "response" json entry for "meta" hash key in redis should exist
 		And the "script" json entry for "meta" hash key in redis should exist
@@ -88,12 +88,12 @@ Feature: Load Repose Plugin Page
 				    "server":"localhost",
 				    "user":"dimi5963",
 				    "path":"/Users/dimi5963/projects/hERmes_viewer/hERmes_viewer/tests/files/data/jmxdata.out_162.209.99.50"
-				  },		            
+				  },
   				  {
 				    "server":"localhost",
 				    "user":"dimi5963",
 				    "path":"/Users/dimi5963/projects/hERmes_viewer/hERmes_viewer/tests/files/data/jmxdata.out_162.209.103.227"
-				  }		            
+				  }
 		        ]
 		      }
 		    ]
@@ -145,12 +145,12 @@ Feature: Load Repose Plugin Page
 				    "server":"invalid",
 				    "user":"dimi5963",
 				    "path":"/Users/dimi5963/projects/hERmes_viewer/hERmes_viewer/tests/files/data/jmxdata.out_162.209.99.50"
-				  },		            
+				  },
   				  {
 				    "server":"invalid",
 				    "user":"dimi5963",
 				    "path":"/Users/dimi5963/projects/hERmes_viewer/hERmes_viewer/tests/files/data/jmxdata.out_162.209.103.227"
-				  }		            
+				  }
 		        ]
 	          }
   	        ]
@@ -202,12 +202,12 @@ Feature: Load Repose Plugin Page
 				    "server":"localhost",
 				    "user":"dimi5963",
 				    "path":"/something/shady"
-				  },		            
+				  },
   				  {
 				    "server":"localhost",
 				    "user":"dimi5963",
 				    "path":"/something/shady"
-				  }		            
+				  }
 		        ]
 	          }
   	        ]
@@ -228,4 +228,4 @@ Feature: Load Repose Plugin Page
 		And the "script" json entry for "meta" hash key in redis should exist
 		And the "meta" directory should contain "test.jmx" result file
 		And the "test" json entry for "meta" hash key in redis should exist
-		And the "configs" list key in redis should exist and contain "4" entries		
+		And the "configs" list key in redis should exist and contain "4" entries

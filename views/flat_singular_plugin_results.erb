@@ -1,4 +1,4 @@
-<% 
+<%
  def parse_element(element)
  	build_tree = ""
  	if element.is_a?(Array)
@@ -6,7 +6,7 @@
  		build_tree = build_tree + "<li>no data</li>" if element.empty?
  		element.each do |child|
 	 		build_tree = build_tree + parse_element(child)
- 		end 
+ 		end
  		build_tree = build_tree + "</ul>"
  	elsif element.is_a?(Hash)
  		build_tree = build_tree + "<ul>"
@@ -67,8 +67,8 @@
 <% summary_plugin_data.each do |instance, content| %>
 				<li>
 					<span class="badge badge-success"><i class="icon-minus-sign"></i><%= instance%></span>
-  <%= parse_element(content[:content]) %>						
-				</li>		
+  <%= parse_element(content[:content]) %>
+				</li>
 <% end %>
         	</ul>
         </div>

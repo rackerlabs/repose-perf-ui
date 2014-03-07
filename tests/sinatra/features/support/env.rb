@@ -11,7 +11,7 @@ require 'capybara'
 require 'capybara/cucumber'
 #require 'rspec'
 
-Capybara.app = PerfApp
+Capybara.app = SnapshotComparer::PerfApp
 
 class PerfAppWorld
   include Capybara::DSL
@@ -20,7 +20,7 @@ class PerfAppWorld
   include Rack::Test::Methods
   def app
     @app = Rack::Builder.new do
-      run PerfApp
+      run SnapshotComparer::PerfApp
     end
   end
 end

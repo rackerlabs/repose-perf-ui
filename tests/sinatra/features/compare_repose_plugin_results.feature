@@ -236,7 +236,7 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "404"
-		And the error page should match the "No data for ReposeJmxPlugin|||logs found"
+		And the error should match the "No data for ReposeJmxPlugin|||logs found"
 		
 	Scenario: Compare repose_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for logs jmx metrics graph data
 		When I post to "/repose_comparison_app/results/main/load_test/compare-plugin/metric" with:
