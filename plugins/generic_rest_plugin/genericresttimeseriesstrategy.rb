@@ -20,7 +20,6 @@ module GenericRestPluginModule
     def populate_metric(entry, name, id, template, start, stop)
       output = open(entry).read
       results = JSON.parse(output) if output
-      puts "results: #{results}"
       parsed_template = match_vs_template(template, results)
 
       if results
@@ -104,7 +103,6 @@ module GenericRestPluginModule
         results_path = {:results => [], :is_found => false}
         template_name_list[key] = check_vs_template(current_template, response, key, results_path, false)[:results]        
       end
-      puts template_name_list
       template_name_list
     end
     

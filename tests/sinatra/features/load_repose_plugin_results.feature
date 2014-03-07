@@ -47,11 +47,11 @@ Feature: Load Repose Plugin Page
 		And response should be a json
 		And "result" json record should equal to "OK"
 		And the "results" json entry for "data" hash key in redis should exist
-		And the "repose_jmx_plugin|time_series|jmxdata.out_162.209.99.50_localhost" json entry for "data" hash key in redis should exist
-		And the "repose_jmx_plugin|time_series|jmxdata.out_162.209.103.227_localhost" json entry for "data" hash key in redis should exist
+		And the "repose_jmx_plugin|time_series|jmxdata.out_162.209.99.50_localhost_localhost" json entry for "data" hash key in redis should exist
+		And the "repose_jmx_plugin|time_series|jmxdata.out_162.209.103.227_localhost_localhost" json entry for "data" hash key in redis should exist
 		And the "data" directory should contain "summary.log" result file
-		And the "data/repose_jmx_plugin" directory should contain "jmxdata.out_162.209.99.50_localhost" result file
-		And the "data/repose_jmx_plugin" directory should contain "jmxdata.out_162.209.103.227_localhost" result file
+		And the "data/repose_jmx_plugin" directory should contain "jmxdata.out_162.209.99.50_localhost_localhost" result file
+		And the "data/repose_jmx_plugin" directory should contain "jmxdata.out_162.209.103.227_localhost_localhost" result file
 		And the "request" json entry for "meta" hash key in redis should exist
 		And the "response" json entry for "meta" hash key in redis should exist
 		And the "script" json entry for "meta" hash key in redis should exist
@@ -104,11 +104,11 @@ Feature: Load Repose Plugin Page
 		And "result" json record should equal to "OK"
 		And "with_errors" list has "repose_jmx_plugin" record, which should equal to "repose_jmx_plugin id not found"
 		And the "results" json entry for "data" hash key in redis should exist
-		And the "repose_jmx_plugin|time_series|162.209.99.50" json entry for "data" hash key in redis should not exist
-		And the "repose_jmx_plugin|time_series|162.209.103.227" json entry for "data" hash key in redis should not exist
+		And the "repose_jmx_plugin|time_series|jmxdata.out_162.209.99.50_localhost_localhost" json entry for "data" hash key in redis should not exist
+		And the "repose_jmx_plugin|time_series|jmxdata.out_162.209.103.227_localhost_localhost" json entry for "data" hash key in redis should not exist
 		And the "data" directory should contain "summary.log" result file
-		And the "data" directory should not contain "jmxdata.out_162.209.99.50" result file
-		And the "data" directory should not contain "jmxdata.out_162.209.103.227" result file
+		And the "data" directory should not contain "jmxdata.out_162.209.99.50_localhost_localhost" result file
+		And the "data" directory should not contain "jmxdata.out_162.209.103.227_localhost_localhost" result file
 		And the "request" json entry for "meta" hash key in redis should exist
 		And the "response" json entry for "meta" hash key in redis should exist
 		And the "script" json entry for "meta" hash key in redis should exist
@@ -161,11 +161,11 @@ Feature: Load Repose Plugin Page
 		And "result" json record should equal to "OK"
 		And "with_errors" list has "repose_jmx_plugin" record, which should equal to "getaddrinfo: nodename nor servname provided, or not known"
 		And the "results" json entry for "data" hash key in redis should exist
-		And the "repose_jmx_plugin|time_series|162.209.99.50" json entry for "data" hash key in redis should not exist
-		And the "repose_jmx_plugin|time_series|162.209.103.227" json entry for "data" hash key in redis should not exist
+		And the "repose_jmx_plugin|time_series|jmxdata.out_162.209.99.50_localhost_localhost" json entry for "data" hash key in redis should not exist
+		And the "repose_jmx_plugin|time_series|jmxdata.out_162.209.103.227_localhost_localhost" json entry for "data" hash key in redis should not exist
 		And the "data" directory should contain "summary.log" result file
-		And the "data" directory should not contain "jmxdata.out_162.209.99.50" result file
-		And the "data" directory should not contain "jmxdata.out_162.209.103.227" result file
+		And the "data" directory should not contain "jmxdata.out_162.209.99.50_localhost_localhost" result file
+		And the "data" directory should not contain "jmxdata.out_162.209.103.227_localhost_localhost" result file
 		And the "request" json entry for "meta" hash key in redis should exist
 		And the "response" json entry for "meta" hash key in redis should exist
 		And the "script" json entry for "meta" hash key in redis should exist
@@ -218,11 +218,11 @@ Feature: Load Repose Plugin Page
 		And "result" json record should equal to "OK"
 		And "with_errors" list has "repose_jmx_plugin" record, which should equal to "SCP did not finish successfully (1)"
 		And the "results" json entry for "data" hash key in redis should exist
-		And the "repose_jmx_plugin|time_series|162.209.99.50" json entry for "data" hash key in redis should not exist
-		And the "repose_jmx_plugin|time_series|162.209.103.227" json entry for "data" hash key in redis should not exist
+		And the "repose_jmx_plugin|time_series|jmxdata.out_162.209.99.50_localhost_localhost" json entry for "data" hash key in redis should not exist
+		And the "repose_jmx_plugin|time_series|jmxdata.out_162.209.103.227_localhost_localhost" json entry for "data" hash key in redis should not exist
 		And the "data" directory should contain "summary.log" result file
-		And the "data" directory should not contain "jmxdata.out_162.209.99.50" result file
-		And the "data" directory should not contain "jmxdata.out_162.209.103.227" result file
+		And the "data" directory should not contain "jmxdata.out_162.209.99.50_localhost_localhost" result file
+		And the "data" directory should not contain "jmxdata.out_162.209.103.227_localhost_localhost" result file
 		And the "request" json entry for "meta" hash key in redis should exist
 		And the "response" json entry for "meta" hash key in redis should exist
 		And the "script" json entry for "meta" hash key in redis should exist

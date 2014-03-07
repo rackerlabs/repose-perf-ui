@@ -708,9 +708,6 @@ class PerfApp < Sinatra::Base
               v[:plugin_type]
             }.first
 
-            puts detailed_plugin_result
-            puts detailed_plugin_data
-
           erb PluginModule::PluginView.retrieve_view(plugin_type,new_app.config['application']['type'].to_sym), :locals => {
             :application => app[:id],
             :sub_app_id => name.to_sym,
@@ -1019,7 +1016,6 @@ class PerfApp < Sinatra::Base
 =end
   get '/:application/tests/:name/:test' do |application, name, test|
     app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-    puts app
     if app and SnapshotComparer::Apps::Bootstrap.test_list.keys.include?(test)
       new_app = app[:klass].new
       sub_app = new_app.retrieve_sub_apps_for_running_tests.find do |sa|

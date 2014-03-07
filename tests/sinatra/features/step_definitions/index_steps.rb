@@ -334,7 +334,6 @@ Then(/^the "(.*?)" json entry for "(.*?)" hash key in redis should exist$/) do |
   if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
     result = Redis.new(new_app.db).hget("#{set_app}:#{set_name}:results:#{set_test}:#{guid}:#{key}", entry)
-    puts result
   end
   result.should_not be_nil
 end
@@ -357,7 +356,6 @@ Then(/^the "(.*?)" list key in redis should exist and contain "(\d+)" entries$/)
   if app
     new_app = app[:klass].new(ENV['RACK_ENV'].to_sym)
     result_list = Redis.new(new_app.db).lrange("#{set_app}:#{set_name}:results:#{set_test}:#{guid}:#{key}", 0, -1)
-    puts result_list.length
     result = (result_list.length == entry_count.to_i)
   end
   result.should be(true)
@@ -417,7 +415,7 @@ Then(/^the "(.*?)" json entry for "(.*?)" hash key in redis contains "(.*?)" key
 end
 
 After('~@index,~@application') do |scenario|
-  puts "after"
+puts 'After index'
   SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
   storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
   FileUtils.rm_rf("#{storage_info['path']}/#{storage_info['prefix']}/#{set_app}/#{set_name}/results/#{set_test}/#{guid}")
@@ -435,7 +433,8 @@ After('~@index,~@application') do |scenario|
 end
 
 After('@tests') do |scenario|
-  puts "after tests"
+puts 'After tests'
+puts "#{set_app}:test:#{set_name}:#{set_test}:start"
   SnapshotComparer::Apps::Bootstrap.main_config(ENV['RACK_ENV'].to_sym)
   storage_info = SnapshotComparer::Apps::Bootstrap.storage_info
   FileUtils.rm_rf("#{storage_info['path']}/#{storage_info['prefix']}/#{set_app}/#{set_name}/results/#{set_test}/#{guid}")

@@ -60,12 +60,12 @@
 <% if running_test %>
 	    <div class="panel panel-warning">
         <div class="panel-heading">
-          <h3 class="panel-title">Running Test</h3>
+          <h3 class="panel-title">Current Running Test</h3>
         </div>
         <div class="tree">
         	<ul>
         	  <li>
-        	    <span class="badge badge-success"><i class="icon-minus-sign"></i>Running Test</span>
+        	    <span class="badge badge-success"><i class="icon-minus-sign"></i>Current Running Test</span>
   <%= parse_element(running_test) %>						
             </li>		
         	</ul>
@@ -79,7 +79,7 @@
         <form method="POST">
           <div class="form-group">
             <label for="name">Test name</label>
-            <input type="text" name="name" class="form-control" id="name" placeholder="name">
+            <input type="text" name="test_name" class="form-control" id="name" placeholder="name">
           </div>
           <div class="form-group">
             <label for="description">Test description</label>

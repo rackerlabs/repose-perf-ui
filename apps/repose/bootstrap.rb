@@ -3,9 +3,6 @@ require 'logging'
 require 'redis'
 require File.expand_path("apps/bootstrap.rb", Dir.pwd)
 require File.expand_path("Models/models.rb", Dir.pwd)
-require_relative 'tasks/abstract_tasks.rb'
-require_relative 'tasks/task.rb'
-require_relative 'tasks/composite_tasks.rb'
 
 module SnapshotComparer
   module Apps
@@ -45,3 +42,4 @@ module SnapshotComparer
       end
     end
   end
+end

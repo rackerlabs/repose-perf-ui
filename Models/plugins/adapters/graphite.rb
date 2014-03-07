@@ -43,13 +43,10 @@ module PluginModule
         end
 
 
-        puts "local start: #{local_start} and local stop: #{local_stop}"
-        puts "http://#{@remote_host}/render/?#{targets}&from=#{target_start}&until=#{target_stop}&format=json"
         File.open("#{tmp_dir}/graphitedata.out_#{@remote_host}", 'w') do |f|
           f.write(RestClient.get "http://#{@remote_host}/render/?#{targets}&from=#{local_start}&until=#{local_stop}&format=json")
         end
        
-        puts "local host: #{@local_host}"
 
         if @local_host == 'localhost'
           FileUtils.mkpath "#{@local_path}/#{application}/#{sub_app}/results/#{type}" unless File.exists?("#{@localhost_path}/#{application}/#{sub_app}/results/#{type}")

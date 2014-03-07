@@ -31,7 +31,7 @@ module PluginModule
 
 
         metrics = encoded_metrics.join('&metrics[]=')
-        puts "stop: #{stop} and start: #{start}"
+        
         if start.is_a?(Fixnum)
           target_start = DateTime.strptime(start.to_s,"%s")
         else
@@ -44,7 +44,7 @@ module PluginModule
           target_stop = DateTime.parse(stop)
         end
 
-        puts "https://api.newrelic.com/api/v1/accounts/#{@remote_account}/agents/#{@remote_agent}/data.json?metrics[]=#{metrics}&begin=#{target_start}&end=#{target_stop}&field=#{@remote_field}"
+        
 
         File.open("#{tmp_dir}/newrelic.out_#{@remote_field}", 'w') do |f|
           f.write(RestClient.get "https://api.newrelic.com/api/v1/accounts/#{@remote_account}/agents/#{@remote_agent}/data.json?metrics[]=#{metrics}&begin=#{target_start}&end=#{target_stop}&field=#{@remote_field}", {"x-api-key" => @remote_api})

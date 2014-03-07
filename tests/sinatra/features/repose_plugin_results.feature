@@ -9,9 +9,9 @@ Feature: Repose Plugin Page
 		And the page should contain "instance"
 		And the page should contain "key-four"
 		And the page should not contain "key-one"
-		And the page should contain "http-logging:Mean"
+		And the page should contain "http-logging:75thPercentile"
 		And the page should contain "key-four - filters - jmxdata.out_162.209.124.167"
-		And the page should contain "2.2863381843067287"
+		And the page should contain "2.2857142857142856"
 		And the page should contain "Detailed Test Results for jmxdata.out_162.209.124.167"
 		And the page should contain "2013-11-14T22:54:55+00:00"
 
@@ -83,9 +83,9 @@ Feature: Repose Plugin Page
 		When I navigate to '/repose_singular_app/results/main/load_test/id/key-one/plugin/ReposeJmxPlugin/filters'
 		Then the page response status code should be "200"
 		And the page should contain "instance"
-		And the page should contain "http-logging:Mean"
+		And the page should contain "http-logging:75thPercentile"
 		And the page should contain "filters - jmxdata.out_162.209.124.167"
-		And the page should contain "2.2863381843067287"
+		And the page should contain "2.2857142857142856"
 		And the page should contain "Detailed Test Results for jmxdata.out_162.209.124.167"
 		And the page should contain "2013-11-14T22:54:55+00:00"
 

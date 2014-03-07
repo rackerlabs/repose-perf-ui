@@ -22,7 +22,6 @@ module PluginModule
         tmp_dir = "/tmp/#{guid}/data/#{@plugin_id}/"
         FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
 
-        puts "remote info: #{@remote_host}, #{@remote_path}, #{@remote_user}"
         Net::SCP.download!(
           @remote_host,
           @remote_user,
@@ -35,13 +34,10 @@ module PluginModule
           `mv #{f} #{f}_#{@remote_host}`
         end
 
-        puts "downloaded"
         Dir.glob("#{tmp_dir}**/*").each do |f|
           `mv #{f} #{f}_#{@remote_host}`
         end
-        
 
-        puts "local info: #{@local_host}, #{@local_path}, #{@local_user}"
         #second, upload to local
         if @local_host == 'localhost'
           FileUtils.mkpath "#{@local_path}/#{application}/#{sub_app}/results/#{type}" unless File.exists?("#{@localhost_path}/#{application}/#{sub_app}/results/#{type}")
