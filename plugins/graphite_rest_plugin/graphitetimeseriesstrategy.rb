@@ -31,8 +31,8 @@ module GraphiteRestPluginModule
           datapoint_results = []
           average_results = 0
           target['datapoints'].each do |datapoint|
-            datapoint_results << {:time => datapoint[1], :value => datapoint[0]}
-            average_results = average_results + datapoint[0]
+            datapoint_results << {:time => datapoint[1], :value => datapoint[0]} if datapoint[1] && datapoint[0]
+            average_results = average_results + datapoint[0] if datapoint[0]
           end
           @detailed_metric_list[target['target']] = [
             {:dev_name => name, :results => datapoint_results}

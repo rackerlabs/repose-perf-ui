@@ -37,30 +37,20 @@
         </div>
         <div class="span11" style="overflow: auto;">
 	        <table class="table table-hover" id="comparisonTable" style="max-width: none;">
-<% 
-    entry = summary_plugin_data_list.first
-    if entry 
-		id = entry[:id]
-		summary_plugin_data = entry[:data]
-    %>
           <thead>
             <tr>
               <th>key</th>
               <th>instance</th>
-  <% summary_plugin_data.each do |k, value|
-  	value[:headers].each do |header| %>
-              <th><span class="metric_desc" data-toggle="tooltip" title="<%= value[:description][header] %>" data-placement="bottom"><%= header %></span></th>
-  <%
-    end 
-  end %>
+  <% summary_headers.each do |header| %>
+              <th><span class="metric_desc" data-toggle="tooltip" title="<%= summary_header_descriptions[header] if summary_header_descriptions %>" data-placement="bottom"><%= header %></span></th>
+  <% end %>
             </tr>
           </thead>
-<%
-end %>          
           <tbody>
 <% summary_plugin_data_list.each do |entry| 
+	puts entry.inspect
 	id = entry[:id]
-	summary_plugin_data = entry[:data]
+	summary_plugin_data = entry[:results]
     summary_plugin_data.each do |key, value|
         value[:content].each do |instance, data| %>
             <tr>
@@ -78,12 +68,7 @@ end %>
         </table>
 		</div>
       </div>
-<%
-  if summary_plugin_data_list.length > 0
-  	summary_plugin_data = summary_plugin_data_list.first[:data]
-  	summary_plugin_data.each do |key, value|
-  		value[:headers].each do |header|
-%>
+  <% summary_headers.each do |header| %>
       <div class="panel">
         <div class="panel-heading">
           <h3 class="panel-title"><%= header %></h3>
@@ -91,8 +76,6 @@ end %>
         <div id="<%= header.gsub(/[\/%:.-]/,'_') %>" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
       </div>
 <%
-		end
-	end
   end 
 %>
     </div>
@@ -119,12 +102,7 @@ end %>
       	$("table#comparisonTable").tablesorter({ sortList: [[1,0]] });
         var results = <%=compare_guids %>
 
-<%
-  if summary_plugin_data_list.length > 0
-  	summary_plugin_data = summary_plugin_data_list.first[:data]
-  	summary_plugin_data.each do |key, value|
-  		value[:headers].each do |header|
-%>
+  <% summary_headers.each do |header| %>
       var option_<%= header.gsub(/[\/%:.-]/,'_') %> = {
           chart: {
             renderTo: '<%= header.gsub(/[\/%:.-]/,'_') %>',
@@ -144,7 +122,7 @@ end %>
     <% 
     summary_plugin_data_list.each do |entry|
     	id = entry[:id]
-    	data = entry[:data]
+    	data = entry[:results]
     	data.each do |data_key, data_value|
     		data_value[:content].each do |k, instance|
 	 %>
@@ -160,8 +138,6 @@ end %>
       }
 
 <%
-		end
-	end
   end 
 %>
       
@@ -175,12 +151,7 @@ end %>
       			var id = data[i].id;
       			var content = data[i].data.<%= option %>.content;
       			var headers = data[i].data.<%= option %>.headers;
-<%
-  if summary_plugin_data_list.length > 0
-  	summary_plugin_data = summary_plugin_data_list.first[:data]
-  	summary_plugin_data.each do |key, value|
-  		value[:headers].each do |header|
-%>
+  <% summary_headers.each do |header| %>
       			var index = get_index(headers, '<%= header %>');
       			if(index > -1){
 	      			for(var j = 0, jmax = option_<%= header.gsub(/[\/%:.-]/,'_') %>.series.length; j < jmax; j++){
@@ -198,8 +169,6 @@ end %>
 	      			var <%= header.gsub(/[\/%:.-]/,'_') %>_chart = new Highcharts.Chart(option_<%= header.gsub(/[\/%:.-]/,'_') %>);
 	      		}
 <%
-		end
-	end
   end 
 %>
       			

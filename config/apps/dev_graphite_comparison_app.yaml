@@ -1,0 +1,15 @@
+---
+application:
+  name: Graphite
+  description: test
+  location: apps/graphite_comparison_app/bootstrap.rb
+  type: comparison
+  plugins:
+  - location: plugins/graphite_rest_plugin/plugin.rb
+  sub_apps:
+  - id: main
+    name: Main application
+    description: main desc
+  - id: main
+    name: Main application
+    description: main desc

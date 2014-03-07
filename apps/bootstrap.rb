@@ -196,6 +196,7 @@ module Apps
         plugins = load_plugins
         plugins.each do |plugin|
           @logger.debug "start storing data for: #{plugin}"
+          @logger.debug "start: #{start_test['time']}, stop: #{end_time}"
           plugin_result = plugin.new(@db, @fs_ip).store_data(application, sub_app, type, json_data, store, start_test, end_time, storage_info)
           plugin_result_list << plugin_result if plugin_result
         end 
@@ -213,6 +214,51 @@ module Apps
       end
     end
     
+    def retrieve_sub_apps_for_running_tests
+      app_list = @config['application']['sub_apps']
+      app_list << {'id' => 'custom', 'name' => 'Custom setup', 'description' => 'This is a custom setup for executing tests.'} unless app_list.find {|a| a['id'] == 'custom'}
+      app_list  
+    end
+    
+    def highlight_currently_running_tests(application, sub_app)
+      running_tests = {}
+      Apps::Bootstrap.test_list.each do |test, detail|
+        running_tests[test] = detail
+        running_tests[test].delete(:running_results)
+      end
+      store = Redis.new(@db)
+      begin
+        running_tests.each do |test, detail|
+          result = store.get("#{application}:test:#{sub_app['id']}:#{test.gsub('_test','')}:start")
+          running_tests[test][:running_results] = JSON.parse(result) if result
+        end
+      rescue => e
+        @logger.error "failed with: #{e}"
+        @logger.error e.backtrace
+      end
+      running_tests
+    end
+    
+    def retrieve_running_test_info(application, name, test)
+      store = Redis.new(@db)
+      begin
+        result = store.get("#{application}:test:#{name}:#{test.gsub('_test','')}:start")
+        if result
+          json_result = JSON.parse(result)
+          date = nil
+          if json_result['time'].is_a? Fixnum
+            date = Time.at(json_result['time'])
+          else
+            date = DateTime.parse(json_result['time'])
+          end
+          json_result['target end (not necessarily the actual end)'] = date + Rational(json_result['length'], 1440)
+        end
+      rescue => e
+        @logger.error "failed with: #{e}"
+        @logger.error e.backtrace
+      end
+      json_result
+    end
     
     def create_tmp_dir(guid)
       @logger.debug "in create tmp dir"

@@ -1,0 +1,192 @@
+<% 
+ def parse_element(element)
+ 	build_tree = ""
+ 	if element.is_a?(Array)
+ 		build_tree = build_tree + "<ul>"
+ 		build_tree = build_tree + "<li>no data</li>" if element.empty?
+ 		element.each do |child|
+	 		build_tree = build_tree + parse_element(child)
+ 		end 
+ 		build_tree = build_tree + "</ul>"
+ 	elsif element.is_a?(Hash)
+ 		build_tree = build_tree + "<ul>"
+ 		build_tree = build_tree + "<li><span><i class=\"icon-time\"></i>no data</span></li>" if element.empty?
+	    element.each do |key, value|
+ 			build_tree = build_tree + "<li><span class=\"badge badge-success\"><i class=\"icon-minus-sign\"></i>#{key}</span> &ndash; #{parse_element(value)}</li>"
+ 		end
+ 		build_tree = build_tree + "</ul>"
+ 	else
+		build_tree = build_tree + element.to_s
+ 	end
+ 	build_tree
+ end
+
+%>
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %> - Adhoc Current Results</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/css/jquery.treetable.css" rel="stylesheet" media="screen">
+    <link href="/css/prettify.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/<%= application %>"><%= title %></a>
+      <div class="nav-collapse collapse bs-navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="/<%= application %>/tests">Running Tests</a></li>
+          <li><a href="/<%= application %>/applications">Applications</a></li>
+          <li><a href="/<%= application %>/results">Results</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container">
+      <ul class="breadcrumb">
+        <li><a href="/<%= application %>">Home</a></li>
+        <li><a href="/<%= application %>/tests">Running Tests</a></li>
+        <li><a href="/<%= application %>/tests/<%= sub_app_id %>"><%= sub_app_id %></a></li>
+        <li><%= test_type %></li>
+      </ul>
+<% if running_test %>
+	  <div class="panel panel-warning">
+        <div class="panel-heading">
+          <h3 class="panel-title">Running Test</h3>
+        </div>
+        <div class="tree">
+        	<ul>
+				<li>
+					<span class="badge badge-success"><i class="icon-minus-sign"></i>Running Test</span>
+  <%= parse_element(running_test) %>						
+				</li>		
+        	</ul>
+        </div>
+	  </div>
+
+<% end %>      
+      <div class="panel panel-summary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Schedule new test</h3>
+        </div>
+        <form method="POST">
+          <div class="form-group">
+            <label for="name">Test name</label>
+            <input type="text" name="name" class="form-control" id="name" placeholder="name">
+          </div>
+          <div class="form-group">
+            <label for="description">Test description</label>
+            <input type="text" class="form-control" name="description" id="description" placeholder="description">
+          </div>
+          <div class="control-group">
+            <label for="flavor_type">Version:</label>
+            <div class="controls">
+              <select id="flavor_type" name="flavor_type">
+                <option value="standard">Standard</option>
+                <option value="performance">Performance</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="control-group">
+              <label for="test_type">Test Type:</label>
+              <div class="controls">
+		            <select name="test_type" id="test_type">
+		            <% test_types.each do |type, test| %>
+		              <option value="<%= type %>"><%= test['name'] %></option>
+		            <% end %>
+		              <option value="custom">Custom</option>
+            		</select>
+            	</div>
+            </div>
+            <div class="form-group">
+              <label for="length">Test Length in minutes</label>
+              <input type="number" class="form-control" name="length" id="length" placeholder="60">
+            </div>
+            <div class="form-group">
+              <label for="throughput">Throughput in RPS</label>
+              <input type="number" class="form-control" name="throughput" id="throughput" placeholder="100">
+            </div>
+            <div class="form-group">
+            <div class="control-group">
+       	      <label for="configType">Config Type: <%= sub_app_id %></label>
+            </div>
+            <div class="form-group">
+              <div class="control-group">
+                <label for="versions">Version:</label>
+                <div class="controls">
+	          <select id="versions" name="versions">
+		            <% versions.each do |v| %>
+		              <option value="<%= v %>"><%= v %></option>
+		            <% end %>
+                  <option value="git">Git</option>
+            		</select>
+            	</div>
+		</div>
+            </div>
+            <div role="form" id="git_repo">
+              <div class="form-group">
+                <label for="gitRepo">Git Repository</label>
+                <input type="text" name="git_repo" class="form-control" id="gitRepo" placeholder="https://github.com/rackerlabs/repose">
+              </div>
+              <div class="form-group">
+                <label for="branch">Branch</label>
+                <input type="text" class="form-control" name="branch" id="branch" placeholder="master">
+              </div>
+            </div>        	
+          </div>
+          <button type="submit" class="btn btn-default">Schedule</button>
+        </form>
+      </div>
+    </div>
+    <hr>
+    <footer>
+      <p>&copy; Rackspace Hosting 2013</p>
+    </footer>
+  </div> <!-- /container -->
+    <!-- JavaScript plugins (requires jQuery) -->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+    <script src="/js/respond.js"></script>
+    <script src="/js/jquery.treetable.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+      	$('#git_repo').hide();
+      	$('#custom_test_type').hide();
+        
+        $('#test_type').on('change',function(){
+        	if($(this).val() === 'custom'){
+        		//show git repo stuff
+        		$('#custom_test_type').show();
+        	} else {
+        		$('#custom_test_type').hide();
+        	}
+          console.log($(this));
+          console.log($(this).val());
+        });
+        
+        $('#versions').on('change',function(){
+        	if($(this).val() === 'git'){
+        		//show git repo stuff
+        		$('#git_repo').show();
+        	} else {
+        		$('#git_repo').hide();
+        	}
+          console.log($(this));
+          console.log($(this).val());
+        });
+      });
+    </script>
+  </body>
+</html>

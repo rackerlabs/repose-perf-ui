@@ -33,6 +33,9 @@ module PluginModule
         ) 
         
         puts "downloaded"
+        Dir.glob("#{tmp_dir}**/*").each do |f|
+          `mv #{f} #{f}_#{@remote_host}`
+        end
         
         puts @local_host, @local_path, @local_user
         #second, upload to local

@@ -1,3 +1,4 @@
+<% puts load_test_list %>
 <!DOCTYPE html>
 <html>
   <head>
@@ -18,8 +19,8 @@
       <div class="nav-collapse collapse bs-navbar-collapse">
         <ul class="nav navbar-nav">
           <li class="active"><a href="/<%= application %>/tests">Running Tests</a></li>
-          <li><a href="/applications">Applications</a></li>
-          <li><a href="/results">Results</a></li>
+          <li><a href="/<%= application %>/applications">Applications</a></li>
+          <li><a href="/<%= application %>/results">Results</a></li>
         </ul>
       </div>
     </div>
@@ -31,7 +32,12 @@
       </ul>
       <div class="list-group">
         <% load_test_list.each do |id, item| %>
-        <a href="/<%= application %>/tests/<%= sub_app_id %>/<%= id %>" class="list-group-item">
+        <a href="/<%= application %>/tests/<%= sub_app_id %>/<%= id %>" 
+          <% if item[:running_results] %>
+        class="list-group-item list-group-item-warning">
+          <% else %>
+        class="list-group-item">
+          <% end %>
           <h4 class="list-group-item-heading"><%= item['name'] %></h4>
           <p class="list-group-item-text"><%= item['description'] %></p>
         </a>

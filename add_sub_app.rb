@@ -191,7 +191,7 @@ main_responders.split(',').each do |main_responder|
         "#{config['storage_info']['path']}/#{config['storage_info']['prefix']}/#{opts[:app]}/#{opts[:sub_app]}/setup/meta/responders/main/"
       )
   end
-end
+end if main_responders
 
 if secondary_responders
   secondary_responders.split(',').each do |secondary_responder|

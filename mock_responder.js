@@ -23,6 +23,10 @@ app.put('/*', function(req,res){
   res.send(201,'<a><remove-me>test</remove-me>Stuff</a>');
 });
 
+app.del('/*', function(req, res){
+    res.send(204,'hello world');
+});
+
 app.post('/*', function(req, res){
     res.send(201,'hello world');
 });

@@ -51,41 +51,45 @@ class ReposeJmxPlugin < PluginModule::Plugin
   def show_summary_data(application, name, test, id, test_id, options=nil)
     metric = ReposeJmxPlugin.show_plugin_names.find {|i| i[:id] == id }
     results = {}
-    if options && options[:application_type] == :comparison
-      results[:plugin_type] = metric[:type]
-      results[:id_results] = []
-      store = Redis.new(@db)
-      #get meta results and either 
-      test_id.split('+').each do |guid|
-        meta_results = store.hgetall("#{application}:#{name}:results:#{test.chomp('_test')}:#{guid}:meta")
-        test_json = JSON.parse(meta_results['test'])
-        if test_json['comparison_guid']
-          #get the repose data here
-          results[:id_results] << {:id => guid, :results => PluginModule::PastPluginResults.format_results(
-            PluginModule::PluginResult.new(
-              metric[:klass].new(
-                @db, @fs_ip, application, name,test.chomp('_test'), test_json['comparison_guid'], metric[:id]
-              )
-            ).retrieve_average_results, 
-            metric[:id].to_sym, 
-            {}, 
-            metric[:klass].metric_description,
-            metric[:type]
-          )} if metric
+    if metric
+      if options && options[:application_type] == :comparison
+        results[:plugin_type] = metric[:type]
+        results[:id_results] = []
+        store = Redis.new(@db)
+        #get meta results and either
+        test_id.split('+').each do |guid|
+          meta_results = store.hgetall("#{application}:#{name}:results:#{test.chomp('_test')}:#{guid}:meta")
+          if meta_results && !meta_results.empty?
+            test_json = JSON.parse(meta_results['test'])
+            if test_json['comparison_guid']
+              #get the repose data here
+              results[:id_results] << {:id => guid, :results => PluginModule::PastPluginResults.format_results(
+                PluginModule::PluginResult.new(
+                  metric[:klass].new(
+                    @db, @fs_ip, application, name,test.chomp('_test'), test_json['comparison_guid'], metric[:id]
+                  )
+                ).retrieve_average_results, 
+                metric[:id].to_sym, 
+                {}, 
+                metric[:klass].metric_description,
+                metric[:type]
+              )} if metric
+            end
+          end
         end
+      else
+        results = PluginModule::PastPluginResults.format_results(
+          PluginModule::PluginResult.new(
+            metric[:klass].new(
+              @db, @fs_ip, application, name,test.chomp('_test'), test_id, metric[:id]
+            )
+          ).retrieve_average_results, 
+          metric[:id].to_sym, 
+          {}, 
+          metric[:klass].metric_description,
+          metric[:type]
+        ) if metric
       end
-    else
-      results = PluginModule::PastPluginResults.format_results(
-        PluginModule::PluginResult.new(
-          metric[:klass].new(
-            @db, @fs_ip, application, name,test.chomp('_test'), test_id, metric[:id]
-          )
-        ).retrieve_average_results, 
-        metric[:id].to_sym, 
-        {}, 
-        metric[:klass].metric_description,
-        metric[:type]
-      ) if metric
     end 
     results
   end

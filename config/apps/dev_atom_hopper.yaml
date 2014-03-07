@@ -1,21 +1,23 @@
+---
 application:
-  name: Atom Hopper
-  description: atom feed applications that acts as a repository for feeds from other projects
+  name: Atom
+  description: open source ATOMPub server (using Apache Abdera and licensed under
+    Apache License v2.0 with the source code available on GitHub) for accessing, processing
+    and aggregating ATOM entries.
   location: apps/atom_hopper/bootstrap.rb
   type: singular
   plugins:
-   - location: plugins/repose_jmx_plugin/plugin.rb
-   - location: plugins/sysstats_plugin/plugin.rb
-    # location: plugins/mac_perf_mon/plugin.rb
-    #location: plugins/postgres/plugin.rb
-    #location: plugins/atom_feed/plugin.rb
-    #location: plugins/atom_graphite/plugin.rb
-  sub_apps: 
-   - 
-     id: main
-     name: Main application
-     description: This is the base configuration for Atom Hopper
-   - 
-     id: main
-     name: Main application
-     description: This is the base configuration for Atom Hopper
+  - location: plugins/repose_jmx_plugin/plugin.rb
+  - location: plugins/file_plugin/plugin.rb
+  - location: plugins/graphite_rest_plugin/plugin.rb
+  - location: plugins/newrelic_rest_plugin/plugin.rb
+  sub_apps:
+  - id: staging
+    name: Staging environment
+    description: Atom Hopper setup in Staging environment
+  - id: staging
+    name: Staging environment
+    description: Atom Hopper setup in Staging environment
+  - id: staging
+    name: Staging environment
+    description: Atom Hopper setup in Staging environment

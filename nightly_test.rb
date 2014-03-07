@@ -247,11 +247,25 @@ if opts[:action] == 'stop'
         "path" => "/home/repose/logs/jmxdata.out"
       } 
     end
+    repose_log_servers = []
+    server_ip_info[:nodes].each do |server|
+      repose_log_servers << {
+        "server" => server,
+        "user" => "root",
+        "path" => "/home/repose/logs/repose.log"
+      } 
+    end
     request_body["plugins"] << 
       {
       "id" => "repose_jmx_plugin",
       "servers" => repose_jmx_servers
       }
+    request_body["plugins"] << 
+     {
+     "id" => "file_plugin",
+     "type" => "blob",
+     "servers" => repose_log_servers
+     }
   end
   sysstats_servers = []
   server_ip_info[:nodes].each do |server|
@@ -379,7 +393,7 @@ elsif opts[:action] == 'start'
 
 
   if opts[:with_repose] and opts[:release] and opts[:release] == 'master'
-    system "cd ~/repose_repo/repose ; git pull origin master; mvn clean install -DskipTests; "
+    system "rm -rf ~/repose_repo/repose ; mkdir ~/repose_repo/repose ; cd ~/repose_repo/repose ; git init ; git pull https://github.com/rackerlabs/repose master ; mvn clean install -U -DskipTests; "
   end
 
   is_started_successfully = false
@@ -528,7 +542,7 @@ elsif opts[:action] == 'start'
         if opts[:release] == 'master'
           logger.info "download master version"
           
-          filter_bundle_ear = Dir.glob("/root/repose_repo/repose/repose-aggregator/components/filter-bundle/target/*.ear").first
+          filter_bundle_ear = Dir.glob("/root/repose_repo/repose/repose-aggregator/components/filters/filter-bundle/target/*.ear").first
           extension_bundle_ear = Dir.glob("/root/repose_repo/repose/repose-aggregator/extensions/extensions-filter-bundle/target/*.ear").first
           logger.info "filter bundle: #{filter_bundle_ear}"
  	        logger.info "extension filter bundle: #{extension_bundle_ear}"
@@ -611,7 +625,9 @@ elsif opts[:action] == 'start'
         FileUtils.rm_rf("/tmp/#{guid}")
       end
       system "ssh root@#{server} -f 'node /home/mocks/#{name} & '"
-    end 
+    end if opts[:with_repose] || (!opts[:with_repose] && !secondary_responders) || (!opts[:with_repose] && secondary_responders && secondary_responders.length == 0)
+    logger.info "secondary responders: #{secondary_responders}"
+    logger.debug !opts[:with_repose] && secondary_responders
     secondary_responders.each do |key, responder|
       responder_json = JSON.parse(responder)
       name = responder_json['name']
@@ -620,6 +636,7 @@ elsif opts[:action] == 'start'
         Net::SSH.start(server, 'root') do |ssh|
           ssh.exec!("mkdir -p /home/mocks")
         end
+        logger.info "#{config['storage_info']['path']}/#{location}"
         Net::SCP.upload!(
           server, 
           'root', 
@@ -652,7 +669,7 @@ elsif opts[:action] == 'start'
       end
         
       system "ssh root@#{server} -f 'node /home/mocks/#{name} & '"
-    end if secondary_responders
+    end if secondary_responders && !opts[:with_repose]
 
     logger.info "start logging sysstats"
     system "ssh root@#{server} -f 'sar -o /home/repose/logs/sysstats.log 30 >/dev/null 2>&1 & '"

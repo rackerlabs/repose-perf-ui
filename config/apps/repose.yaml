@@ -9,6 +9,8 @@ application:
   plugins:
   - location: plugins/repose_jmx_plugin/plugin.rb
   - location: plugins/sysstats_plugin/plugin.rb
+  - location: plugins/file_plugin/plugin.rb
+  - location: plugins/graphite_rest_plugin/plugin.rb
   sub_apps:
   - id: atom_hopper
     name: Atom Hopper setup

@@ -13,7 +13,7 @@ module PluginModule
         @remote_agent = remote['agent']
         @remote_metrics = remote['metric']
         @remote_api = remote['api-key']
-        @local_host = local['server']
+        @local_host = local['destination']
         @local_user = local['user']
         @local_path = "#{local['path']}/#{local['prefix']}"
         @local_prefix = local['prefix']
@@ -32,29 +32,40 @@ module PluginModule
         
         metrics = encoded_metrics.join('&metrics[]=')
         if start.is_a?(Fixnum)
-          target_start = DateTime.strptime(start.to_s,"%s").strftime("%Y-%m-%dT%H:%m:%SZ")
+          target_start = DateTime.strptime(start.to_s,"%s")
         else
-          target_start = DateTime.parse(start).strftime("%Y-%m-%dT%H:%m:%SZ")
+          target_start = DateTime.parse(start)
         end
 
         if stop.is_a?(Fixnum)
-          target_stop = DateTime.strptime(stop.to_s,"%s").strftime("%Y-%m-%dT%H:%m:%SZ")
+          target_stop = DateTime.strptime(stop.to_s,"%s")
         else
-          target_stop = DateTime.parse(stop).strftime("%Y-%m-%dT%H:%m:%SZ")
+          target_stop = DateTime.parse(stop)
         end
+
+        puts "stop: #{stop}"
+        puts "start: #{start}"
+        puts "https://api.newrelic.com/api/v1/accounts/#{@remote_account}/agents/#{@remote_agent}/data.json?metrics[]=#{metrics}&begin=#{target_start}&end=#{target_stop}&field=#{@remote_field}"
+        puts "x-api-key: #{@remote_api}"
         
         File.open("#{tmp_dir}/newrelic.out_#{@remote_field}", 'w') do |f|
           f.write(RestClient.get "https://api.newrelic.com/api/v1/accounts/#{@remote_account}/agents/#{@remote_agent}/data.json?metrics[]=#{metrics}&begin=#{target_start}&end=#{target_stop}&field=#{@remote_field}", {"x-api-key" => @remote_api})
         end
         
+        puts @local_host, @local_path, @local_user
         #second, upload to local
-        Net::SCP.upload!(
-          @local_host, 
-          @local_user, 
-          "/tmp/#{guid}/", 
-          "#{@local_path}/#{application}/#{sub_app}/results/#{type}", 
-          {:recursive => true, :verbose => true }
-        )
+        if @local_host == 'localhost'
+          FileUtils.mkpath "#{@local_path}/#{application}/#{sub_app}/results/#{type}" unless File.exists?("#{@localhost_path}/#{application}/#{sub_app}/results/#{type}")
+          FileUtils.cp_r "/tmp/#{guid}/", "#{@local_path}/#{application}/#{sub_app}/results/#{type}/"
+        else
+          Net::SCP.upload!(
+            @local_host, 
+            @local_user, 
+            "/tmp/#{guid}/", 
+            "#{@local_path}/#{application}/#{sub_app}/results/#{type}", 
+            {:recursive => true, :verbose => true }
+          )
+        end
         
         #third, add to redis
         Dir.glob("#{tmp_dir}/**/*") do |entry|

@@ -1,0 +1,5 @@
+LOG:  database system was shut down at 2013-12-29 12:34:18 CST
+LOG:  database system is ready to accept connections
+LOG:  autovacuum launcher started
+FATAL:  role "postgres" does not exist
+FATAL:  database "dimi5963" does not exist

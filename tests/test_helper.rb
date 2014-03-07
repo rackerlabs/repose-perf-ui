@@ -5,6 +5,7 @@ SimpleCov.start
 require 'test/unit'
 require 'yaml'
 require 'mocha/setup'
+
 =begin
 require './tests/Models/jmx_results_test.rb'
 require './tests/Models/summary_results_test.rb'
@@ -19,10 +20,9 @@ require './tests/Models/test_tests.rb'
 require './tests/Models/testlocation_tests.rb'
 =end
 
-system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/load_repose_plugin_results.feature tests/sinatra/features/sysstats_plugin_results.feature tests/sinatra/features/load_graphite_plugin_results.feature tests/sinatra/features/graphite_plugin_results.feature tests/sinatra/features/load_newrelic_plugin_results.feature tests/sinatra/features/newrelic_plugin_results.feature" # tests/sinatra/features/load_postgres_plugin_results.feature tests/sinatra/features/load_rest_plugin_results.feature"
+system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/applications.feature tests/sinatra/features/results.feature tests/sinatra/features/start_stop.feature tests/sinatra/features/repose_plugin_results.feature tests/sinatra/features/load_repose_plugin_results.feature tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/sysstats_plugin_results.feature tests/sinatra/features/compare_sysstats_plugin_results.feature tests/sinatra/features/load_graphite_plugin_results.feature tests/sinatra/features/graphite_plugin_results.feature tests/sinatra/features/compare_graphite_plugin_results.feature tests/sinatra/features/load_newrelic_plugin_results.feature tests/sinatra/features/newrelic_plugin_results.feature tests/sinatra/features/compare_newrelic_plugin_results.feature tests/sinatra/features/load_jenkins_plugin_results.feature tests/sinatra/features/jenkins_plugin_results.feature tests/sinatra/features/compare_jenkins_plugin_results.feature tests/sinatra/features/load_file_plugin_results.feature tests/sinatra/features/file_plugin_results.feature tests/sinatra/features/compare_file_plugin_results.feature tests/sinatra/features/current_tests.feature"
 
-#tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/compare_sysstats_plugin_results.feature"
-
+#rest (before/after) then log4j (raw) then diff then email then
 #rest, nagios, postgres, before/afters for graphite, new relic, nagios, postgres
 #week after that - 100% code coverage on unit + mongo
 #---- PRESENTATION WEEK!!!
@@ -31,7 +31,7 @@ system "cucumber tests/sinatra/features/index.feature tests/sinatra/features/app
 #system " tests/sinatra/features/compare_repose_plugin_results.feature tests/sinatra/features/load_sysstats_plugin_results.feature tests/sinatra/features/sysstats_plugin_results.feature"
 =begin
 
-- stop actually saves the data 
+- stop actually saves the data
   - Remote FS Adapter
   - Graphite Adapter
   - New Relic Adapter
@@ -66,12 +66,12 @@ tests/sinatra/features/jmeter.feature
 tests/sinatra/features/gatling.feature
 tests/sinatra/features/calendar.feature
 
-- add ability to start test running from inside the server 
+- add ability to start test running from inside the server
 - add ability to view tests on the fly by hooking directly into disparate sources (not collected though until the test is over)
   - if plugin does not expose the 'read_live_data' method, then the main plugin method will return empty (no error) and will let user know that this plugin is not able to read live data
 tests/sinatra/features/flood.feature
 
 - add ability to view results table on click and don't show it on page right away
-- add ability to specify server size 
+- add ability to specify server size
 
 =end

@@ -12,7 +12,17 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "200"
-		And the page should match the "repose_comparison_app_compare_plugin_results_repose_jmx_plugin_filters" version
+		And the message should contain "http-logging:Mean"
+		And the message should contain "key-four"
+		And the message should contain "key-five"
+		And the message should contain "jmxdata.out_162.209.124.158"
+		And the message should contain "2.1691480572391195"
+		And the message should contain "2.243839219398397"
+		And the message should contain "2.1691480572391195"
+		And the message should contain "2.2863381843067287"
+		And the message should contain "1.6917195328155799"
+		And the message should contain "translation:75thPercentile"
+		And the message should contain "instance"
 		
 	Scenario: Compare repose_comparison_app (overhead) main load test key-one, key-two, key-five, key-four for filter jmx metrics graph data
 		When I post to "/repose_comparison_app/results/main/load_test/compare-plugin/metric" with:
@@ -35,7 +45,17 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "200"
-		And the page should match the "repose_comparison_app_compare_plugin_results_repose_jmx_plugin_w_key_three_filters" version
+		And the message should contain "http-logging:Mean"
+		And the message should contain "key-four"
+		And the message should contain "key-five"
+		And the message should contain "jmxdata.out_162.209.124.158"
+		And the message should contain "2.1691480572391195"
+		And the message should contain "2.243839219398397"
+		And the message should contain "2.1691480572391195"
+		And the message should contain "2.2863381843067287"
+		And the message should contain "1.6917195328155799"
+		And the message should contain "translation:75thPercentile"
+		And the message should contain "instance"
 		
 	Scenario: Compare repose_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for filter jmx metrics graph data
 		When I post to "/repose_comparison_app/results/main/load_test/compare-plugin/metric" with:
@@ -58,7 +78,17 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "200"
-		And the page should match the "repose_comparison_app_compare_plugin_results_repose_jmx_plugin_filters" version
+		And the message should contain "http-logging:Mean"
+		And the message should contain "key-four"
+		And the message should contain "key-five"
+		And the message should contain "jmxdata.out_162.209.124.158"
+		And the message should contain "2.1691480572391195"
+		And the message should contain "2.243839219398397"
+		And the message should contain "2.1691480572391195"
+		And the message should contain "2.2863381843067287"
+		And the message should contain "1.6917195328155799"
+		And the message should contain "translation:75thPercentile"
+		And the message should contain "instance"
 		
 	Scenario: Compare repose_comparison_app (overhead) main load test key-one, key-two, key-five, invalid-key-three, key-four for filter jmx metrics graph data
 		When I post to "/repose_comparison_app/results/main/load_test/compare-plugin/metric" with:
@@ -80,8 +110,8 @@ Feature: Repose Plugin Page
 			"plugin_id": "ReposeJmxPlugin|||filters"
 		  }
 		"""
-		Then the response should be "200"
-		And the page should match the "repose_comparison_app_compare_plugin_results_repose_jmx_plugin_only_key_one_filters" version
+		Then the response should be "404"
+		And the error should match the "No data for ReposeJmxPlugin|||filters found"
 		
 	Scenario: Compare repose_comparison_app (overhead) main load test key-one, invalid-key-two, invalid-key-three for filter jmx metrics graph data
 		When I post to "/repose_comparison_app/results/main/load_test/compare-plugin/metric" with:
@@ -104,7 +134,18 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "200"
-		And the page should match the "repose_comparison_app_compare_plugin_results_repose_jmx_plugin_gc" version
+		And the message should contain "PSMarkSweep.CollectionTime"
+		And the message should contain "key-four"
+		And the message should contain "key-five"
+		And the message should contain "jmxdata.out_162.209.124.158"
+		And the message should contain "jmxdata.out_162.209.124.167"
+		And the message should contain "0.0"
+		And the message should contain "0.25"
+		And the message should contain "79.25"
+		And the message should contain "1157.25"
+		And the message should contain "421.75"
+		And the message should contain "1134.0"
+		And the message should contain "instance"
 		
 	Scenario: Compare repose_comparison_app (overhead) main load test key-one, key-two, key-five, key-four for gc jmx metrics graph data
 		When I post to "/repose_comparison_app/results/main/load_test/compare-plugin/metric" with:
@@ -127,7 +168,18 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "200"
-		And the page should match the "repose_comparison_app_compare_plugin_results_repose_jmx_plugin_jvm_memory" version
+		And the message should contain "HeapMemoryUsage.committed"
+		And the message should contain "key-four"
+		And the message should contain "key-five"
+		And the message should contain "jmxdata.out_162.209.124.158"
+		And the message should contain "jmxdata.out_162.209.124.167"
+		And the message should contain "386301952.0"
+		And the message should contain "231901507.0"
+		And the message should contain "388587520.0"
+		And the message should contain "192118440.0"
+		And the message should contain "3491561472.0"
+		And the message should contain "245467264.0"
+		And the message should contain "instance"
 		
 	Scenario: Compare repose_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for jvm_memory jmx metrics graph data
 		When I post to "/repose_comparison_app/results/main/load_test/compare-plugin/metric" with:
@@ -150,7 +202,18 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "200"
-		And the page should match the "repose_comparison_app_compare_plugin_results_repose_jmx_plugin_jvm_threads" version
+		And the message should contain "PeakThreadCount"
+		And the message should contain "key-four"
+		And the message should contain "key-five"
+		And the message should contain "jmxdata.out_162.209.124.158"
+		And the message should contain "jmxdata.out_162.209.124.167"
+		And the message should contain "41.875"
+		And the message should contain "17.5"
+		And the message should contain "41.125"
+		And the message should contain "44.875"
+		And the message should contain "44.25"
+		And the message should contain "41.0"
+		And the message should contain "instance"
 		
 	Scenario: Compare repose_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for jvm_threads jmx metrics graph data
 		When I post to "/repose_comparison_app/results/main/load_test/compare-plugin/metric" with:
@@ -197,7 +260,7 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "404"
-		And the error page should match the "No data for ReposeJmxPlugin|||unknown found"
+		And the error should match the "No data for ReposeJmxPlugin|||unknown found"
 		
 	Scenario: Compare repose_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for unknown jmx metrics graph data
 		When I post to "/repose_comparison_app/results/main/load_test/compare-plugin/metric" with:
@@ -220,7 +283,7 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "404"
-		And the error page should match the "No plugin by name of unknown found"
+		And the error should match the "No plugin by name of unknown found"
 		
 	Scenario: Compare repose_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for filter unknown graph data
 		When I post to "/repose_comparison_app/results/main/load_test/compare-plugin/metric" with:
@@ -243,7 +306,7 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "404"
-		And the error page should match the "No application by name of repose_comparison_app/invalid found"
+		And the error should match the "No application by name of repose_comparison_app/invalid found"
 		
 	Scenario: Compare repose_comparison_app (overhead) main invalid test key-one, key-two, key-five, key-three, key-four for filter jmx metrics graph data
 		When I post to "/repose_comparison_app/results/main/invalid/compare-plugin/metric" with:
@@ -266,7 +329,7 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "404"
-		And the error page should match the "No sub application for invalid found"
+		And the error should match the "No sub application for invalid found"
 		
 	Scenario: Compare repose_comparison_app (overhead) invalid load test key-one, key-two, key-five, key-three, key-four for filter jmx metrics graph data
 		When I post to "/repose_comparison_app/results/invalid/load_test/compare-plugin/metric" with:
@@ -289,7 +352,7 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "404"
-		And the error page should match the "No application by name of invalid/load_test found"
+		And the error should match the "No application by name of invalid/load_test found"
 		
 	Scenario: Compare repose_comparison_app (overhead) main load test key-one, key-two, key-five, key-three, key-four for filter jmx metrics graph data
 		When I post to "/invalid/results/main/load_test/compare-plugin/metric" with:
@@ -312,7 +375,14 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "200"
-		And the page should match the "repose_singular_app_compare_plugin_results_repose_jmx_plugin_filters" version
+		And the message should contain "http-logging:Mean"
+		And the message should contain "key-one"
+		And the message should contain "key-two"
+		And the message should contain "2.222388633250659"
+		And the message should contain "2.2863381843067287"
+		And the message should contain "1.6917195328155799"
+		And the message should contain "translation:75thPercentile"
+		And the message should contain "instance"
 		
 	Scenario: Compare repose_singular_app (singular) main load test key-one and key-two for filters jmx metrics for graph data
 		When I post to "/repose_singular_app/results/main/load_test/compare-plugin/metric" with:
@@ -335,7 +405,15 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "200"
-		And the page should match the "repose_singular_app_compare_plugin_results_repose_jmx_plugin_w_key_three_filters" version
+		And the message should contain "http-logging:Mean"
+		And the message should contain "key-one"
+		And the message should contain "key-two"
+		And the message should contain "key-three"
+		And the message should contain "2.222388633250659"
+		And the message should contain "2.2863381843067287"
+		And the message should contain "1.6917195328155799"
+		And the message should contain "translation:75thPercentile"
+		And the message should contain "instance"
 		
 	Scenario: Compare repose_singular_app (singular) main load test key-one and key-two and key-three for filters jmx metrics for graph data
 		When I post to "/repose_singular_app/results/main/load_test/compare-plugin/metric" with:
@@ -358,7 +436,13 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "200"
-		And the page should match the "repose_singular_app_compare_plugin_results_repose_jmx_plugin_gc" version
+		And the message should contain "key-one"
+		And the message should contain "key-two"
+		And the message should contain "79.25"
+		And the message should contain "0.25"
+		And the message should contain "1134.0"
+		And the message should contain "PSMarkSweep.CollectionTime"
+		And the message should contain "instance"
 		
 	Scenario: Compare repose_singular_app (singular) main load test key-one and key-two for gc jmx metrics for graph data
 		When I post to "/repose_singular_app/results/main/load_test/compare-plugin/metric" with:
@@ -381,7 +465,13 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "200"
-		And the page should match the "repose_singular_app_compare_plugin_results_repose_jmx_plugin_jvm_memory" version
+		And the message should contain "key-one"
+		And the message should contain "key-two"
+		And the message should contain "386301952.0"
+		And the message should contain "231901507.0"
+		And the message should contain "3491561472.0"
+		And the message should contain "HeapMemoryUsage.committed"
+		And the message should contain "instance"
 		
 	Scenario: Compare repose_singular_app (singular) main load test key-one and key-two for jvm_memory jmx metrics for graph data
 		When I post to "/repose_singular_app/results/main/load_test/compare-plugin/metric" with:
@@ -404,7 +494,13 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "200"
-		And the page should match the "repose_singular_app_compare_plugin_results_repose_jmx_plugin_jvm_threads" version
+		And the message should contain "key-one"
+		And the message should contain "key-two"
+		And the message should contain "41.75"
+		And the message should contain "17.5"
+		And the message should contain "41.0"
+		And the message should contain "PeakThreadCount"
+		And the message should contain "instance"
 		
 	Scenario: Compare repose_singular_app (singular) main load test key-one and key-two for jvm_threads jmx metrics for graph data
 		When I post to "/repose_singular_app/results/main/load_test/compare-plugin/metric" with:
@@ -427,7 +523,7 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "404"
-		And the error page should match the "No data for ReposeJmxPlugin|||logs found"
+		And the error should match the "No data for ReposeJmxPlugin|||logs found"
 		
 	Scenario: Compare repose_singular_app (singular) main load test key-one and key-two for logs jmx metrics for graph data
 		When I post to "/repose_singular_app/results/main/load_test/compare-plugin/metric" with:
@@ -451,7 +547,7 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "404"
-		And the error page should match the "No data for ReposeJmxPlugin|||unknown found"
+		And the error should match the "No data for ReposeJmxPlugin|||unknown found"
 		
 	Scenario: Compare repose_singular_app (singular) main load test key-one and key-two for unknown jmx metrics for graph data
 		When I post to "/repose_singular_app/results/main/load_test/compare-plugin/metric" with:
@@ -475,7 +571,7 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "404"
-		And the error page should match the "No plugin by name of unknown found"
+		And the error should match the "No plugin by name of unknown found"
 		
 	Scenario: Compare repose_singular_app (singular) main load test key-one and key-two for filters none metrics for graph data
 		When I post to "/repose_singular_app/results/main/load_test/compare-plugin/metric" with:
@@ -499,7 +595,7 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "404"
-		And the error page should match the "No application by name of repose_singular_app/invalid found"
+		And the error should match the "No application by name of repose_singular_app/invalid found"
 		
 	Scenario: Compare repose_singular_app (singular) main invalid test key-one and key-two for filters jmx metrics for graph data
 		When I post to "/repose_singular_app/results/main/invalid/compare-plugin/metric" with:
@@ -523,7 +619,7 @@ Feature: Repose Plugin Page
 		  }
 		"""
 		Then the response should be "404"
-		And the error page should match the "No sub application for invalid found"
+		And the error should match the "No sub application for invalid found"
 		
 	Scenario: Compare repose_singular_app (singular) invalid load test key-one and key-two for filters jmx metrics for graph data
 		When I post to "/repose_singular_app/results/invalid/load_test/compare-plugin/metric" with:

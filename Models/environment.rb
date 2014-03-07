@@ -88,7 +88,7 @@ class Environment
   end
 
   
-  def load_balance(region, servers, port = 80, name) 
+  def load_balance(region, servers, port = 80, name = "repose") 
     load_balance_connect region
     repose_nodes = []  
     origin_nodes = []  

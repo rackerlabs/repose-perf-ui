@@ -1,0 +1,11 @@
+---
+application:
+  name: Singular Test App
+  description: 
+  location: apps/singular_test/bootstrap.rb
+  type: singular
+  plugins: []
+  sub_apps:
+  - id: main
+    name: Main
+    description: main description

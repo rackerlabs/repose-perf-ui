@@ -1,0 +1,24 @@
+---
+  - :id: metric_one
+    :name: Metric One
+    :type: :before_after
+    - metric: 
+      - id: test-metric-one
+        description: random description
+      - id: test-metric-two
+        description: random description
+      - id: test-metric-three
+        description: random description
+      regex: ^localhost.*JmxReporter\$Timer\.(.*)\.(\w+)\s+(\d*\.?\d+?)\s+(\d+)$
+  - :id: metric_two
+    :name: Metric Two
+    :type: :before_after
+    - metric: 
+      - id: test-metric-one
+        description: random description
+      - id: test-metric-two
+        description: random description
+      - id: test-metric-three
+        description: random description
+      regex: ^localhost.*JmxReporter\$Timer\.(.*)\.(\w+)\s+(\d*\.?\d+?)\s+(\d+)$
+    

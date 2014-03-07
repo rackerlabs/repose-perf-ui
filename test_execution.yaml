@@ -7,3 +7,5 @@
     test_type: []
   - name: translation
     test_type: []
+  - name: dbaas
+    test_type: []
