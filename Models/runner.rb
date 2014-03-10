@@ -16,7 +16,7 @@ module Models
           temp_hash[:average] = average
           temp_hash[:errors] = errors
         end
-      end
+      end if summary_list
 =begin
       if temp_hash[:length].nil?
         summary = `tail -1 #{summary_location}`
