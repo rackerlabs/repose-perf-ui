@@ -15,7 +15,7 @@ module SnapshotComparer
         test_list.each do |test|
           meta_results = store.hgetall("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:meta")
           data_result = store.hget("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:data", "results")
-          if meta_results and data_result
+          if meta_results && data_result && !data_result.empty? && !meta_results.empty?
             test_json = JSON.parse(meta_results['test'])
             test.merge!(test_json) if test_json
             runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
@@ -104,14 +104,16 @@ module SnapshotComparer
         test_list.each do |test|
           meta_results = store.hgetall("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:meta")
           data_result = store.hget("#{test[:application]}:#{test[:name]}:results:#{test[:test_type]}:#{test[:guid]}:data", "results")
-          test_json = JSON.parse(meta_results['test'])
-          test.merge!(test_json) if test_json
-          runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
-          summary_data = JSON.parse(data_result)['location']
-          runner_class.compile_summary_results(test, test[:guid], "http://#{fs_ip}#{summary_data}")
-          singular_test_list << Result.new(
-              test['start'],test[:length],test[:average],
-              test[:throughput], test[:errors], test['name'], test['description'], test[:guid])
+          if meta_results && data_result && !data_result.empty? && !meta_results.empty?
+            test_json = JSON.parse(meta_results['test'])
+            test.merge!(test_json) if test_json
+            runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
+            summary_data = JSON.parse(data_result)['location']
+            runner_class.compile_summary_results(test, test[:guid], "http://#{fs_ip}#{summary_data}")
+            singular_test_list << Result.new(
+                test['start'],test[:length],test[:average],
+                test[:throughput], test[:errors], test['name'], test['description'], test[:guid])
+          end
         end
         singular_test_list
       ensure
