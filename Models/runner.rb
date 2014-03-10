@@ -34,12 +34,36 @@ module Models
 
     def compile_detailed_results(guid, entry)
       detailed_results = []
-      temp_time = 0
+      actual_throughput = 0
+      prev_throughput = 0
+      current_time = 0
+      prev_time = 0
+      avg = 0
+      errors = 0
       open(entry).readlines.each do |line|
-        time_line = line.scan(/summary \=\s+\d+\s+in\s+(\d+(?:\.\d)?)s/)
-        t = line.scan(/summary \+\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/)
-        temp_time = time_line[0][0].to_i unless time_line.empty?
-        detailed_results << DetailedResult.new(temp_time, t[0][1], t[0][2], t[0][3]) unless t.empty?
+        time_line = line.scan(/summary \=\s+(\d+)\s+in\s+(\d+(?:\.\d)?)s/)
+        puts "time line: #{time_line.inspect}"
+        range_entry = line.scan(/summary \+\s+(\d+)\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/)
+        puts "t: #{range_entry.inspect}"
+        unless range_entry.empty?
+          avg = range_entry[0][3].to_i
+          errors = range_entry[0][4].to_i
+          puts "set avg, errors: #{range_entry[0][3]}, #{range_entry[0][4]}"
+        end
+        unless time_line.empty?
+          total_throughput = time_line[0][0].to_i
+          current_time = time_line[0][1].to_i
+          puts "(#{total_throughput} - #{prev_throughput}) / (#{current_time} - #{prev_time})"
+          actual_throughput = (total_throughput - prev_throughput) / (current_time - prev_time) if current_time - prev_time > 0
+          prev_time = current_time
+          prev_throughput = total_throughput
+          puts "set throughput, time range, temp time: #{actual_throughput}, #{current_time}"
+        end
+        puts "throughput: #{actual_throughput}, #{avg}, #{errors}, #{current_time}"
+        if actual_throughput.to_i > 0 && current_time.to_i > 0
+          detailed_results << DetailedResult.new(current_time, actual_throughput, avg, errors)
+          current_time, actual_throughput, avg, errors = 0
+        end
       end
       detailed_results
     end
