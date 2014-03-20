@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+source /usr/local/rvm/environments/ruby-2.0.0-p353
+cd /root/viewer/hERmes_viewer
+bundle install
+ruby -v
+which ruby
+echo "start duration test"
+ruby cloud_feeds.rb -a atom_hopper -s staging -t duration -c start -l 1440 -d "This is the weekly cloud feeds test" -n "Duration test against cloud feeds" -r jmeter -e 10.23.80.100
+echo "stop duration test"
+ruby cloud_feeds.rb -a atom_hopper -s staging -t duration -c stop -l 1440 -d "This is the weekly cloud feeds test" -n "Duration test against cloud feeds" -r jmeter -e 10.23.80.100
+echo "finished duration test."
