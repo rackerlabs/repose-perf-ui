@@ -138,7 +138,8 @@
           yAxis:{
             title: {
               text: 'Milliseconds'
-            }
+            },
+            min: 0
           },
           xAxis:{
             type: 'datetime',
@@ -162,7 +163,8 @@
           yAxis:{
             title: {
               text: 'requests/sec'
-            }
+            },
+            min: 0
           },
           xAxis:{
             type: 'datetime',
@@ -186,7 +188,8 @@
           yAxis:{
             title: {
               text: 'Total'
-            }
+            },
+            min: 0
           },
           xAxis:{
             type: 'datetime',
@@ -221,7 +224,7 @@ console.log(data);
 
       function convertDate(value){
         var temp_date = new Date(parseInt(value[0]));
-        return [parseInt(value[0]), Math.abs(value[1])];
+        return [parseInt(value[0]) * 1000, Math.abs(value[1])];
       }
     </script>
   </body>

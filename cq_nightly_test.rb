@@ -42,6 +42,7 @@ def get_server_ips(lb_name, logger, env)
       retry_counter = retry_counter + 1  
     end
   end
+  raise "Could not get servers" unless run_succeeded
   logger.debug "nodes: #{node_ips}"
   
   {:lb => lb_ip, :nodes => node_ips}
@@ -52,7 +53,7 @@ def get_test_ip(logger, env)
   retry_counter = 0
   while !run_succeeded && retry_counter < RETRY_COUNT
     begin
-      test_agent = env.service.servers.find {|server| server.name =~ /test_agent/}.ipv4_address
+      test_agent = env.service.servers.find {|server| server.name =~ /test-agent-0/}.ipv4_address
       logger.info "test agent: #{test_agent}"
       run_succeeded = true
     rescue Exception => e
@@ -61,6 +62,7 @@ def get_test_ip(logger, env)
       retry_counter = retry_counter + 1  
     end
   end
+  raise "Could not get test server" unless run_succeeded
   test_agent
 end
 
@@ -70,7 +72,8 @@ environment_hash = {
  :identity => :iad,
  :dbaas => :iad,
  :auto_scale => :dfw,
- :psl => :dfw
+ :psl => :dfw,
+ :cloud_queues => :dfw
 }
 
 
@@ -168,7 +171,7 @@ if opts[:action] == 'stop'
   while !run_succeeded && retry_counter < RETRY_COUNT
     begin
       Net::SSH.start(test_agent, 'root') do |ssh|
-        ssh.exec!("/home/apache/apache-jmeter-2.10/bin/shutdown.sh")
+        ssh.exec!("/home/apache/apache-jmeter-2.9/bin/shutdown.sh")
       end
       run_succeeded = true
     rescue Exception => e
@@ -182,11 +185,11 @@ if opts[:action] == 'stop'
     if opts[:with_repose]
       #performance with repose!
       logger.debug "we just ran a test on performance flavor with repose"
-      server_ip_info = get_server_ips("repose_lb_perf_flavors_withrepose", logger, env)
+      server_ip_info = get_server_ips("repose_lb_perf_flavors_withrepose_0", logger, env)
     else
       #performance without repose!
       logger.debug "we just ran a test on performance flavor without repose"
-      server_ip_info = get_server_ips("repose_lb_perf_flavors_withoutrepose", logger, env)
+      server_ip_info = get_server_ips("repose_lb_perf_flavors_withoutrepose_0", logger, env)
     end
   else
     if opts[:with_repose]
@@ -305,10 +308,13 @@ if opts[:action] == 'stop'
       system "ssh root@#{server} 'rm -rf /home/repose/usr/share/repose/repose-valve.jar '" 
       system "ssh root@#{server} 'rm -rf /home/repose/usr/share/repose/filters/* '" 
       system "ssh root@#{server} 'rm -rf /home/repose/logs/* '" 
+      system "ssh root@#{server} 'rm -rf /home/repose/deployments/* '" 
     end
     system "ssh root@#{server} -f 'killall node '"
     system "ssh root@#{server} -f 'killall sar '"
     system "ssh root@#{server} -f 'service sysstat stop '"
+    system "ssh root@#{server} -f 'killall mongo '"
+    system "ssh root@#{server} -f 'killall marconi-server '"
   end
 
   logger.info "remove the used values from yaml"
@@ -358,11 +364,11 @@ elsif opts[:action] == 'start'
     if opts[:with_repose]
       #performance with repose!
       logger.debug "we are setting up a test on performance flavor with repose"
-      server_ip_info = get_server_ips("repose_lb_perf_flavors_withrepose", logger, env)
+      server_ip_info = get_server_ips("repose_lb_perf_flavors_withrepose_0", logger, env)
     else
       #performance without repose!
       logger.debug "we are setting up a test on performance flavor without repose"
-      server_ip_info = get_server_ips("repose_lb_perf_flavors_withoutrepose", logger, env)
+      server_ip_info = get_server_ips("repose_lb_perf_flavors_withoutrepose_0", logger, env)
     end
   else
     if opts[:with_repose]
@@ -400,6 +406,9 @@ elsif opts[:action] == 'start'
 
   server_ip_info[:nodes].each do |server|
     if opts[:with_repose]
+      logger.info "make sure you create the deployments directory"
+      system "ssh root@#{server} 'mkdir -p /home/repose/deployments '"
+
       config_list.each do |config_data|
         #first, download from remote
 
@@ -443,6 +452,8 @@ elsif opts[:action] == 'start'
             Net::SSH.start(server, 'root') do |ssh|
               ssh.exec!("mkdir -p /home/repose/configs/#{directory_to_save}")
             end
+
+            logger.debug "#{config['storage_info']['path']}/#{JSON.parse(config_data)['location']}"
             Net::SCP.upload!(
               server, 
               'root', 
@@ -576,11 +587,11 @@ elsif opts[:action] == 'start'
             {:recursive => true, :verbose => true }
           )
         else
-          system "ssh root@#{server} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --version #{opts[:release]}'"
+          system "ssh root@#{server} 'cd /home/repose ; apt-get install virtualenv ; apt-get install python-pip ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --version #{opts[:release]}'"
         end
       else 
         logger.info "download snapshot version"
-        system "ssh root@#{server} 'cd /home/repose ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --snapshot'"      
+        system "ssh root@#{server} 'cd /home/repose ; apt-get install virtualenv ; apt-get install python-pip ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --snapshot'"      
       end
     end
     
@@ -625,6 +636,8 @@ elsif opts[:action] == 'start'
         FileUtils.rm_rf("/tmp/#{guid}")
       end
       system "ssh root@#{server} -f 'node /home/mocks/#{name} & '"
+      #this is cloud queues specific to start marconi
+      system "ssh root@#{server} -f 'sudo apt-get install -y python-dev; sudo apt-get install -y python-pip; sudo apt-get install -y openjdk-6-jdk;sudo apt-get install -y git; sudo apt-get install -y gunicorn;sudo apt-get install -y mongodb; git clone https://github.com/openstack/marconi ; mkdir ~/.marconi ; cp /home/repose/configs/marconi.conf ~/.marconi/marconi.conf; cp etc/logging.conf.sample ~/.marconi/logging.conf; cd ~/marconi/ ; sudo pip install -e . ; pip install httpie ; nohup marconi-server -v &'"
     end if opts[:with_repose] || (!opts[:with_repose] && !secondary_responders) || (!opts[:with_repose] && secondary_responders && secondary_responders.length == 0)
     logger.info "secondary responders: #{secondary_responders}"
     logger.debug !opts[:with_repose] && secondary_responders
@@ -872,13 +885,13 @@ elsif opts[:action] == 'start'
     when "load"
       rampdown = test_data["rampdown"] 
       throughput = test_data["throughput"]
-      logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{test_duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 >> /home/apache/test/summary.log & '"
-      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{test_duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 -l /home/apache/test/response.jtl >> /home/apache/test/summary.log & '"
+      logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.9/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.9/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{test_duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 >> /home/apache/test/summary.log & '"
+      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.9/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.9/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{test_duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 -l /home/apache/test/response.jtl >> /home/apache/test/summary.log & '"
     when "stress"  
       rampup_threads = test_data["rampup_threads"]  
       maxthreads = test_data["maxthreads"]
-      logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{test_duration} -Jrampup_threads=#{rampup_threads} -Jmaxthreads=#{maxthreads} -Jport=80 -l /home/apache/test/response.jtl >> /home/apache/test/summary.log & '"
-      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -R 162.209.124.170,162.209.124.104,162.209.99.151,162.209.97.222,162.209.103.84 -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gmaxthreads=#{maxthreads} -Gport=80 >> /home/apache/test/summary.log & '"
+      logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.9/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.9/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{test_duration} -Jrampup_threads=#{rampup_threads} -Jmaxthreads=#{maxthreads} -Jport=80 -l /home/apache/test/response.jtl >> /home/apache/test/summary.log & '"
+      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.9/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -R 162.209.124.170,162.209.124.104,162.209.99.151,162.209.97.222,162.209.103.84 -p /home/apache/apache-jmeter-2.9/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gmaxthreads=#{maxthreads} -Gport=80 >> /home/apache/test/summary.log & '"
 
       sleep(60)
       logger.info Net::SSH.start(test_agent,'root') {|ssh| ssh.exec!("lsof -i :4445")}

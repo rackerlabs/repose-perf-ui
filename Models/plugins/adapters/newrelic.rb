@@ -50,14 +50,21 @@ module PluginModule
           f.write(RestClient.get "https://api.newrelic.com/api/v1/accounts/#{@remote_account}/agents/#{@remote_agent}/data.json?metrics[]=#{metrics}&begin=#{target_start}&end=#{target_stop}&field=#{@remote_field}", {"x-api-key" => @remote_api})
         end
 
+
+        puts "local: #{@local_host}, user: #{@local_user} to #{@local_path}/#{application}/#{sub_app}/results/#{type}"
         #second, upload to local
-        Net::SCP.upload!(
-          @local_host,
-          @local_user,
-          "/tmp/#{guid}/",
-          "#{@local_path}/#{application}/#{sub_app}/results/#{type}",
-          {:recursive => true, :verbose => true }
-        )
+        if @local_host == 'localhost'
+          FileUtils.mkpath "#{@local_path}/#{application}/#{sub_app}/results/#{type}" unless File.exists?("#{@localhost_path}/#{application}/#{sub_app}/results/#{type}")
+          FileUtils.cp_r "/tmp/#{guid}/", "#{@local_path}/#{application}/#{sub_app}/results/#{type}/"
+        else
+          Net::SCP.upload!(
+            @local_host,
+            @local_user,
+            "/tmp/#{guid}/",
+            "#{@local_path}/#{application}/#{sub_app}/results/#{type}",
+            {:recursive => true, :verbose => true }
+          )
+        end
         #third, add to redis
         Dir.glob("#{tmp_dir}/**/*") do |entry|
           entry_basename = File.basename(entry)

@@ -42,9 +42,10 @@ module PluginModule
           local_stop = tz.utc_to_local(target_stop).strftime("%H:%M_%Y%m%d")
         end
 
+        puts "get data from http://#{@remote_host}/render/?target=#{targets}&from=#{local_start}&until=#{local_stop}&format=json"
 
         File.open("#{tmp_dir}/graphitedata.out_#{@remote_host}", 'w') do |f|
-          f.write(RestClient.get "http://#{@remote_host}/render/?#{targets}&from=#{local_start}&until=#{local_stop}&format=json")
+          f.write(RestClient.get "http://#{@remote_host}/render/?target=#{targets}&from=#{local_start}&until=#{local_stop}&format=json")
         end
        
 

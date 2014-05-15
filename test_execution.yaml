@@ -2,10 +2,14 @@
 - name: repose
   sub_app:
   - name: atom_hopper
-    test_type: []
+    test_type:
+    - name: load
+      repose_guid: 8ee5a4d5-537c-458f-a654-acb68824de41
   - name: identity
     test_type: []
   - name: translation
     test_type: []
   - name: dbaas
+    test_type: []
+  - name: cloud_queues
     test_type: []
