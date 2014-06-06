@@ -12,7 +12,6 @@ coverage/
 Gemfile.lock
 *.png
 *.log
-*.db
 hERmes_viewer/
 .metadata
 files/*
