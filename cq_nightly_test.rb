@@ -587,11 +587,11 @@ elsif opts[:action] == 'start'
             {:recursive => true, :verbose => true }
           )
         else
-          system "ssh root@#{server} 'cd /home/repose ; apt-get install virtualenv ; apt-get install python-pip ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --version #{opts[:release]}'"
+          system "ssh root@#{server} 'cd /home/repose ; apt-get install python-pip ; pip install virtualenv ;  virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --version #{opts[:release]} ; deactivate'"
         end
       else 
         logger.info "download snapshot version"
-        system "ssh root@#{server} 'cd /home/repose ; apt-get install virtualenv ; apt-get install python-pip ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --snapshot'"      
+        system "ssh root@#{server} 'cd /home/repose ; apt-get install python-pip ; pip install virtualenv ; virtualenv . ; source bin/activate ; pip install requests ; pip install narwhal ; download-repose --snapshot ; deactivate '"      
       end
     end
     

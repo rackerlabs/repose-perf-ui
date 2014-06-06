@@ -40,6 +40,7 @@ Attributes:
   name - test name
   runner - which runner to use to run the test (jmeter, gatling, etc)
   test_agent - remote test agent
+  test_agent_slaves - remote test agent slaves
 Usage:
        cloud --name <app name> --test-type <load|duration|benchmark> --action <start|stop>
 where [options] are:
@@ -53,6 +54,7 @@ EOS
   opt :name, "Test name", :type => :string
   opt :runner, "Runner", :type => :string
   opt :test_agent, "Test agent", :type => :string
+  opt :test_agent_slaves, "Test agent slaves", :type => :string
 end
 
 Trollop::die :action, "must be specified" unless opts[:action]
@@ -266,15 +268,15 @@ elsif opts[:action] == 'start'
     when "load"
       rampdown = test_data["rampdown"] 
       throughput = test_data["throughput"]
-      logger.info "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -R 166.78.107.85,166.78.107.252,166.78.107.4,166.78.101.137 >> /opt/test/summary.log & '"
-      system "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -l /opt/test/response.jtl -R 166.78.107.85,166.78.107.252,166.78.107.4,166.78.101.137 >> /opt/test/summary.log & '"
+      logger.info "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
+      system "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -l /opt/test/response.jtl -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
 
       sleep(test_duration)
     when "duration"
       rampdown = test_data["rampdown"] 
       throughput = test_data["throughput"]
-      logger.info "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -R 166.78.107.85,166.78.107.252,166.78.107.4,166.78.101.137 >> /opt/test/summary.log & '"
-      system "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -l /opt/test/response.jtl -R 166.78.107.85,166.78.107.252,166.78.107.4,166.78.101.137 >> /opt/test/summary.log & '"
+      logger.info "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
+      system "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -l /opt/test/response.jtl -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
 
       sleep(60)
       logger.info Net::SSH.start(opts[:test_agent],'cloudfeeds') {|ssh| ssh.exec!("lsof -i :4445")}
@@ -288,8 +290,8 @@ elsif opts[:action] == 'start'
     when "stress"  
       rampup_threads = test_data["rampup_threads"]  
       maxthreads = test_data["maxthreads"]
-      logger.info "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gthreads=#{maxthreads} -Gmaxthreads=#{maxthreads}  -l /opt/test/response.jtl -R 166.78.107.85,166.78.107.252,166.78.107.4,166.78.101.137 >> /opt/test/summary.log & '"
-      system "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gthreads=#{maxthreads} -Gmaxthreads=#{maxthreads}  -l /opt/test/response.jtl -R 166.78.107.85,166.78.107.252,166.78.107.4,166.78.101.137 >> /opt/test/summary.log & '"
+      logger.info "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gthreads=#{maxthreads} -Gmaxthreads=#{maxthreads}  -l /opt/test/response.jtl -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
+      system "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gthreads=#{maxthreads} -Gmaxthreads=#{maxthreads}  -l /opt/test/response.jtl -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
 
       sleep(60)
       logger.info Net::SSH.start(opts[:test_agent],'cloudfeeds') {|ssh| ssh.exec!("lsof -i :4445")}

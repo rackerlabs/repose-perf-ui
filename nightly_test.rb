@@ -16,14 +16,14 @@ require 'rest_client'
 
 RETRY_COUNT = 3
 
-def get_server_ips(lb_name, logger, env)
+def get_server_ips(lb_name, logger, env, test_id)
   run_succeeded = false
   retry_counter = 0
   while !run_succeeded && retry_counter < RETRY_COUNT
     begin
-      logger.debug "load balancer name: #{lb_name}"
+      logger.debug "load balancer name: #{lb_name}_#{test_id}"
       lb_ip = env.lb_service.load_balancers.find do |lb| 
-        lb.name =~ /#{Regexp.escape(lb_name)}/ 
+        lb.name =~ /#{Regexp.escape(lb_name)}_#{Regexp.escape(test_id.to_s)}/ 
       end.virtual_ips.find do |ip| 
         ip.ip_version == 'IPV4' && ip.type == 'PUBLIC' 
       end.address
@@ -31,7 +31,7 @@ def get_server_ips(lb_name, logger, env)
       logger.debug "load balancer ip: #{lb_ip}"
   
       node_ips = env.lb_service.load_balancers.find do |lb| 
-        lb.name =~ /#{Regexp.escape(lb_name)}/ 
+        lb.name =~ /#{Regexp.escape(lb_name)}_#{Regexp.escape(test_id.to_s)}/ 
       end.nodes.map do |ip| 
         ip.address 
       end
@@ -47,12 +47,12 @@ def get_server_ips(lb_name, logger, env)
   {:lb => lb_ip, :nodes => node_ips}
 end
 
-def get_test_ip(logger, env)
+def get_test_ip(logger, env, test_id)
   run_succeeded = false
   retry_counter = 0
   while !run_succeeded && retry_counter < RETRY_COUNT
     begin
-      test_agent = env.service.servers.find {|server| server.name =~ /test_agent/}.ipv4_address
+      test_agent = env.service.servers.find {|server| server.name =~ /test-agent-id-#{Regexp.escape(test_id.to_s)}/}.ipv4_address
       logger.info "test agent: #{test_agent}"
       run_succeeded = true
     rescue Exception => e
@@ -64,13 +64,32 @@ def get_test_ip(logger, env)
   test_agent
 end
 
+def get_slave_test_ip(logger, env, test_id)
+  run_succeeded = false
+  retry_counter = 0
+  while !run_succeeded && retry_counter < RETRY_COUNT
+    begin
+      
+      test_agent_list = env.service.servers.find_all {|server| logger.info server.name ;  server.name =~ /slave-test-agent-id-#{Regexp.escape(test_id.to_s)}/}.map {|server| server.ipv4_address}
+      logger.info "slave test agent list: #{test_agent_list}"
+      run_succeeded = true
+    rescue Exception => e
+      logger.info e
+      logger.info e.backtrace
+      retry_counter = retry_counter + 1  
+    end
+  end
+  test_agent_list
+end
+
 environment_hash = {
  :atom_hopper => :iad,
  :translation => :iad,
  :identity => :iad,
  :dbaas => :iad,
  :auto_scale => :dfw,
- :psl => :dfw
+ :psl => :dfw,
+ :cloud_queues => :dfw
 }
 
 
@@ -126,11 +145,13 @@ Attributes:
   description - description of the test
   name - test name
   release - specify release.  We'll be testing against 2.11.0
+  branch - specifies branch.  Defaults to master
   flavor_type - can either be original or performance
   runner - which runner to use to run the test (jmeter, gatling, etc)
+  test_id - specifies test id
   with_repose - whether repose or origin target server
 Usage:
-       cloud --name <app name> --test-type <load|duration|benchmark> --action <start|stop>
+       nightly_test --app repose --sub-app <sub app name> --test-type <load|duration|benchmark> --action <start|stop> --length 60 --description <some desc> --release master --branch master --flavor-type performance --runner jmeter --test-id 0 --with-repose true
 where [options] are:
 EOS
   opt :app, "App name", :default => "repose"
@@ -141,8 +162,10 @@ EOS
   opt :description, "Test description", :type => :string
   opt :name, "Test name", :type => :string
   opt :release, "Specify Release", :type => :string
+  opt :branch, "Specify Branch", :type => :string
   opt :flavor_type, "Flavor type", :type => :string
   opt :runner, "Runner", :type => :string
+  opt :test_id, "Test id", :type => :int
   opt :with_repose, "Boolean repose", :type => :boolean
   opt :extra_ear, "Extra ears containing filters not in Repose", :type => :string
 end
@@ -161,7 +184,7 @@ if opts[:action] == 'stop'
   env.connect(environment_hash[opts[:sub_app].to_sym])
   env.load_balance_connect(environment_hash[opts[:sub_app].to_sym])
 
-  test_agent = get_test_ip(logger, env)
+  test_agent = get_test_ip(logger, env, opts[:test_id])
 
   run_succeeded = false
   retry_counter = 0
@@ -182,21 +205,21 @@ if opts[:action] == 'stop'
     if opts[:with_repose]
       #performance with repose!
       logger.debug "we just ran a test on performance flavor with repose"
-      server_ip_info = get_server_ips("repose_lb_perf_flavors_withrepose", logger, env)
+      server_ip_info = get_server_ips("repose_lb_perf_flavors_withrepose", logger, env, opts[:test_id])
     else
       #performance without repose!
       logger.debug "we just ran a test on performance flavor without repose"
-      server_ip_info = get_server_ips("repose_lb_perf_flavors_withoutrepose", logger, env)
+      server_ip_info = get_server_ips("repose_lb_perf_flavors_withoutrepose", logger, env, opts[:test_id])
     end
   else
     if opts[:with_repose]
       #original with repose!
       logger.debug "we just ran a test on original flavor with repose"
-      server_ip_info = get_server_ips("repose_lb_original_withrepose", logger, env)
+      server_ip_info = get_server_ips("repose_lb_original_withrepose", logger, env, opts[:test_id])
     else
       #original with repose!
       logger.debug "we just ran a test on original flavor without repose"
-      server_ip_info = get_server_ips("repose_lb_original_withoutrepose", logger, env)
+      server_ip_info = get_server_ips("repose_lb_original_withoutrepose", logger, env, opts[:test_id])
     end
   end
 
@@ -358,23 +381,26 @@ elsif opts[:action] == 'start'
     if opts[:with_repose]
       #performance with repose!
       logger.debug "we are setting up a test on performance flavor with repose"
-      server_ip_info = get_server_ips("repose_lb_perf_flavors_withrepose", logger, env)
+      server_ip_info = get_server_ips("repose_lb_perf_flavors_withrepose", logger, env,opts[:test_id])
     else
       #performance without repose!
       logger.debug "we are setting up a test on performance flavor without repose"
-      server_ip_info = get_server_ips("repose_lb_perf_flavors_withoutrepose", logger, env)
+      server_ip_info = get_server_ips("repose_lb_perf_flavors_withoutrepose", logger, env, opts[:test_id])
     end
   else
     if opts[:with_repose]
       #original with repose!
       logger.debug "we are setting up a test on original flavor with repose"
-      server_ip_info = get_server_ips("repose_lb_original_withrepose", logger, env)
+      server_ip_info = get_server_ips("repose_lb_original_withrepose", logger, env, opts[:test_id])
     else
       #original with repose!
       logger.debug "we are setting up a test on original flavor without repose"
-      server_ip_info = get_server_ips("repose_lb_original_withoutrepose", logger, env)
+      server_ip_info = get_server_ips("repose_lb_original_withoutrepose", logger, env, opts[:test_id])
     end
   end
+
+  slave_test_agent_list = get_slave_test_ip(logger,env,opts[:test_id])
+  logger.info "slaves: #{slave_test_agent_list.inspect}"
 
   logger.info "get into redis"
   redis = Redis.new({:host => config['redis']['host'], :port => config['redis']['port'], :db => config['redis']['db']})
@@ -393,7 +419,8 @@ elsif opts[:action] == 'start'
 
 
   if opts[:with_repose] and opts[:release] and opts[:release] == 'master'
-    system "rm -rf ~/repose_repo/repose ; mkdir ~/repose_repo/repose ; cd ~/repose_repo/repose ; git init ; git pull https://github.com/rackerlabs/repose master ; mvn clean install -U -DskipTests; "
+    branch = opts[:branch] ? opts[:branch] : 'master'
+    system "rm -rf ~/repose_repo/repose ; mkdir ~/repose_repo/repose ; cd ~/repose_repo/repose ; git init ; git pull https://github.com/rackerlabs/repose #{opts[:branch]} ; mvn clean install -U -DskipTests; "
   end
 
   is_started_successfully = false
@@ -522,7 +549,7 @@ elsif opts[:action] == 'start'
         end
  
         logger.info "stop jmxtrans"
-        system "ssh root@#{server} 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
+        system "ssh root@#{server} -f 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
         logger.debug "start jmxtrans"
         system "ssh root@#{server} -f 'cd /usr/share/jmxtrans ; ./jmxtrans.sh start #{plugin['name']} '" 
       end if plugin_list_json
@@ -624,7 +651,7 @@ elsif opts[:action] == 'start'
       
         FileUtils.rm_rf("/tmp/#{guid}")
       end
-      system "ssh root@#{server} -f 'node /home/mocks/#{name} & '"
+      system "ssh root@#{server} -f 'nohup node /home/mocks/#{name} & '"
     end if opts[:with_repose] || (!opts[:with_repose] && !secondary_responders) || (!opts[:with_repose] && secondary_responders && secondary_responders.length == 0)
     logger.info "secondary responders: #{secondary_responders}"
     logger.debug !opts[:with_repose] && secondary_responders
@@ -668,7 +695,7 @@ elsif opts[:action] == 'start'
         FileUtils.rm_rf("/tmp/#{guid}")
       end
         
-      system "ssh root@#{server} -f 'node /home/mocks/#{name} & '"
+      system "ssh root@#{server} -f 'nohup node /home/mocks/#{name} & '"
     end if secondary_responders && !opts[:with_repose]
 
     logger.info "start logging sysstats"
@@ -676,7 +703,7 @@ elsif opts[:action] == 'start'
 
     if opts[:with_repose]
       logger.info "start repose"
-      system "ssh root@#{server} -f 'nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ -s 6666 start & '" 
+      system "ssh root@#{server} -f 'nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Xms4G -Xmx4G -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ -s 6666 start & '" 
        
       
       is_valid = false
@@ -710,7 +737,7 @@ elsif opts[:action] == 'start'
     end
   end
 
-  test_agent = get_test_ip(logger, env)
+  test_agent = get_test_ip(logger, env, opts[:test_id])
   Net::SSH.start(test_agent, 'root') do |ssh|
     ssh.exec!("mkdir -p /home/apache/test")
     ssh.exec!("rm -rf /home/apache/test/*")
@@ -872,13 +899,14 @@ elsif opts[:action] == 'start'
     when "load"
       rampdown = test_data["rampdown"] 
       throughput = test_data["throughput"]
-      logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{test_duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 >> /home/apache/test/summary.log & '"
-      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{test_duration} -Jrampdown=#{rampdown} -Jthroughput=#{throughput} -Jport=80 -l /home/apache/test/response.jtl >> /home/apache/test/summary.log & '"
+      slave_test_agent_list << test_agent
+      logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -R #{slave_test_agent_list.join(',')} >> /home/apache/test/summary.log & '"
+      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -l /home/apache/test/response.jtl -R #{slave_test_agent_list.join(',')} >> /home/apache/test/summary.log & '"
     when "stress"  
       rampup_threads = test_data["rampup_threads"]  
       maxthreads = test_data["maxthreads"]
-      logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Jhost=#{host} -Jstartdelay=#{startdelay} -Jrampup=#{rampup} -Jduration=#{test_duration} -Jrampup_threads=#{rampup_threads} -Jmaxthreads=#{maxthreads} -Jport=80 -l /home/apache/test/response.jtl >> /home/apache/test/summary.log & '"
-      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -R 162.209.124.170,162.209.124.104,162.209.99.151,162.209.97.222,162.209.103.84 -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gmaxthreads=#{maxthreads} -Gport=80 >> /home/apache/test/summary.log & '"
+      logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gmaxthreads=#{maxthreads} -Gport=80 -l /home/apache/test/response.jtl -R #{test_agent},166.78.152.90 >> /home/apache/test/summary.log & '"
+      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -R 162.209.124.170,162.209.124.104,162.209.99.151,162.209.97.222,162.209.103.84 -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gmaxthreads=#{maxthreads} -Gport=80 -R #{test_agent},166.78.152.90 >> /home/apache/test/summary.log & '"
 
       sleep(60)
       logger.info Net::SSH.start(test_agent,'root') {|ssh| ssh.exec!("lsof -i :4445")}

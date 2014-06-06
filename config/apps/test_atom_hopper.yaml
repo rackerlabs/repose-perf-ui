@@ -21,3 +21,6 @@ application:
   - id: staging
     name: Staging environment
     description: Atom Hopper setup in Staging environment
+  - id: tenant_id_search
+    name: Tenant id search
+    description: Test suite for search by tenant id only

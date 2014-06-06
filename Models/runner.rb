@@ -6,6 +6,7 @@ module Models
   class JMeterRunner
     def compile_summary_results(test_hash, guid, entry)
       temp_hash = {}
+puts entry
       summary_list = open(entry) do |f|
         f.readlines[-5..-1]
       end

@@ -25,11 +25,5 @@ application:
     name: Cloud Databases
     description: Repose setup with DBaaS configurations
   - id: cloud_queues
-    name: “Cloud
-    description: “repose
-  - id: cloud_queues
-    name: “Cloud
-    description: “repose
-  - id: cloud_queues
-    name: “Cloud
-    description: “repose
+    name: Cloud Queues
+    description: Repose setup with Cloud Queues configurations

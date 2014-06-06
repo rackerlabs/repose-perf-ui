@@ -387,6 +387,7 @@ module Apps
  get configs from user's servers.config
  add entry application:sub_app:results:type:guid:configs with the json path
 =end
+      puts "source config: #{source_config_info['server']}, #{source_config_info['user']}, #{source_config_info['path']}"
       Net::SCP.download!(
         source_config_info['server'],
         source_config_info['user'],
