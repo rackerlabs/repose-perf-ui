@@ -1,10 +1,23 @@
 require 'net/scp'
 require 'open-uri'
 require 'json'
+require_relative 'database.rb'
+require_relative 'sla.rb'
+require_relative '../apps/bootstrap.rb'
 
 module SnapshotComparer
 module Models
   class JMeterRunner
+    attr_reader :app_list
+
+    def initialize(app_list = nil)
+      if app_list
+        @app_list = app_list
+      else
+        @app_list = SnapshotComparer::Apps::Bootstrap.application_list 
+      end
+    end
+
     def compile_summary_results(test_hash, guid, entry)
       temp_hash = {}
       summary_list = open(entry) do |f|
@@ -69,7 +82,7 @@ module Models
       detailed_results
     end
 
-    def store_results(application, sub_app, type, guid, source_result_info, storage_info, store)
+    def store_results(application, sub_app, type, guid, source_result_info, storage_info, store, config = File.expand_path("config/config.yaml", Dir.pwd))
 =begin
  1. get file remotely (specified by configs whether it's an scp or wget)
  2. load file in specific directory via scp
@@ -98,9 +111,30 @@ module Models
   - compile summary results and save to pg (required)
   - compare sla to results and send notification (if set)
 =end
-      puts "testers"
       summary_results = compile_summary_results({}, guid, "/tmp/#{guid}/data/summary.log")
-      puts summary_results
+      database = SnapshotComparer::Models::PostgresDatabase.new
+      if config['database'] && Database.databases[config['database']['type'].to_sym]
+        database = Database.databases[config['database']['type'].to_sym]
+      end
+      #database.store_metrics_for_test(application, sub_app, type, guid, summary_results)
+      app_config = @app_list.find {|a| a[:id] == application}[:klass].new.config
+      sla_list = []
+      app_config['application']['sla'].each do | sla |
+        sla_list << SnapshotComparer::Models::Sla.new(sla['name'], sla['value'],sla['limit'].to_sym, sla['value_type'], sla['test_type'])
+      end
+# check if notification is set, send an email
+# compare sla list to results in summary_results
+      if app_config['application']['notify']
+        notification_results = []
+        puts summary_results.inspect
+        sla_list.each do |sla|
+          notification_results << SnapshotComparer::Models::Sla.result_failed_sla(sla,summary_results[sla.name.to_sym], type) if summary_results.has_key?(sla.name.to_sym)  
+        end
+        puts notification_results.inspect
+        puts sla_list.inspect
+      end
+
+            
     end
   end
 

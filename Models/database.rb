@@ -10,6 +10,12 @@ module Models
     attr_accessor :version
     attr_reader :db
 
+    def self.databases
+      {
+        :postgres => PostgresDatabase
+      }
+    end
+
     def initialize(name = nil)
       name = "performance" unless name
       @db = SQLite3::Database.new("#{name}.db")
@@ -40,11 +46,11 @@ module Models
   class PostgresDatabase
     attr_reader :conn
 
-    def initialize(config_path)
+    def initialize(config_path = nil)
       config_path ||= File.expand_path("config/config.yaml", Dir.pwd)
       @config = YAML.load_file(config_path)
 puts @config.inspect
-      @conn = PGconn.connect(dbname: @config['postgres']['db'],user: @config['postgres']['user'], password: @config['postgres']['password'], host: @config['postgres']['host'])
+      @conn = PGconn.connect(dbname: @config['datastore']['db'],user: @config['datastore']['user'], password: @config['datastore']['password'], host: @config['datastore']['host'])
     end
 
     def get_slas(app, sub_app, test_type)
