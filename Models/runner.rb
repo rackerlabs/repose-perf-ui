@@ -1,12 +1,12 @@
 require 'net/scp'
 require 'open-uri'
+require 'json'
 
 module SnapshotComparer
 module Models
   class JMeterRunner
     def compile_summary_results(test_hash, guid, entry)
       temp_hash = {}
-puts entry
       summary_list = open(entry) do |f|
         f.readlines[-5..-1]
       end
@@ -75,20 +75,32 @@ puts entry
  2. load file in specific directory via scp
 =end
       FileUtils.mkdir_p "/tmp/#{guid}/data/"
-      #if source_result_info['server'] == 'localhost'
+      if source_result_info['server'] == 'localhost'
+        FileUtils.mkpath "#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}" unless File.exists?("#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}")
+        FileUtils.cp_r source_result_info['path'], "/tmp/#{guid}/data/summary.log"
+      else
         Net::SCP.download!(
           source_result_info['server'],
           source_result_info['user'],
           source_result_info['path'],
           "/tmp/#{guid}/data/summary.log")
+      end
 
-          result_data = {}
-          result_data['location'] = "/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/#{guid}/data/summary.log"
-          result_data['name'] = 'summary.log'
+      result_data = {}
+      result_data['location'] = "/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/#{guid}/data/summary.log"
+      result_data['name'] = 'summary.log'
 
-          result = result_data.to_json
-      #end
+      result = result_data.to_json
       store.hset("#{application}:#{sub_app}:results:#{type}:#{guid}:data", "results", result)
+
+=begin
+  Here, check to see if notifications are set then check if it needs to be sent
+  - compile summary results and save to pg (required)
+  - compare sla to results and send notification (if set)
+=end
+      puts "testers"
+      summary_results = compile_summary_results({}, guid, "/tmp/#{guid}/data/summary.log")
+      puts summary_results
     end
   end
 
