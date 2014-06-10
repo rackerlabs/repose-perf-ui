@@ -20,6 +20,14 @@ module Models
     @description = description
     @status = status
   end
+
+  def self.get_overhead(results_one, results_two)
+    overhead = {}
+    results_one.each do |metric, value|
+      overhead.merge!({metric => value.to_f - results_two[metric].to_f}) if results_two[metric]
+    end
+    overhead
+  end  
 end
 
 class SummaryResult

@@ -1,4 +1,3 @@
-require './tests/Models/test_helper.rb'
 require  './Models/request.rb'
 
 class RequestTest < Test::Unit::TestCase

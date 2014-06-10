@@ -5,6 +5,12 @@ module SnapshotComparer
     class Notification
       attr_reader :notification_type
 
+    def self.notifications
+      {
+        :mail => MailNotification
+      }
+    end
+
       def initialize(notification_type)
         @notification_type = notification_type
       end

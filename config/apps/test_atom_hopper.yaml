@@ -31,4 +31,5 @@ application:
       value: 10
       test_type: load
   notification:
-    mail: dimitry.ushakov@rackspace.com
+    type: 'mail'
+    recipient_list: [dimitry.ushakov@rackspace.com,reposecore@rackspace.com]

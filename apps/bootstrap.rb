@@ -188,6 +188,7 @@ module Apps
         raise ArgumentError, "start time for this test was not found.  Did you forget to start the test?" unless store.get(id)
         start_test = JSON.parse(store.get(id))
         @logger.debug "start test: #{start_test}"
+        @logger.debug "check to make sure that the guid passed in the request is the same as the guid stored in redis"
         raise ArgumentError, "invalid guid" unless json_data['guid'] == start_test['guid']
         end_time = timestamp ? timestamp : Time.now.to_i
         @logger.debug "end time: #{end_time}"
@@ -349,13 +350,13 @@ module Apps
  update the following data with the values coming from the start_test entry
  - application:sub_app:results:type:guid:meta test (NEED application, sub_app, type, json_data, start_test, end_time)
 =end
-      copy_meta_test(application, sub_app, type, json_data, start_test, end_time, start_test['runner'], store)
+      copy_meta_test(application, sub_app, type, json_data, start_test, end_time, start_test['runner'], store )
 
       @logger.debug "get runner and store results"
       source_result_info = json_data['servers']['results']
       runner = Apps::Bootstrap.runner_list[start_test['runner'].to_sym]
       @logger.debug "store results"
-      runner.store_results(application, sub_app, type, json_data['guid'], source_result_info, storage_info, store)
+      runner.store_results(application, sub_app, type, json_data['guid'], source_result_info, storage_info, store, nil, start_test['comparison_guid'])
       @logger.debug "finish storing results"
       source_config_info = json_data['servers']['config'] if json_data['servers'].has_key?('config')
       @logger.debug "copy configs if required"

@@ -2,7 +2,10 @@ redis:
   host: localhost
   port: 6379
   db: 0
-file_store: localhost:3000  
+file_store:  
+scheme:
+ui_scheme: http://
+ui_hostname: performance.repose.rax.io
 storage_info:
   destination: localhost
   user: dimi5963
@@ -21,9 +24,9 @@ test_list:
   adhoc_test:
     name: Adhoc Test
     description: Test with custom settings.  A one-time only iteration
-postgres:
+datastore:
+  type: postgres
   host: localhost
-  db: perf_test_db
+  db: perf_db
   user: postgres
   password: dimaisawesome
-
