@@ -263,7 +263,7 @@ class MockComparisonLowSlaObject
          }
        ],
        'notify' => true,
-       'notification' => { 'type' => 'mail', 'recipient_list' => 'dimitry.ushakov@rackspace.com,reposecore@rackspace.com'}
+       'notification' => { 'type' => 'mail', 'recipient_list' => 'dimitry.ushakov@rackspace.com'}
      }
    }  
   end

@@ -2,6 +2,7 @@ require_relative  'request.rb'
 require_relative  'response.rb'
 require 'htmlentities'
 require 'redis'
+require 'json'
 
 module SnapshotComparer
   module Models
@@ -69,7 +70,7 @@ module SnapshotComparer
         requests_json = JSON.parse(requests) if requests
         responses_json = JSON.parse(responses) if responses
 
-        if requests_json and responses_json
+        if requests_json && requests_json.is_a?(Array) && responses_json && responses_json.is_a?(Array)
           requests_json.each do |request|
             request_list << Request.new(request["method"], request["uri"], request["headers"], coder.encode(request["body"]))
           end
