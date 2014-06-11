@@ -179,7 +179,7 @@ module Models
           if !@notification_validation_results.empty?
             @notification_validation_results << link_to_result
             notification = SnapshotComparer::Models::Notification.notifications[app_config['application']['notification']['type'].to_sym]
-            notification.new(app_config['application']['notification']['recipient_list'], "SLA failed", @notification_validation_results).send_notification
+            notification.new(app_config['application']['notification']['recipient_list'], "SLA failed for #{application}:#{sub_app}:#{type}", @notification_validation_results).send_notification
           end
         end
       end           
