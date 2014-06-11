@@ -29,7 +29,7 @@ class JMeterRunnerTest < Test::Unit::TestCase
    source_result_info = {
      'server' => 'localhost',
      'user' => 'root',
-     'path' => '/tmp/open-uri20131220-13905-1nbyz35' 
+     'path' => File.expand_path("tests/files/data/summary.log_1", Dir.pwd) 
    }
    storage_info = @config['storage_info']
    @runner.store_results(@app,@sub_app,@test, @guid, source_result_info, storage_info, @store, @config)
@@ -47,7 +47,7 @@ class JMeterRunnerTest < Test::Unit::TestCase
    source_result_info = {
      'server' => 'localhost',
      'user' => 'root',
-     'path' => '/tmp/open-uri20131220-13905-1nbyz35' 
+     'path' => File.expand_path("tests/files/data/summary.log_1", Dir.pwd) 
    }
    storage_info = @config['storage_info']
    @runner.store_results(@app,@sub_app,@test, @guid, source_result_info, storage_info, @store, @config)
@@ -66,7 +66,7 @@ class JMeterRunnerTest < Test::Unit::TestCase
    source_result_info = {
      'server' => 'localhost',
      'user' => 'root',
-     'path' => '/tmp/open-uri20131220-13905-1nbyz35' 
+     'path' => File.expand_path("tests/files/data/summary.log_1", Dir.pwd) 
    }
    storage_info = @config['storage_info']
    @runner.store_results(@app,@sub_app,@test, @guid, source_result_info, storage_info, @store, @config)
@@ -88,7 +88,7 @@ class JMeterRunnerWithComparisonAppTest < Test::Unit::TestCase
     @sub_app = "test_sub_app"
     @test = "load"
     @comparison_guid = "test_guid_123"
-    comparison_guid_data_location = "/tmp/open-uri20131220-13905-1jqkk3c" 
+    comparison_guid_data_location = File.expand_path("tests/files/data/summary.log_2", Dir.pwd) 
     @store.hset("#{@app}:#{@sub_app}:results:#{@test}:#{@comparison_guid}:meta", "test", "{\"runner\":\"jmeter\",\"start\":1392340471,\"stop\":1392344078,\"description\":null,\"name\":\"nightly test against master branch\"}")
     @store.hset("#{@app}:#{@sub_app}:results:#{@test}:#{@comparison_guid}:data", "results", "{\"location\":\"#{comparison_guid_data_location}\",\"name\":\"summary.log\"}")
   end
@@ -106,7 +106,7 @@ class JMeterRunnerWithComparisonAppTest < Test::Unit::TestCase
    source_result_info = {
      'server' => 'localhost',
      'user' => 'root',
-     'path' => '/tmp/open-uri20131220-13905-1nbyz35' 
+     'path' => File.expand_path("tests/files/data/summary.log_1", Dir.pwd)
    }
    storage_info = @config['storage_info']
    @runner.store_results(@app,@sub_app,@test, @guid, source_result_info, storage_info, @store, @config, @comparison_guid)
@@ -125,7 +125,7 @@ class JMeterRunnerWithComparisonAppTest < Test::Unit::TestCase
    source_result_info = {
      'server' => 'localhost',
      'user' => 'root',
-     'path' => '/tmp/open-uri20131220-13905-1nbyz35' 
+     'path' => File.expand_path("tests/files/data/summary.log_1", Dir.pwd)
    }
    storage_info = @config['storage_info']
    @runner.store_results(@app,@sub_app,@test, @guid, source_result_info, storage_info, @store,@config, @comparison_guid)
@@ -146,7 +146,7 @@ class MockSingularObject
          {
           'name' => 'average',
           'limit' => 'upper',
-          'value' => 5,
+          'value' => 10,
           'value_type' => 'ms',
           'test_type' => ['load']
          },
@@ -159,7 +159,7 @@ class MockSingularObject
          {
           'name' => 'errors',
           'limit' => 'upper',
-          'value' => 10,
+          'value' => 2000,
           'test_type' => ['load']
          }
        ],
