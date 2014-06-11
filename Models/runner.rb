@@ -165,7 +165,7 @@ module Models
       if overhead_result
         sla_list = []
         app_config['application']['sla'].each do | sla |
-          sla_list << SnapshotComparer::Models::Sla.new(sla['name'], sla['value'],sla['limit'].to_sym, sla['value_type'], sla['test_type'])
+          sla.each { |sla_key, sla_value| sla_list << SnapshotComparer::Models::Sla.new(sla_key, sla_value['value'],sla_value['limit'].to_sym, sla_value['value_type'], sla_value['test_type'])}
         end
 # check if notification is set, send an email
 # compare sla list to results in summary_results

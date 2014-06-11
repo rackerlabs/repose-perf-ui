@@ -143,25 +143,22 @@ class MockSingularObject
       'application' => {
         'type' => 'singular',
         'sla' => [
-         {
-          'name' => 'average',
+         {'average' => {
           'limit' => 'upper',
           'value' => 10,
           'value_type' => 'ms',
           'test_type' => ['load']
-         },
-         {
-          'name' => 'throughput',
+         }},
+         {'throughput' => {
           'limit' => 'lower',
           'value' => 400,
           'test_type' => ['load','stress']
-         },
-         {
-          'name' => 'errors',
+         }},
+         {'errors' => {
           'limit' => 'upper',
           'value' => 2000,
           'test_type' => ['load']
-         }
+         }}
        ],
        'notify' => true,
        'notification' => { 'type' => 'mail', 'recipient_list' => 'dimitry.ushakov@rackspace.com'}
@@ -176,25 +173,22 @@ class MockSingularLowSlaObject
       'application' => {
         'type' => 'singular',
         'sla' => [
-         {
-          'name' => 'average',
+         {'average' => {
           'limit' => 'upper',
           'value' => 1.9,
           'value_type' => 'ms',
           'test_type' => ['load']
-         },
-         {
-          'name' => 'throughput',
+         }},
+         {'throughput' => {
           'limit' => 'lower',
           'value' => 500,
           'test_type' => ['load','stress']
-         },
-         {
-          'name' => 'errors',
+         }},
+         {'errors' => {
           'limit' => 'upper',
           'value' => 10,
           'test_type' => ['load']
-         }
+         }}
        ],
        'notify' => true,
        'notification' => { 'type' => 'mail', 'recipient_list' => 'dimitry.ushakov@rackspace.com'}
@@ -209,25 +203,22 @@ class MockComparisonObject
       'application' => {
         'type' => 'comparison',
         'sla' => [
-         {
-          'name' => 'average',
+         {'average' => {
           'limit' => 'upper',
           'value' => 10,
           'value_type' => 'ms',
           'test_type' => ['load']
-         },
-         {
-          'name' => 'throughput',
+         }},
+         {'throughput' => {
           'limit' => 'lower',
           'value' => 0,
           'test_type' => ['load','stress']
-         },
-         {
-          'name' => 'errors',
+         }},
+         {'errors' => {
           'limit' => 'upper',
           'value' => 50000,
           'test_type' => ['load']
-         }
+         }}
        ],
        'notify' => true,
        'notification' => { 'type' => 'mail', 'recipient_list' => 'dimitry.ushakov@rackspace.com'}
@@ -242,25 +233,22 @@ class MockComparisonLowSlaObject
       'application' => {
         'type' => 'comparison',
         'sla' => [
-         {
-          'name' => 'average',
+         {'average' => {
           'limit' => 'upper',
           'value' => 1.9,
           'value_type' => 'ms',
           'test_type' => ['load']
-         },
-         {
-          'name' => 'throughput',
+         }},
+         {'throughput' => {
           'limit' => 'lower',
           'value' => 500,
           'test_type' => ['load','stress']
-         },
-         {
-          'name' => 'errors',
+         }},
+         {'errors' => {
           'limit' => 'upper',
           'value' => 10,
           'test_type' => ['load']
-         }
+         }}
        ],
        'notify' => true,
        'notification' => { 'type' => 'mail', 'recipient_list' => 'dimitry.ushakov@rackspace.com'}

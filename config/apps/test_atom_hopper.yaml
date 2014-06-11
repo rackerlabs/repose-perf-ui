@@ -17,19 +17,19 @@ application:
     name: Tenant id search
     description: Test suite for search by tenant id only
   sla:
-    - name: art
-      limit: upper
-      value: 5
-      value_type: ms
-      test_type: load
-    - name: throughput 
-      limit: lower
-      value: 600
-      test_type: [load,stress]
-    - name: error
-      limit: upper
-      value: 10
-      test_type: load
+    - art:
+        limit: upper
+        value: 5
+        value_type: ms
+        test_type: load
+    - throughput:
+        limit: lower
+        value: 600
+        test_type: [load,stress]
+    - error:
+        limit: upper
+        value: 10
+        test_type: load
   notification:
     type: 'mail'
     recipient_list: [dimitry.ushakov@rackspace.com,reposecore@rackspace.com]
