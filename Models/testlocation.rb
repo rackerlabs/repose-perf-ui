@@ -1,3 +1,5 @@
+require 'json'
+
 module SnapshotComparer
 module Models
   class TestLocationFactory
