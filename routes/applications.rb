@@ -1,6 +1,4 @@
-puts 'applications'
   get '/:application/applications' do |application|
-    puts 'test'
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app
       new_app = app[:klass].new(settings.deployment)

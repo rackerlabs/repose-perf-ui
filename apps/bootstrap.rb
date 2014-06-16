@@ -25,6 +25,10 @@ module Apps
       end
     end
 
+    def self.main_config_impl
+      YAML.load_file(File.expand_path(self.env, Dir.pwd))
+    end
+
     def self.logger
       Logging.color_scheme( 'bright',
         :levels => {
@@ -356,18 +360,24 @@ module Apps
       source_result_info = json_data['servers']['results']
       runner = Apps::Bootstrap.runner_list[start_test['runner'].to_sym]
       @logger.debug "store results"
-      runner.store_results(application, sub_app, type, json_data['guid'], source_result_info, storage_info, store, nil, start_test['comparison_guid'])
+      @logger.debug Apps::Bootstrap.main_config_impl
+      runner.store_results(application, sub_app, type, json_data['guid'], source_result_info, storage_info, store, Apps::Bootstrap.main_config_impl, start_test['comparison_guid'])
       @logger.debug "finish storing results"
       source_config_info = json_data['servers']['config'] if json_data['servers'].has_key?('config')
       @logger.debug "copy configs if required"
       copy_configs(application, sub_app, type, json_data['guid'], source_config_info, storage_info, store) if source_config_info
       @logger.debug "finish copy configs"
-
+      @logger.debug storage_info
       if storage_info['destination'] == 'localhost'
         @logger.debug "create directory in file store"
         FileUtils.mkdir_p "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}" unless File.exists?("#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}")
+        @logger.debug "copy everything from temp directory"
+        @logger.debug Dir["/tmp/#{json_data['guid']}/**/*"]
         @logger.debug "copy directory data to file store"
+        @logger.debug "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/"
         FileUtils.cp_r "/tmp/#{json_data['guid']}/", "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/"
+        @logger.debug "did the directory copy?"
+        @logger.debug Dir["#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/**/*"]
       else
         Net::SSH.start(server, 'root') do |ssh|
           ssh.exec!("mkdir -p #{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}")

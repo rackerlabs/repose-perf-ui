@@ -1,4 +1,3 @@
-  puts 'tests'
   get '/:application/tests' do |application|
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app
@@ -52,7 +51,6 @@
 =end
   get '/:application/tests/:name/:test' do |application, name, test|
     app = Apps::Bootstrap.application_list.find {|a| a[:id] == application}
-    puts app
     if app and Apps::Bootstrap.test_list.keys.include?(test)
       new_app = app[:klass].new
       sub_app = new_app.retrieve_sub_apps_for_running_tests.find do |sa|

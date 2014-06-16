@@ -103,7 +103,6 @@ class NewrelicRestPlugin < PluginModule::Plugin
           servers = plugin_data['fields']
           if servers
             servers.each do |server|
-              puts "start time: #{start_test_data['time']} and stop time: #{end_time}"
               PluginModule::Adapters::NewrelicRestAdapter.new(store, 'newrelic_rest_plugin', server, storage_info).load(json_data['guid'], plugin_type, application, sub_app, type, start_test_data['time'], end_time)
             end
           else

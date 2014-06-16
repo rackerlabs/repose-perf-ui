@@ -6,29 +6,29 @@ bundle install
 ruby -v
 which ruby
 echo "start load repose test"
-ruby nightly_test.rb --app repose --sub-app atom_hopper --action start --test-type load --length 60 --release master --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --with-repose true
+ruby nightly_test.rb --app repose --sub-app atom_hopper --action start --test-type load --length 60 --release master --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --with-repose true --test-id 0
 sleep 60m
 echo "stop load repose test"
-ruby nightly_test.rb --app repose --sub-app atom_hopper --action stop --test-type load --length 60 --release master --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --with-repose true
+ruby nightly_test.rb --app repose --sub-app atom_hopper --action stop --test-type load --length 60 --release master --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --with-repose true --test-id 0
 
 echo "start load origin test"
-ruby nightly_test.rb --app repose --sub-app atom_hopper --action start --test-type load --length 60 --name "nightly test against master branch" --runner "jmeter" --flavor-type performance
+ruby nightly_test.rb --app repose --sub-app atom_hopper --action start --test-type load --length 60 --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --test-id 0
 sleep 60m
 
 echo "stop load origin test"
-ruby nightly_test.rb --app repose --sub-app atom_hopper --action stop --test-type load --length 60 --name "nightly test against master branch" --runner "jmeter" --flavor-type performance
+ruby nightly_test.rb --app repose --sub-app atom_hopper --action stop --test-type load --length 60 --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --test-id 0
 echo "finished load test."
 
 echo "start stress repose test"
-ruby nightly_test.rb --app repose --sub-app atom_hopper --action start --test-type stress --release master --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --with-repose true
+ruby nightly_test.rb --app repose --sub-app atom_hopper --action start --test-type stress --release master --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --with-repose true --test-id 0
 
 echo "stop stress repose test"
-ruby nightly_test.rb --app repose --sub-app atom_hopper --action stop --test-type stress --release master --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --with-repose true
+ruby nightly_test.rb --app repose --sub-app atom_hopper --action stop --test-type stress --release master --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --with-repose true --test-id 0
 
 echo "start stress origin test"
-ruby nightly_test.rb --app repose --sub-app atom_hopper --action start --test-type stress --name "nightly test against master branch" --runner "jmeter" --flavor-type performance
+ruby nightly_test.rb --app repose --sub-app atom_hopper --action start --test-type stress --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --test-id 0
 
 echo "stop stress origin test"
-ruby nightly_test.rb --app repose --sub-app atom_hopper --action stop --test-type stress --name "nightly test against master branch" --runner "jmeter" --flavor-type performance
+ruby nightly_test.rb --app repose --sub-app atom_hopper --action stop --test-type stress --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --test-d 0
 echo "finished stress test."
 

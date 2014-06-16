@@ -24,8 +24,13 @@ module Models
     def compile_summary_results(test_hash, guid, entry)
   puts entry
       temp_hash = {}
-      summary_list = open(entry) do |f|
-        f.readlines[-5..-1]
+      begin
+        summary_list = open(entry) do |f|
+          f.readlines[-5..-1]
+        end
+      rescue => e
+        puts e
+        puts e.backtrace 
       end
       summary_list.each do |summary|
         summary.scan(/summary =\s+\d+\s+in\s+(\d+(?:\.\d)?)s =\s+(\d+(?:\.\d)?)\/s Avg:\s+(\d+).*Err:\s+(\d+)/).map do |time_offset,throughput,average,errors|
@@ -96,7 +101,7 @@ module Models
           source_result_info['path'],
           "/tmp/#{guid}/data/summary.log")
       end
-
+  
       result_data = {}
       result_data['location'] = "/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/#{guid}/data/summary.log"
       result_data['name'] = 'summary.log'
@@ -172,12 +177,15 @@ module Models
         if app_config['application']['notify']
           @notification_validation_results = []
           sla_list.each do |sla|
-            result = SnapshotComparer::Models::Sla.result_failed_sla(sla,overhead_result[sla.name.to_sym], type) if overhead_result.has_key?(sla.name.to_sym)  
+            puts "sla: #{sla.inspect}"
+            result = SnapshotComparer::Models::Sla.result_failed_sla(sla,overhead_result[sla.name.to_sym], type) if overhead_result.has_key?(sla.name.to_sym) 
+            puts "result: #{result}" 
             @notification_validation_results << result if result
           end
 
           if !@notification_validation_results.empty?
             @notification_validation_results << link_to_result
+            puts "notification: #{@notification_validation_results}"
             notification = SnapshotComparer::Models::Notification.notifications[app_config['application']['notification']['type'].to_sym]
             notification.new(app_config['application']['notification']['recipient_list'], "SLA failed for #{application}:#{sub_app}:#{type}", @notification_validation_results).send_notification
           end

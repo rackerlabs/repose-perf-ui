@@ -420,7 +420,7 @@ elsif opts[:action] == 'start'
 
   if opts[:with_repose] and opts[:release] and opts[:release] == 'master'
     branch = opts[:branch] ? opts[:branch] : 'master'
-    system "rm -rf ~/repose_repo/repose ; mkdir ~/repose_repo/repose ; cd ~/repose_repo/repose ; git init ; git pull https://github.com/rackerlabs/repose #{opts[:branch]} ; mvn clean install -U -DskipTests; "
+    system "rm -rf ~/repose_repo/repose ; mkdir ~/repose_repo/repose ; cd ~/repose_repo/repose ; git init ; git pull https://github.com/rackerlabs/repose #{branch} ; mvn clean install -U -DskipTests; "
   end
 
   is_started_successfully = false
