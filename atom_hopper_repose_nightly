@@ -29,6 +29,6 @@ echo "start stress origin test"
 ruby nightly_test.rb --app repose --sub-app atom_hopper --action start --test-type stress --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --test-id 0
 
 echo "stop stress origin test"
-ruby nightly_test.rb --app repose --sub-app atom_hopper --action stop --test-type stress --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --test-d 0
+ruby nightly_test.rb --app repose --sub-app atom_hopper --action stop --test-type stress --name "nightly test against master branch" --runner "jmeter" --flavor-type performance --test-id 0
 echo "finished stress test."
 
