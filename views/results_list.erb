@@ -8,21 +8,23 @@
     <link href="/css/repose.css" rel="stylesheet" media="screen">
   </head>
   <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="/<%= application %>"><%= title %></a>
-      <div class="nav-collapse collapse bs-navbar-collapse">
-        <ul class="nav navbar-nav">
-          <li><a href="/<%= application %>/tests">Running Tests</a></li>
-          <li><a href="/<%= application %>/applications">Applications</a></li>
-          <li class="active"><a href="/<%= application %>/results">Results</a></li>
-        </ul>
+    <nav role="navigation" class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".repose-navbar-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/<%= application %>"><%= title %></a>
+        <div class="navbar-collapse collapse repose-navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/<%= application %>/tests">Running Tests</a></li>
+            <li><a href="/<%= application %>/applications">Applications</a></li>
+            <li class="active"><a href="/<%= application %>/results">Results</a></li>
+          </ul>
+        </div>
       </div>
-    </div>
+    </nav>
     <div class="container">
       <ul class="breadcrumb">
         <li><a href="/<%= application %>">Home</a></li>
@@ -32,6 +34,11 @@
       <div class="list-group">
         <% load_test_list.each do |id, item| %>
         <a href="/<%= application %>/results/<%= sub_app_id %>/<%= id %>" class="list-group-item">
+          <% if item['status'] == 'passed' %>
+          <span class="badge"><span class="glyphicon glyphicon-ok"></span></span>
+          <% else %>
+          <span class="badge"><span class="glyphicon glyphicon-exclamation-sign"></span></span>
+          <% end %>
           <h4 class="list-group-item-heading"><%= item['name'] %></h4>
           <p class="list-group-item-text"><%= item['description'] %></p>
         </a>

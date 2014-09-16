@@ -2,6 +2,7 @@ require 'json'
 require 'yaml'
 require_relative 'result.rb'
 require_relative 'models.rb'
+require_relative 'application_test_type.rb'
 
 module SnapshotComparer
   module Models
@@ -41,7 +42,9 @@ module SnapshotComparer
                 result_to_compare.errors.to_i - temp.errors.to_i,
                 result_to_compare.name,
                 result_to_compare.description,
-                "#{result_to_compare.id}+#{temp.id}")
+                "#{result_to_compare.id}+#{temp.id}",
+                :completed,
+                ApplicationTestType.new(store,nil).get_status_for_guid(test[:application], test[:name], test[:test_type], test[:guid])) if result_to_compare
               temp_list.delete(result_to_compare)
             else
               temp_list << temp

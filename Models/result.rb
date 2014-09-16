@@ -6,10 +6,10 @@ module SnapshotComparer
 module Models
   class Result
 
-  attr_reader :start, :length, :avg, :throughput, :errors, :id, :name, :description, :status
+  attr_reader :start, :length, :avg, :throughput, :errors, :id, :name, :description, :status, :execution_result
   attr_accessor :jmx_results, :network_results
 
-  def initialize(start, length, avg, throughput, errors, name, description, id, status = :completed)
+  def initialize(start, length, avg, throughput, errors, name, description, id, status = :completed, execution_result = :passed)
     @start = start
     @avg = avg
     @length = length
@@ -19,6 +19,7 @@ module Models
     @name = name
     @description = description
     @status = status
+    @execution_result = execution_result
   end
 
   def self.get_overhead(results_one, results_two)

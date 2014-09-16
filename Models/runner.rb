@@ -5,6 +5,7 @@ require_relative 'database.rb'
 require_relative 'sla.rb'
 require_relative 'notification.rb'
 require_relative 'result.rb'
+require_relative 'application_test_type.rb'
 require_relative '../apps/bootstrap.rb'
 
 module SnapshotComparer
@@ -22,7 +23,6 @@ module Models
     end
 
     def compile_summary_results(test_hash, guid, entry)
-  puts entry
       temp_hash = {}
       begin
         summary_list = open(entry) do |f|
@@ -91,6 +91,7 @@ module Models
  2. load file in specific directory via scp
 =end
       FileUtils.mkdir_p "/tmp/#{guid}/data/"
+      puts "source result info: #{source_result_info}"
       if source_result_info['server'] == 'localhost'
         FileUtils.mkpath "#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}" unless File.exists?("#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}")
         FileUtils.cp_r source_result_info['path'], "/tmp/#{guid}/data/summary.log"
@@ -187,7 +188,10 @@ module Models
             @notification_validation_results << link_to_result
             puts "notification: #{@notification_validation_results}"
             notification = SnapshotComparer::Models::Notification.notifications[app_config['application']['notification']['type'].to_sym]
-            notification.new(app_config['application']['notification']['recipient_list'], "SLA failed for #{application}:#{sub_app}:#{type}", @notification_validation_results).send_notification
+            notification.new(app_config['application']['notification']['recipient_list'], "SLA failed for #{application} #{sub_app} #{type} test", @notification_validation_results).send_notification
+            SnapshotComparer::Models::ApplicationTestType.new(store).save(application, sub_app, type, guid, SnapshotComparer::Models::ApplicationTestType.FAILED)
+          else
+            SnapshotComparer::Models::ApplicationTestType.new(store).save(application, sub_app, type, guid, SnapshotComparer::Models::ApplicationTestType.PASSED)
           end
         end
       end           

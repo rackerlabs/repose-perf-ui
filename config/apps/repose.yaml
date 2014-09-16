@@ -27,20 +27,27 @@ application:
   - id: cloud_queues
     name: Cloud Queues
     description: Repose setup with Cloud Queues configurations
+  - id: connection_pool
+    name: Connection Pool
+    description: Tests for connection pooling
   sla:
-    - art:
-        limit: upper
-        value: 5
-        value_type: ms
-        test_type: load
-    - throughput:
-        limit: lower
-        value: 0
-        test_type: [load,stress]
-    - error:
-        limit: upper
-        value: 10
-        test_type: load
+  - average:
+      limit: upper
+      value: 5
+      value_type: ms
+      test_type: 
+      - load
+  - throughput:
+      limit: lower
+      value: -100
+      test_type: 
+      - load
+  - errors:
+      limit: upper
+      value: 10
+      test_type: 
+      - load
+  notify: true
   notification:
-    type: 'mail'
-    recipient_list: [dimitry.ushakov@rackspace.com,reposecore@rackspace.com]
+    type: mail
+    recipient_list: reposecore@rackspace.com

@@ -382,8 +382,15 @@ class PerfApp < Sinatra::Base
     app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app
       new_app = app[:klass].new(settings.deployment)
+      sub_apps = []
+      new_app.config['application']['sub_apps'].each do |sa|
+        sa['status'] = SnapshotComparer::Models::ApplicationTestType.new(nil, new_app.db).get_overall_status(application, sa['id'])
+        sa['status'] ||= SnapshotComparer::Models::ApplicationTestType.PASSED
+        sub_apps << sa
+      end
+
       erb :results, :locals => {
-        :application_list => new_app.config['application']['sub_apps'],
+        :application_list => sub_apps,
         :title => new_app.config['application']['name'],
         :application => app[:id]
       }
@@ -399,12 +406,18 @@ class PerfApp < Sinatra::Base
       sub_app = new_app.config['application']['sub_apps'].find do |sa|
         sa['id'] == name
       end
+      test_list = {}
+      SnapshotComparer::Apps::Bootstrap.test_list.each do |id, t|
+        t['status'] = SnapshotComparer::Models::ApplicationTestType.new(nil, new_app.db).get_status_for_type(app[:id], name.to_sym, id)
+        t['status'] ||= SnapshotComparer::Models::ApplicationTestType.PASSED
+        test_list.merge!({id => t})
+      end
       if sub_app
         erb :results_list, :locals => {
           :application => app[:id],
           :sub_app_id => name.to_sym,
           :title => new_app.config['application']['name'],
-          :load_test_list => SnapshotComparer::Apps::Bootstrap.test_list
+          :load_test_list => test_list
         }
       else
         status 404
@@ -437,7 +450,7 @@ class PerfApp < Sinatra::Base
           :application => app[:id],
           :sub_app_id => name.to_sym,
           :title => new_app.config['application']['name'],
-          :result_set_list => results.past_summary_results.test_results(new_app.db, new_app.fs_ip, results.test_list).sort_by {|r| r.start.to_s},
+          :result_set_list => results.past_summary_results.test_results(new_app.db, new_app.fs_ip, results.test_list).sort_by {|r| r.start.to_s}.reverse,
           :plugin_list => plugins,
           :test_type => test
         }

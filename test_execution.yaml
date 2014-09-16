@@ -4,10 +4,15 @@
   - name: atom_hopper
     test_type: []
   - name: identity
-    test_type: []
+    test_type:
+    - name: load
+      repose_guid: b318d6e5-cb9d-48b6-ac87-ccd1d11f0a82
+      origin_guid: 7b0d6c49-1028-47d6-abfe-6e7314dbe07c
   - name: translation
     test_type: []
   - name: dbaas
     test_type: []
   - name: cloud_queues
+    test_type: []
+  - name: connection_pool
     test_type: []

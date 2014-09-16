@@ -34,3 +34,6 @@ application:
   - id: cloud_queues
     name: “Cloud
     description: “repose
+  - id: connection_pool
+    name: Connection Pool
+    description: Tests for connection pooling

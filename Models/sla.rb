@@ -13,8 +13,8 @@ module SnapshotComparer
 
       def self.result_failed_sla(sla, test_result, test_type)
         if sla.test_list.include?(test_type)
-          return "Last test failed SLA!  SLA \"#{sla.name}\" is set to #{sla.value}#{sla.value_type}; however last test returned a result of #{test_result}#{sla.value_type}\n\n" if sla.value.to_f < test_result.to_f && sla.limit == :upper
-          return "Last test failed SLA!  SLA \"#{sla.name}\" is set to #{sla.value}#{sla.value_type}; however last test returned a result of #{test_result}#{sla.value_type}\n\n" if sla.value.to_f > test_result.to_f && sla.limit == :lower
+          return "Last test failed SLA!  SLA \"#{sla.name}\" maximum threshold is set to #{sla.value}#{sla.value_type}; however last test returned a result of #{test_result}#{sla.value_type}\n\n" if sla.value.to_f < test_result.to_f && sla.limit == :upper
+          return "Last test failed SLA!  SLA \"#{sla.name}\" minimum threshold is set to #{sla.value}#{sla.value_type}; however last test returned a result of #{test_result}#{sla.value_type}\n\n" if sla.value.to_f > test_result.to_f && sla.limit == :lower
         end
       end
 

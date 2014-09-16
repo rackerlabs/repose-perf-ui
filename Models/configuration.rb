@@ -21,7 +21,9 @@ module Models
         config_json = JSON.parse(config_json_text)
         contents = open("http://#{@fs_ip}#{config_json['location']}") {|f| f.read }
         config = config_json['name'].gsub('.','_').gsub('-','_').gsub('/','_')
-        config_list.merge!({config.to_sym => coder.encode(contents)})
+        puts config
+        puts contents
+        config_list.merge!({config.to_sym => coder.encode(contents.force_encoding('utf-8'))})
       end
       config_list
     end
