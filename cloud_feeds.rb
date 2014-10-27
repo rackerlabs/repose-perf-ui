@@ -54,7 +54,11 @@ EOS
   opt :name, "Test name", :type => :string
   opt :runner, "Runner", :type => :string
   opt :test_agent, "Test agent", :type => :string
+  opt :target_server, "Target server", :type => :string
   opt :test_agent_slaves, "Test agent slaves", :type => :string
+  opt :protocol, "Protocol", :type => :string
+  opt :port, "Port", :type => :string
+  opt :token, "Token", :type => :string
 end
 
 Trollop::die :action, "must be specified" unless opts[:action]
@@ -74,8 +78,8 @@ if opts[:action] == 'stop'
   retry_counter = 0
   while !run_succeeded && retry_counter < RETRY_COUNT
     begin
-      Net::SSH.start(opts[:test_agent], 'cloudfeeds') do |ssh|
-        ssh.exec!("/opt/apache-jmeter-2.9/bin/shutdown.sh")
+      Net::SSH.start(opts[:test_agent], 'root') do |ssh|
+        ssh.exec!("/opt/apache-jmeter-2.10/bin/shutdown.sh")
       end
       run_succeeded = true
     rescue Exception => e
@@ -98,7 +102,7 @@ if opts[:action] == 'stop'
     "servers" => {
       "results" => {
         "server" => opts[:test_agent],
-        "user" => "cloudfeeds",
+        "user" => "root",
         "path" => "/opt/test/summary.log"
       }
     }
@@ -181,7 +185,7 @@ if opts[:action] == 'stop'
   
   File.delete(File.expand_path("atom_execution.yaml", Dir.pwd))
   
-  Net::SSH.start(opts[:test_agent], 'cloudfeeds') do |ssh|
+  Net::SSH.start(opts[:test_agent], 'root') do |ssh|
     ssh.exec!("rm -rf /opt/test/*")
   end
 elsif opts[:action] == 'start'
@@ -195,8 +199,8 @@ elsif opts[:action] == 'start'
   guid = SecureRandom.uuid
   
   logger.info "get meta information"
-
-  Net::SSH.start(opts[:test_agent], 'cloudfeeds') do |ssh|
+  logger.info "clean up #{opts[:test_agent]}"
+  Net::SSH.start(opts[:test_agent], 'root') do |ssh|
     ssh.exec!("mkdir -p /opt/test")
     ssh.exec!("rm -rf /opt/test/*")
   end
@@ -212,10 +216,11 @@ elsif opts[:action] == 'start'
   
   test_script = JSON.parse(test_script_list.find {|s| parsed_result = JSON.parse(s) ; parsed_result['type'] == opts[:runner] and parsed_result['test'] == opts[:test_type]})
   if config['storage_info']['destination'] == 'localhost'
-    
+    logger.info " upload #{config['storage_info']['path']}/#{test_script['location']}"
+  
     Net::SCP.upload!(
       opts[:test_agent], 
-      'cloudfeeds', 
+      'root', 
       "#{config['storage_info']['path']}/#{test_script['location']}", 
       "/opt/test/"
     )
@@ -232,7 +237,7 @@ elsif opts[:action] == 'start'
     #second, upload to remote
     Net::SCP.upload!(
       opts[:test_agent], 
-      'cloudfeeds', 
+      'root', 
       "/tmp/#{guid}/#{name}", 
       "/opt/test/"
     )
@@ -241,6 +246,9 @@ elsif opts[:action] == 'start'
   end
 
   host = opts[:target_server]
+  protocol = opts[:protocol]
+  port = opts[:port]
+  token = opts[:token]
   startdelay = test_data["startdelay"]
   rampup = test_data["rampup"]
   duration = opts[:length] ? opts[:length] : test_data["duration"]
@@ -265,41 +273,56 @@ elsif opts[:action] == 'start'
 
   test_duration = duration * 60
   case opts[:test_type]
+    when "adhoc"
+      rampdown = test_data["rampdown"] 
+      throughput = test_data["throughput"]
+      logger.info "ssh root@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.10/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
+      system "ssh root@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.10/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=#{port} -Gprotocol=#{protocol} -Gtoken=#{token} -l /opt/test/response.jtl -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
+
+      sleep(60)
+      logger.info Net::SSH.start(opts[:test_agent],'root') {|ssh| ssh.exec!("lsof -i :4445")}
+      total_running_time = 0
+      while Net::SSH.start(opts[:test_agent],'root') {|ssh| ssh.exec!("lsof -i :4445")} and total_running_time < 3600
+        sleep(60)
+        total_running_time = total_running_time + 60
+        logger.info Net::SSH.start(opts[:test_agent],'root') {|ssh| ssh.exec!("lsof -i :4445")}
+        logger.info total_running_time
+      end
     when "load"
       rampdown = test_data["rampdown"] 
       throughput = test_data["throughput"]
-      logger.info "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
-      system "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -l /opt/test/response.jtl -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
+      logger.info "ssh root@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.10/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
+      system "ssh root@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.10/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -l /opt/test/response.jtl -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
 
       sleep(test_duration)
     when "duration"
       rampdown = test_data["rampdown"] 
       throughput = test_data["throughput"]
-      logger.info "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
-      system "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -l /opt/test/response.jtl -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
+      logger.info "ssh root@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.10/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
+      system "ssh root@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.10/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -l /opt/test/response.jtl -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
 
       sleep(60)
-      logger.info Net::SSH.start(opts[:test_agent],'cloudfeeds') {|ssh| ssh.exec!("lsof -i :4445")}
+      logger.info Net::SSH.start(opts[:test_agent],'root') {|ssh| ssh.exec!("lsof -i :4445")}
       total_running_time = 0
-      while Net::SSH.start(opts[:test_agent],'cloudfeeds') {|ssh| ssh.exec!("lsof -i :4445")} and total_running_time < 3600
+      while Net::SSH.start(opts[:test_agent],'root') {|ssh| ssh.exec!("lsof -i :4445")} and total_running_time < 3600
         sleep(60)
         total_running_time = total_running_time + 60
-        logger.info Net::SSH.start(opts[:test_agent],'cloudfeeds') {|ssh| ssh.exec!("lsof -i :4445")}
+        logger.info Net::SSH.start(opts[:test_agent],'root') {|ssh| ssh.exec!("lsof -i :4445")}
         logger.info total_running_time
       end
     when "stress"  
       rampup_threads = test_data["rampup_threads"]  
       maxthreads = test_data["maxthreads"]
-      logger.info "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gthreads=#{maxthreads} -Gmaxthreads=#{maxthreads}  -l /opt/test/response.jtl -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
-      system "ssh cloudfeeds@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.9/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.9/bin/jmeter.properties -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gthreads=#{maxthreads} -Gmaxthreads=#{maxthreads}  -l /opt/test/response.jtl -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
+      logger.info "ssh root@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.10/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.10/bin/jmeter.properties -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gthreads=#{maxthreads} -Gmaxthreads=#{maxthreads}  -l /opt/test/response.jtl -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
+      system "ssh root@#{opts[:test_agent]} -f 'nohup /opt/apache-jmeter-2.10/bin/jmeter -n -t /opt/test/#{test_script['name']} -p /opt/apache-jmeter-2.10/bin/jmeter.properties -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gthreads=#{maxthreads} -Gmaxthreads=#{maxthreads}  -l /opt/test/response.jtl -R #{opts[:test_agent_slaves]} >> /opt/test/summary.log & '"
 
       sleep(60)
-      logger.info Net::SSH.start(opts[:test_agent],'cloudfeeds') {|ssh| ssh.exec!("lsof -i :4445")}
+      logger.info Net::SSH.start(opts[:test_agent],'root') {|ssh| ssh.exec!("lsof -i :4445")}
       total_running_time = 0
-      while Net::SSH.start(opts[:test_agent],'cloudfeeds') {|ssh| ssh.exec!("lsof -i :4445")} and total_running_time < 3600
+      while Net::SSH.start(opts[:test_agent],'root') {|ssh| ssh.exec!("lsof -i :4445")} and total_running_time < 3600
         sleep(60)
         total_running_time = total_running_time + 60
-        logger.info Net::SSH.start(opts[:test_agent],'cloudfeeds') {|ssh| ssh.exec!("lsof -i :4445")}
+        logger.info Net::SSH.start(opts[:test_agent],'root') {|ssh| ssh.exec!("lsof -i :4445")}
         logger.info total_running_time
       end
     else

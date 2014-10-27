@@ -410,6 +410,10 @@ class PerfApp < Sinatra::Base
       SnapshotComparer::Apps::Bootstrap.test_list.each do |id, t|
         t['status'] = SnapshotComparer::Models::ApplicationTestType.new(nil, new_app.db).get_status_for_type(app[:id], name.to_sym, id)
         t['status'] ||= SnapshotComparer::Models::ApplicationTestType.PASSED
+        t['test_count'] = SnapshotComparer::Models::PastSummaryResults.new(application, name,
+            new_app.config['application']['type'].to_sym, id.chomp('_test'),
+            new_app.db, new_app.fs_ip, nil, logger).test_list.count
+        t['test_count'] ||= 0
         test_list.merge!({id => t})
       end
       if sub_app

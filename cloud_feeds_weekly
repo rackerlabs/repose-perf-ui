@@ -6,7 +6,7 @@ bundle install
 ruby -v
 which ruby
 echo "start duration test"
-ruby cloud_feeds.rb -a atom_hopper -s staging -t duration -c start -l 1440 -d "This is the weekly cloud feeds test" -n "Duration test against cloud feeds" -r jmeter -e 166.78.107.85 --test-agent-slaves 166.78.107.85,166.78.107.252,166.78.107.4,166.78.101.137
+ruby cloud_feeds.rb -a atom_hopper -s staging -t duration -c start -l 720 -d "This is the weekly cloud feeds test" -n "Load test against cloud feeds" -r jmeter -e 10.23.244.38 --test-agent-slaves 10.23.244.38,10.23.246.100,10.23.246.101 --protocol https --port 443 --target-server atom.staging.ord1.uk.ci.rackspace.net
 echo "stop duration test"
-ruby cloud_feeds.rb -a atom_hopper -s staging -t duration -c stop -l 1440 -d "This is the weekly cloud feeds test" -n "Duration test against cloud feeds" -r jmeter -e 166.78.107.85 --test-agent-slaves 166.78.107.85,166.78.107.252,166.78.107.4,166.78.101.137
+ruby cloud_feeds.rb -a atom_hopper -s staging -t duration -c stop -l 720 -d "This is the weekly cloud feeds test" -n "Load test against cloud feeds" -r jmeter -e 10.23.244.38 --test-agent-slaves 10.23.244.38,10.23.246.100,10.23.246.101 --protocol https --port 443 --target-server atom.staging.ord1.uk.ci.rackspace.net
 echo "finished duration test."

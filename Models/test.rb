@@ -14,6 +14,16 @@ module SnapshotComparer
       @db = db
     end
 
+    def start_test(application, name, test_type, extra_data)
+      pid = 0
+      if application == "repose"
+        pid = spawn("/root/viewer/hERmes_viewer/adhoc_nightly -a #{application} -s #{name} -t #{test_type} -l #{extra_data['length']} -r #{extra_data['release']} -b #{extra_data['branch']?extra_data['branch']:"master"} -n '#{extra_data['name']}' -f #{extra_data['flavor_type']} -i #{extra_data['test_id']} -u #{extra_data['runner']}")
+      elsif application == "atom_hopper"
+        pid = spawn("/root/viewer/hERmes_viewer/adhoc_nightly -a #{application} -s #{name} -t #{test_type} -l #{extra_data[:length]} -n #{extra_data[:name]} -i #{extra_data[:test_id]}")
+      end
+      pid
+    end
+
     def _get_result_requests(store, application, name, test_type, id)
       response = []
       requests = store.hget("#{application}:#{name}:results:#{test_type}:#{id}:meta", "request")

@@ -34,7 +34,7 @@
       </ol>
       <div class="list-group">
         <% application_list.each do |item| %>
-        <a href="/<%= application %>/results/<%= item['id'] %>" class="list-group-item">
+        <a href="/<%= application %>/results/<%= item['id'] %>" class="list-group-item <%= 'list-group-item-danger' unless item['status'] == 'passed' %>">
           <% if item['status'] == 'passed' %>
           <span class="badge"><span class="glyphicon glyphicon-ok"></span></span>
           <% else %>

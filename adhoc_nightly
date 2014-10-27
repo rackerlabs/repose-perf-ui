@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+source /usr/local/rvm/environments/ruby-2.0.0-p353
+cd /root/viewer/hERmes_viewer
+bundle install
+ruby -v
+which ruby
+echo $*
+while getopts ":a:s:t:l:r:u:b:n:f:i:" opt; do
+  case $opt in
+    a) app="$OPTARG"
+    ;;
+    s) sub_app="$OPTARG"
+    ;;
+    t) test_type="$OPTARG"
+    ;;
+    l) length="$OPTARG"
+    ;;
+    r) release="$OPTARG"
+    ;;
+    n) test_name="$OPTARG"
+      echo "here"
+    ;;
+    u) runner="$OPTARG"
+    ;;
+    f) flavor_type="$OPTARG"
+    ;;
+    i) test_id="$OPTARG"
+    ;;
+    \?) echo "Invalid option -$OPTARG" >&2
+    ;;
+  esac
+done
+
+echo "start load repose test"
+ruby adhoc_nightly_test.rb --app $app --sub-app $sub_app --action start --test-type $test_type --length $length --release $release --name $test_name --runner $runner --flavor-type $flavor_type --with-repose true --test-id $test_id
+
+echo "stop load repose test"
+ruby adhoc_nightly_test.rb --app $app --sub-app $sub_app --action stop --test-type $test_type --length $length --release $release --name $test_name --runner $runner --flavor-type $flavor_type --with-repose true --test-id $test_id
+
+echo "start load origin test"
+ruby adhoc_nightly_test.rb --app $app --sub-app $sub_app --action start --test-type $test_type --length $length --release $release --name $test_name --runner $runner --flavor-type $flavor_type --test-id $test_id
+
+echo "stop load origin test"
+ruby adhoc_nightly_test.rb --app $app --sub-app $sub_app --action stop --test-type $test_type --length $length --release $release --name $test_name --runner $runner --flavor-type $flavor_type --test-id $test_id
+echo "finished load test."

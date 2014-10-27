@@ -2,12 +2,13 @@
 - name: repose
   sub_app:
   - name: atom_hopper
-    test_type: []
-  - name: identity
     test_type:
+    - name: adhoc
+      repose_guid: 3723bb37-6d0b-4702-9acf-533623020192
     - name: load
-      repose_guid: b318d6e5-cb9d-48b6-ac87-ccd1d11f0a82
-      origin_guid: 7b0d6c49-1028-47d6-abfe-6e7314dbe07c
+      repose_guid: 06a4e973-934e-4f62-b084-7d8a26f40f1a
+  - name: identity
+    test_type: []
   - name: translation
     test_type: []
   - name: dbaas

@@ -149,6 +149,7 @@ module Models
 
 =end    
       link_to_result = nil 
+      guid_to_save = ""
       app_config = @app_list.find {|a| a[:id] == application}[:klass].new.config
       if app_config['application']['type'].to_sym == :comparison && comparison_guid
 # both sides ran
@@ -157,11 +158,13 @@ module Models
         comparison_data_results = store.hget("#{application}:#{sub_app}:results:#{type}:#{comparison_guid}:data", "results")
         comparison_summary_data = JSON.parse(comparison_data_results)['location']
         compile_summary_results(comparison_results, comparison_guid, "#{config['scheme']}#{config['file_store']}#{comparison_summary_data}")
-        link_to_result = "You can check out the results at #{config['ui_scheme']}#{config['ui_hostname']}/#{application}/results/#{sub_app}/#{type}_test/id/#{comparison_guid}+#{guid}"
+        guid_to_save = "#{comparison_guid}+#{guid}"
+        link_to_result = "You can check out the results at #{config['ui_scheme']}#{config['ui_hostname']}/#{application}/results/#{sub_app}/#{type}_test/id/#{guid_to_save}"
         overhead_result = SnapshotComparer::Models::Result.get_overhead(comparison_results, summary_results)  
       elsif app_config['application']['type'].to_sym == :singular
 # only one side ran but that's ok
         overhead_result = summary_results
+        guid_to_save = guid
         link_to_result = "You can check out the results at #{config['ui_scheme']}#{config['ui_hostname']}/#{application}/results/#{sub_app}/#{type}_test/id/#{guid}"
       else       
 # we got nothing .  return nil FOR NOW
@@ -189,9 +192,9 @@ module Models
             puts "notification: #{@notification_validation_results}"
             notification = SnapshotComparer::Models::Notification.notifications[app_config['application']['notification']['type'].to_sym]
             notification.new(app_config['application']['notification']['recipient_list'], "SLA failed for #{application} #{sub_app} #{type} test", @notification_validation_results).send_notification
-            SnapshotComparer::Models::ApplicationTestType.new(store).save(application, sub_app, type, guid, SnapshotComparer::Models::ApplicationTestType.FAILED)
+            SnapshotComparer::Models::ApplicationTestType.new(store).save(application, sub_app, type, guid_to_save, SnapshotComparer::Models::ApplicationTestType.FAILED)
           else
-            SnapshotComparer::Models::ApplicationTestType.new(store).save(application, sub_app, type, guid, SnapshotComparer::Models::ApplicationTestType.PASSED)
+            SnapshotComparer::Models::ApplicationTestType.new(store).save(application, sub_app, type, guid_to_save, SnapshotComparer::Models::ApplicationTestType.PASSED)
           end
         end
       end           

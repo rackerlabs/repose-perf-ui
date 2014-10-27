@@ -6,12 +6,12 @@ bundle install
 ruby -v
 which ruby
 echo "start load test"
-ruby cloud_feeds.rb -a atom_hopper -s staging -t load -c start -l 120 -d "This is the nightly cloud feeds test" -n "Load test against cloud feeds" -r jmeter -e 166.78.107.85 --test-agent-slaves 166.78.107.85,166.78.107.252,166.78.107.4,166.78.101.137
+ruby cloud_feeds.rb -a atom_hopper -s staging -t load -c start -l 120 -d "This is the nightly cloud feeds test" -n "Load test against cloud feeds" -r jmeter -e 10.23.244.38 --test-agent-slaves 10.23.244.38,10.23.246.100,10.23.246.101 --protocol https --port 443 --target-server atom.staging.ord1.uk.ci.rackspace.net
 echo "stop load test"
-ruby cloud_feeds.rb -a atom_hopper -s staging -t load -c stop -l 120 -d "This is the nightly cloud feeds test" -n "Load test against cloud feeds" -r jmeter -e 166.78.107.85 --test-agent-slaves 166.78.107.85,166.78.107.252,166.78.107.4,166.78.101.137
+ruby cloud_feeds.rb -a atom_hopper -s staging -t load -c stop -l 120 -d "This is the nightly cloud feeds test" -n "Load test against cloud feeds" -r jmeter -e 10.23.244.38 --test-agent-slaves 10.23.244.38,10.23.246.100,10.23.246.101 --protocol https --port 443 --target-server atom.staging.ord1.uk.ci.rackspace.net
 echo "finished load test."
 echo "start stress test"
-ruby cloud_feeds.rb -a atom_hopper -s staging -t stress -c start -l 180 -d "This is the nightly cloud feeds test" -n "Stress test against cloud feeds" -r jmeter -e 166.78.107.85 --test-agent-slaves 166.78.107.85,166.78.107.252,166.78.107.4,166.78.101.137
+ruby cloud_feeds.rb -a atom_hopper -s staging -t stress -c start -l 120 -d "This is the nightly cloud feeds test" -n "Load test against cloud feeds" -r jmeter -e 10.23.244.38 --test-agent-slaves 10.23.244.38,10.23.246.100,10.23.246.101 --protocol https --port 443 --target-server atom.staging.ord1.uk.ci.rackspace.net
 echo "stop stress test"
-ruby cloud_feeds.rb -a atom_hopper -s staging -t stress -c stop -l 180 -d "This is the nightly cloud feeds test" -n "Stress test against cloud feeds" -r jmeter -e 166.78.107.85 --test-agent-slaves 166.78.107.85,166.78.107.252,166.78.107.4,166.78.101.137
+ruby cloud_feeds.rb -a atom_hopper -s staging -t stress -c stop -l 120 -d "This is the nightly cloud feeds test" -n "Load test against cloud feeds" -r jmeter -e 10.23.244.38 --test-agent-slaves 10.23.244.38,10.23.246.100,10.23.246.101 --protocol https --port 443 --target-server atom.staging.ord1.uk.ci.rackspace.net
 echo "finished stress test."

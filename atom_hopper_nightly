@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+source /usr/local/rvm/environments/ruby-2.0.0-p353
+cd /root/viewer/hERmes_viewer
+bundle install
+ruby -v
+which ruby
+echo "start load test"
+ruby cloud_feeds.rb -a atom_hopper -s staging -t load -c start -l 120 -d "This is the nightly cloud feeds test" -n "Load test against cloud feeds" -r jmeter -e 10.23.244.38 --test-agent-slaves 10.23.244.38,10.23.246.100,10.23.246.101 --protocol https --port 443 --target-server atom.staging.ord1.uk.ci.rackspace.net --token f83cea360c9b46c48b98e7d3eb7faadf
+echo "stop load test"
+ruby cloud_feeds.rb -a atom_hopper -s staging -t load -c stop -l 120 -d "This is the nightly cloud feeds test" -n "Load test against cloud feeds" -r jmeter -e 10.23.244.38 --test-agent-slaves 10.23.244.38,10.23.246.100,10.23.246.101 --protocol https --port 443 --target-server atom.staging.ord1.uk.ci.rackspace.net --token f83cea360c9b46c48b98e7d3eb7faadf
+echo "finished load test."
+echo "start stress test"
+# ruby cloud_feeds.rb -a atom_hopper -s staging -t stress -c start -l 180 -d "This is the nightly cloud feeds test" -n "Stress test against cloud feeds" -r jmeter -e 10.23.244.38 --test-agent-slaves 10.23.244.38,10.23.246.100,10.23.246.101 
+echo "stop stress test"
+# ruby cloud_feeds.rb -a atom_hopper -s staging -t stress -c stop -l 180 -d "This is the nightly cloud feeds test" -n "Stress test against cloud feeds" -r jmeter -e 10.23.244.38 --test-agent-slaves 10.23.244.38,10.23.246.100,10.23.246.101
+echo "finished stress test."

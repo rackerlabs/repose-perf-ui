@@ -16,72 +16,6 @@ require 'rest_client'
 
 RETRY_COUNT = 3
 
-def get_server_ips(lb_name, logger, env, test_id)
-  run_succeeded = false
-  retry_counter = 0
-  while !run_succeeded && retry_counter < RETRY_COUNT
-    begin
-      logger.debug "load balancer name: #{lb_name}_#{test_id}"
-      lb_ip = env.lb_service.load_balancers.find do |lb| 
-        lb.name =~ /#{Regexp.escape(lb_name)}_#{Regexp.escape(test_id.to_s)}/ 
-      end.virtual_ips.find do |ip| 
-        ip.ip_version == 'IPV4' && ip.type == 'PUBLIC' 
-      end.address
-  
-      logger.debug "load balancer ip: #{lb_ip}"
-  
-      node_ips = env.lb_service.load_balancers.find do |lb| 
-        lb.name =~ /#{Regexp.escape(lb_name)}_#{Regexp.escape(test_id.to_s)}/ 
-      end.nodes.map do |ip| 
-        ip.address 
-      end
-      run_succeeded = true
-    rescue Exception => e
-      logger.info e
-      logger.info e.backtrace
-      retry_counter = retry_counter + 1  
-    end
-  end
-  logger.debug "nodes: #{node_ips}"
-  
-  {:lb => lb_ip, :nodes => node_ips}
-end
-
-def get_test_ip(logger, env, test_id)
-  run_succeeded = false
-  retry_counter = 0
-  while !run_succeeded && retry_counter < RETRY_COUNT
-    begin
-      test_agent = env.service.servers.find {|server| server.name =~ /test-agent-id-#{Regexp.escape(test_id.to_s)}/}.ipv4_address
-      logger.info "test agent: #{test_agent}"
-      run_succeeded = true
-    rescue Exception => e
-      logger.info e
-      logger.info e.backtrace
-      retry_counter = retry_counter + 1  
-    end
-  end
-  test_agent
-end
-
-def get_slave_test_ip(logger, env, test_id)
-  run_succeeded = false
-  retry_counter = 0
-  while !run_succeeded && retry_counter < RETRY_COUNT
-    begin
-      
-      test_agent_list = env.service.servers.find_all {|server| logger.info server.name ;  server.name =~ /test-slave-agent-id-#{Regexp.escape(test_id.to_s)}/}.map {|server| server.ipv4_address}
-      logger.info "slave test agent list: #{test_agent_list}"
-      run_succeeded = true
-    rescue Exception => e
-      logger.info e
-      logger.info e.backtrace
-      retry_counter = retry_counter + 1  
-    end
-  end
-  test_agent_list
-end
-
 environment_hash = {
  :atom_hopper => :dfw,
  :translation => :dfw,
@@ -185,7 +119,7 @@ if opts[:action] == 'stop'
   env.connect(environment_hash[opts[:sub_app].to_sym])
   env.load_balance_connect(environment_hash[opts[:sub_app].to_sym])
 
-  test_agent = get_test_ip(logger, env, opts[:test_id])
+  test_agent = SnaphostComparer::Models::Servers.new.get_test_ip(logger, env, opts[:test_id])
 
   run_succeeded = false
   retry_counter = 0
@@ -206,21 +140,21 @@ if opts[:action] == 'stop'
     if opts[:with_repose]
       #performance with repose!
       logger.debug "we just ran a test on performance flavor with repose"
-      server_ip_info = get_server_ips("repose_lb_perf_flavors_withrepose", logger, env, opts[:test_id])
+      server_ip_info = SnapshotComparer::Models::Servers.new.get_server_ips("repose_lb_perf_flavors_withrepose", logger, env, opts[:test_id])
     else
       #performance without repose!
       logger.debug "we just ran a test on performance flavor without repose"
-      server_ip_info = get_server_ips("repose_lb_perf_flavors_withoutrepose", logger, env, opts[:test_id])
+      server_ip_info = SnapshotComparer::Models::Servers.new.get_server_ips("repose_lb_perf_flavors_withoutrepose", logger, env, opts[:test_id])
     end
   else
     if opts[:with_repose]
       #original with repose!
       logger.debug "we just ran a test on original flavor with repose"
-      server_ip_info = get_server_ips("repose_lb_original_withrepose", logger, env, opts[:test_id])
+      server_ip_info = SnapshotComparer::Models::Servers.new.get_server_ips("repose_lb_original_withrepose", logger, env, opts[:test_id])
     else
       #original with repose!
       logger.debug "we just ran a test on original flavor without repose"
-      server_ip_info = get_server_ips("repose_lb_original_withoutrepose", logger, env, opts[:test_id])
+      server_ip_info = SnapshotComparer::Models::Servers.new.get_server_ips("repose_lb_original_withoutrepose", logger, env, opts[:test_id])
     end
   end
 
@@ -329,7 +263,6 @@ if opts[:action] == 'stop'
       system "ssh root@#{server} 'rm -rf /home/repose/usr/share/repose/repose-valve.jar '" 
       system "ssh root@#{server} 'rm -rf /home/repose/usr/share/repose/filters/* '" 
       system "ssh root@#{server} 'rm -rf /home/repose/logs/* '" 
-      system "ssh root@#{server} 'rm -rf /home/repose/deployments/* '" 
     end
     system "ssh root@#{server} -f 'killall node '"
     system "ssh root@#{server} -f 'killall sar '"
@@ -383,30 +316,31 @@ elsif opts[:action] == 'start'
     if opts[:with_repose]
       #performance with repose!
       logger.debug "we are setting up a test on performance flavor with repose"
-      server_ip_info = get_server_ips("repose_lb_perf_flavors_withrepose", logger, env,opts[:test_id])
+      server_ip_info = SnapshotComparer::Models::Servers.new.get_server_ips("repose_lb_perf_flavors_withrepose", logger, env,opts[:test_id])
     else
       #performance without repose!
       logger.debug "we are setting up a test on performance flavor without repose"
-      server_ip_info = get_server_ips("repose_lb_perf_flavors_withoutrepose", logger, env, opts[:test_id])
+      server_ip_info = SnapshotComparer::Models::Servers.new.get_server_ips("repose_lb_perf_flavors_withoutrepose", logger, env, opts[:test_id])
     end
   else
     if opts[:with_repose]
       #original with repose!
       logger.debug "we are setting up a test on original flavor with repose"
-      server_ip_info = get_server_ips("repose_lb_original_withrepose", logger, env, opts[:test_id])
+      server_ip_info = SnapshotComparer::Models::Servers.new.get_server_ips("repose_lb_original_withrepose", logger, env, opts[:test_id])
     else
       #original with repose!
       logger.debug "we are setting up a test on original flavor without repose"
-      server_ip_info = get_server_ips("repose_lb_original_withoutrepose", logger, env, opts[:test_id])
+      server_ip_info = SnapshotComparer::Models::Servers.new.get_server_ips("repose_lb_original_withoutrepose", logger, env, opts[:test_id])
     end
   end
 
-  slave_test_agent_list = get_slave_test_ip(logger,env,opts[:test_id])
+  slave_test_agent_list = SnapshotComparer::Models::Servers.new.get_slave_test_ip(logger,env,opts[:test_id])
   logger.info "slaves: #{slave_test_agent_list.inspect}"
 
   logger.info "get into redis"
   redis = Redis.new({:host => config['redis']['host'], :port => config['redis']['port'], :db => config['redis']['db']})
   logger.debug "redis: #{redis}"
+  redis.set("#{opts[:app]}:test:#{opts[:sub_app]}:#{opts[:test_type]}:temp_start", 1)
   config_list = redis.lrange("#{opts[:app]}:#{opts[:sub_app]}:setup:configs", 0, -1)
 
   guid = SecureRandom.uuid
@@ -571,6 +505,7 @@ elsif opts[:action] == 'start'
         system "ssh root@#{server} -f 'cd /usr/share/jmxtrans ; ./jmxtrans.sh stop '"
         logger.debug "start jmxtrans"
         system "ssh root@#{server} -f 'cd /usr/share/jmxtrans ; ./jmxtrans.sh start #{plugin['name']} '" 
+        logger.debug "jmxtrans started"
       end if plugin_list_json
 
       if opts[:release]
@@ -724,14 +659,14 @@ elsif opts[:action] == 'start'
 
     if opts[:with_repose]
       logger.info "start repose"
-      logger.info "ssh root@#{server} -f 'export SAXON_HOME=/etc/saxon && nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Xms4G -Xmx4G -XX:MaxPermSize=512m -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ & '"
-      system "ssh root@#{server} -f 'export SAXON_HOME=/etc/saxon && nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Xms4G -Xmx4G -XX:MaxPermSize=512m -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ & '" 
+      logger.info "ssh root@#{server} -f 'export SAXON_HOME=/etc/saxon && nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Xms2048m -Xmx2048m -XX:MaxPermSize=512m -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ start & '"
+      system "ssh root@#{server} -f 'export SAXON_HOME=/etc/saxon && nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Xms2048m -Xmx2048m -XX:MaxPermSize=512m -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ start & '" 
        
       
       is_valid = false
       execution_tries = 0
       response = nil
-      until is_valid || execution_tries > 200
+      until is_valid || execution_tries > 1000
         begin
           logger.info "execute: http://#{server}:7070 for test"
           response = Net::HTTP.get_response(URI("http://#{server}:7070"))
@@ -759,7 +694,7 @@ elsif opts[:action] == 'start'
     end
   end
 
-  test_agent = get_test_ip(logger, env, opts[:test_id])
+  test_agent = SnapshotComparer::Models::Servers.new.get_test_ip(logger, env, opts[:test_id])
   Net::SSH.start(test_agent, 'root') do |ssh|
     ssh.exec!("mkdir -p /home/apache/test")
     ssh.exec!("rm -rf /home/apache/test/*")
@@ -767,14 +702,11 @@ elsif opts[:action] == 'start'
   
   logger.info "get jmeter stuff from redis"
   test_json = redis.hget("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "test_#{opts[:test_type]}_#{opts[:runner]}")
-
-  sleep 60  
-  logger.info test_json
+  
   raise ArgumentError, "invalid test" unless test_json
   test_data = JSON.parse(test_json)
   
   test_script_list = redis.lrange("#{opts[:app]}:#{opts[:sub_app]}:tests:setup:script", 0, -1)
-  logger.info test_script_list
   raise ArgumentError, "no tests found" unless test_script_list
   
   test_script = JSON.parse(test_script_list.find {|s| parsed_result = JSON.parse(s) ; parsed_result['type'] == opts[:runner] and parsed_result['test'] == opts[:test_type]})
@@ -920,6 +852,7 @@ elsif opts[:action] == 'start'
   File.open(File.expand_path("test_execution.yaml", Dir.pwd), 'w') {|f| f.write test_yaml.to_yaml }
 
   test_duration = duration * 60
+  redis.del("#{opts[:app]}:test:#{opts[:sub_app]}:#{opts[:test_type]}:temp_start")
   case opts[:test_type]
     when "load"
       rampdown = test_data["rampdown"] 

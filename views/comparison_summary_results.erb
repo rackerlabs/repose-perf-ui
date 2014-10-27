@@ -51,7 +51,7 @@
             </thead>
             <tbody>
 <% result_set_list.each do |result| %>
-              <tr <% "class=\"danger\"" unless result.execution_result || result.execution_result == :failed %>>
+              <tr <%= "class=\"danger\"" if result.execution_result && result.execution_result == 'failed' %>>
                 <td><%= result.name %></td>
                 <td><%= result.description %></td>
                 <td><a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/id/<%= result.id %>"><%= result.start.is_a?(Fixnum) ? DateTime.strptime(result.start.to_s.chomp("000"), '%s') : result.start  %></td>
@@ -61,7 +61,7 @@
                 <td>
 <% plugin_list.each do |plugin| %>
                   <div class="btn-group">
-                    <a class="btn dropdown-toggle" role="button" data-toggle="dropdown" href="#"><%= plugin[:id] %><span class="caret"></span></a>
+                    <a class="btn dropdown-toggle btn-primary" role="button" data-toggle="dropdown" href="#"><%= plugin[:id] %><span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
 <% plugin[:data].each do |option| %>
                       <li><a href="/<%= application %>/results/<%= sub_app_id %>/<%= test_type %>/id/<%= result.id %>/plugin/<%= plugin[:id] %>/<%= option[:id] %>"><%= option[:name] %></a></li>

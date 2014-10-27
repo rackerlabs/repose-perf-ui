@@ -44,7 +44,7 @@ module SnapshotComparer
                 result_to_compare.description,
                 "#{result_to_compare.id}+#{temp.id}",
                 :completed,
-                ApplicationTestType.new(store,nil).get_status_for_guid(test[:application], test[:name], test[:test_type], test[:guid])) if result_to_compare
+                ApplicationTestType.new(store,nil).get_status_for_guid(test[:application], test[:name], test[:test_type], "#{result_to_compare.id}+#{temp.id}")) if result_to_compare
               temp_list.delete(result_to_compare)
             else
               temp_list << temp
@@ -257,6 +257,30 @@ module SnapshotComparer
       @summary_results = @new_summary_results + @summary_results
       @new_summary_results
     end
+  end
+  
+  class Results
+      def get_running_test(db, app, sub_app, type)
+        store = Redis.new(db)
+        result = nil
+        begin
+          result = store.get("#{app}:test:#{sub_app}:#{type}:start")
+        ensure
+          store.quit
+        end
+        result
+      end
+
+      def get_state(db, app, sub_app, type)
+        store = Redis.new(db)
+        result = nil
+        begin
+          result = store.get("#{app}:test:#{sub_app}:#{type}:temp_start")
+        ensure
+          store.quit
+        end
+        result
+      end
   end
 end
 end
