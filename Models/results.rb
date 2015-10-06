@@ -22,7 +22,7 @@ module SnapshotComparer
             runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
             summary_data = JSON.parse(data_result)['location']
 
-            runner_class.compile_summary_results(test, test[:guid], "http://#{fs_ip}#{summary_data}")
+            runner_class.compile_summary_results(test, test[:guid], "http://#{fs_ip}#{summary_data}") if summary_data
 
             temp = Result.new(
                 test['start'],test[:length],test[:average],

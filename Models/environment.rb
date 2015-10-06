@@ -65,6 +65,7 @@ module SnapshotComparer
         retry_counter = 0
         while !run_succeeded && retry_counter < RETRY_COUNT
           begin
+            logger.info "get test agent #{test_id}"
             test_agent = env.service.servers.find {|server| server.name =~ /test-agent-id-#{Regexp.escape(test_id.to_s)}/}.ipv4_address
             logger.info "test agent: #{test_agent}"
             run_succeeded = true
@@ -82,7 +83,7 @@ module SnapshotComparer
         retry_counter = 0
         while !run_succeeded && retry_counter < RETRY_COUNT
           begin
-            logger.debug "load balancer name: #{lb_name}_#{test_id}"
+            logger.debug "load balancer name: #{lb_name}_#{test_id} from #{env.lb_service.load_balancers}"
             lb_ip = env.lb_service.load_balancers.find do |lb| 
               lb.name =~ /#{Regexp.escape(lb_name)}_#{Regexp.escape(test_id.to_s)}/ 
             end.virtual_ips.find do |ip| 
@@ -113,6 +114,7 @@ module SnapshotComparer
         retry_counter = 0
         while !run_succeeded && retry_counter < RETRY_COUNT
           begin      
+            logger.info "get test agent #{test_id}"
             test_agent_list = env.service.servers.find_all {|server| logger.info server.name ;  server.name =~ /test-slave-agent-id-#{Regexp.escape(test_id.to_s)}/}.map {|server| server.ipv4_address}
             logger.info "slave test agent list: #{test_agent_list}"
             run_succeeded = true
@@ -213,7 +215,7 @@ module SnapshotComparer
           :rackspace_api_key => @apikey,
           :rackspace_region => region
         })
-        @logger.info "connected to load balance service #{@lb_service.inspect}"
+        @logger.info "connected to load balance service in #{region} and retrieved #{@lb_service.inspect}"
         @lb_service
       end
 

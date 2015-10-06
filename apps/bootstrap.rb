@@ -185,6 +185,7 @@ module Apps
     def stop_test_recording(application, sub_app = 'main', type = 'load', json_data = nil, timestamp = nil)
       @logger.debug "stopping test recording"
       id = "#{application}:test:#{sub_app}:#{type}:start"
+      @logger.debug "json data: #{json_data}"
       @logger.debug "id: #{id}"
       store = Redis.new(@db)
       plugin_result_list = []

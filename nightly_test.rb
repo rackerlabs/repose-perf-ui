@@ -637,10 +637,12 @@ elsif opts[:action] == 'start'
       name = responder_json['name']
       location = responder_json['location']
       if config['storage_info']['destination'] == 'localhost'
+        logger.info "create directory in #{server} as root" 
         Net::SSH.start(server, 'root') do |ssh|
           ssh.exec!("mkdir -p /home/mocks")
         end
         logger.info "#{config['storage_info']['path']}/#{location}"
+        logger.info "upload mocks to #{server} as root" 
         Net::SCP.upload!(
           server, 
           'root', 
@@ -650,6 +652,7 @@ elsif opts[:action] == 'start'
         )
       else
         tmp_dir = "/tmp/#{guid}/"
+        logger.info "Download #{config['storage_info']['destination']} as #{config['storage_info']['user']} to #{location}"
         FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
         Net::SCP.download!(
           config['storage_info']['destination'], 
@@ -661,6 +664,7 @@ elsif opts[:action] == 'start'
         ) 
     
         #second, upload to remote
+        logger.info "upload mocks to #{server} as root"
         Net::SCP.upload!(
           server, 
           'root', 

@@ -152,7 +152,6 @@ class PerfApp < Sinatra::Base
   end
 
   get '/:application/running_tests/:name/:test_type/state' do |application, name, test_type|
-    content_type :json
     app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app
       new_app = app[:klass].new(settings.deployment)
@@ -161,6 +160,26 @@ class PerfApp < Sinatra::Base
       end
       if SnapshotComparer::Models::Results.new.get_state(new_app.db, application, name, test_type.chomp('_test')) 
         body 'SPINNING-UP'
+      elsif SnapshotComparer::Models::Results.new.get_running_test(new_app.db, application, name, test_type.chomp('_test'))
+        body 'RUNNING'
+      else
+        body 'NONE'
+      end
+    else
+      status 404
+    end
+  end
+
+  get '/:application/running_tests/:name/:test_type/status' do |application, name, test_type|
+    app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
+    if app
+      new_app = app[:klass].new(settings.deployment)
+      sub_app = new_app.config['application']['sub_apps'].find do |sa|
+        sa['id'] == name
+      end
+      result = SnapshotComparer::Models::Results.new.get_state(new_app.db, application, name, test_type.chomp('_test')) 
+      if result
+        body result
       elsif SnapshotComparer::Models::Results.new.get_running_test(new_app.db, application, name, test_type.chomp('_test'))
         body 'RUNNING'
       else

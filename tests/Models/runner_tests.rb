@@ -6,6 +6,41 @@ require 'redis'
 require 'securerandom'
 require 'fileutils'
 
+class GatlingRunnerTest < Test::Unit::TestCase
+  def setup
+    @runner = SnapshotComparer::Models::GatlingRunner.new([{
+      :id => "test_app",
+      :klass => MockSingularObject
+    }])
+    @config = YAML.load_file(File.expand_path("config/test_config.yaml", Dir.pwd))
+    @store = Redis.new({:host => @config['redis']['host'], :port => @config['redis']['port'], :db => @config['redis']['db']})
+    @guid = SecureRandom.uuid
+    @app = "test_app"
+    @sub_app = "test_sub_app"
+    @test = "load"
+  end
+
+  def teardown
+    @store.hdel("#{@app}:#{@sub_app}:results:#{@test}:#{@guid}:data", "results")
+    FileUtils.rm_rf("/tmp/#{@guid}")
+  end
+
+  def test_store_results
+   source_result_info = {
+     'server' => '104.239.172.205',
+     'user' => 'root',
+     'password' => 'eqo7jWFjkZ86',
+     'path' => '/root/gatling/gatling-charts-highcharts-bundle-2.1.3/results/'
+   }
+   storage_info = @config['storage_info']
+   @runner.store_results(@app,@sub_app,@test, @guid, source_result_info, storage_info, @store, @config)
+   assert_equal(
+     "{\"location\":\"/files/#{@app}/#{@sub_app}/results/#{@test}/#{@guid}/data/summary.log\",\"name\":\"summary.log\"}", 
+     @store.hget("#{@app}:#{@sub_app}:results:#{@test}:#{@guid}:data","results"))
+   assert(File.exists?("/tmp/#{@guid}/data/summary.log"))
+  end
+end
+
 class JMeterRunnerTest < Test::Unit::TestCase
   def setup
     @runner = SnapshotComparer::Models::JMeterRunner.new([{

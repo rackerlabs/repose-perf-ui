@@ -1142,6 +1142,8 @@ class PerfApp < Sinatra::Base
 =begin
   POST /atom_hopper/applications/main/load/start -d '{"length":60, "description": "this is a description of the test", "flavor_type": "performance", "release": 1.6}'
 =end
+    logger.info "app: #{application}, name: #{name}, test: #{test}"
+    puts "app: #{application}, name: #{name}, test: #{test}"
     app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app and (SnapshotComparer::Apps::Bootstrap.test_list.keys.include?(test) or SnapshotComparer::Apps::Bootstrap.test_list.keys.include?("#{test}_test"))
       new_app = app[:klass].new(settings.deployment)
@@ -1151,6 +1153,7 @@ class PerfApp < Sinatra::Base
       if sub_app
         request.body.rewind
         json_data = JSON.parse(request.body.read)
+        logger.debug "jsondata: #{json_data}"
         content_type :json
         halt 400, { "fail" => "required keys are missing"}.to_json unless json_data.has_key?("name") and json_data.has_key?("length") and json_data.has_key?("runner")
         guid_response = new_app.start_test_recording(application, name, test.chomp('_test'), json_data)
@@ -1186,7 +1189,14 @@ class PerfApp < Sinatra::Base
       end
       if sub_app
         request.body.rewind
-        json_data = JSON.parse(request.body.read)
+        request_body = request.body.read
+        puts "json data: #{request_body}"
+        begin
+          json_data = JSON.parse(request_body)
+        rescue 
+          request_body.gsub!(/([a-z]+):/, '"\1":')
+          json_data = JSON.parse(request_body)
+        end
         content_type :json
         halt 400, { "fail" => "required keys are missing"}.to_json unless json_data.has_key?("guid") and json_data.has_key?("servers") and json_data["servers"].has_key?("results")
         stop_response = new_app.stop_test_recording(application, name, test.chomp('_test'), json_data)

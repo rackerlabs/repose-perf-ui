@@ -2,11 +2,7 @@
 - name: repose
   sub_app:
   - name: atom_hopper
-    test_type:
-    - name: adhoc
-      repose_guid: 3723bb37-6d0b-4702-9acf-533623020192
-    - name: load
-      repose_guid: 06a4e973-934e-4f62-b084-7d8a26f40f1a
+    test_type: []
   - name: identity
     test_type: []
   - name: translation
