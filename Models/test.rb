@@ -2,6 +2,7 @@ require_relative  'request.rb'
 require_relative  'response.rb'
 require 'htmlentities'
 require 'redis'
+require 'json'
 
 module SnapshotComparer
   module Models
@@ -11,6 +12,16 @@ module SnapshotComparer
 
     def initialize(db)
       @db = db
+    end
+
+    def start_test(application, name, test_type, extra_data)
+      pid = 0
+      if application == "repose"
+        pid = spawn("/root/viewer/hERmes_viewer/adhoc_nightly -a #{application} -s #{name} -t #{test_type} -l #{extra_data['length']} -r #{extra_data['release']} -b #{extra_data['branch']?extra_data['branch']:"master"} -n '#{extra_data['name']}' -f #{extra_data['flavor_type']} -i #{extra_data['test_id']} -u #{extra_data['runner']}")
+      elsif application == "atom_hopper"
+        pid = spawn("/root/viewer/hERmes_viewer/adhoc_nightly -a #{application} -s #{name} -t #{test_type} -l #{extra_data[:length]} -n #{extra_data[:name]} -i #{extra_data[:test_id]}")
+      end
+      pid
     end
 
     def _get_result_requests(store, application, name, test_type, id)
@@ -69,7 +80,7 @@ module SnapshotComparer
         requests_json = JSON.parse(requests) if requests
         responses_json = JSON.parse(responses) if responses
 
-        if requests_json and responses_json
+        if requests_json && requests_json.is_a?(Array) && responses_json && responses_json.is_a?(Array)
           requests_json.each do |request|
             request_list << Request.new(request["method"], request["uri"], request["headers"], coder.encode(request["body"]))
           end

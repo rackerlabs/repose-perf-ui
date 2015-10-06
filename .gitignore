@@ -17,3 +17,5 @@ hERmes_viewer/
 files/*
 .DS_Store
 bower_components
+lighttpd.tar.giz
+dump*

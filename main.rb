@@ -382,8 +382,15 @@ class PerfApp < Sinatra::Base
     app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app
       new_app = app[:klass].new(settings.deployment)
+      sub_apps = []
+      new_app.config['application']['sub_apps'].each do |sa|
+        sa['status'] = SnapshotComparer::Models::ApplicationTestType.new(nil, new_app.db).get_overall_status(application, sa['id'])
+        sa['status'] ||= SnapshotComparer::Models::ApplicationTestType.PASSED
+        sub_apps << sa
+      end
+
       erb :results, :locals => {
-        :application_list => new_app.config['application']['sub_apps'],
+        :application_list => sub_apps,
         :title => new_app.config['application']['name'],
         :application => app[:id]
       }
@@ -399,12 +406,22 @@ class PerfApp < Sinatra::Base
       sub_app = new_app.config['application']['sub_apps'].find do |sa|
         sa['id'] == name
       end
+      test_list = {}
+      SnapshotComparer::Apps::Bootstrap.test_list.each do |id, t|
+        t['status'] = SnapshotComparer::Models::ApplicationTestType.new(nil, new_app.db).get_status_for_type(app[:id], name.to_sym, id)
+        t['status'] ||= SnapshotComparer::Models::ApplicationTestType.PASSED
+        t['test_count'] = SnapshotComparer::Models::PastSummaryResults.new(application, name,
+            new_app.config['application']['type'].to_sym, id.chomp('_test'),
+            new_app.db, new_app.fs_ip, nil, logger).test_list.count
+        t['test_count'] ||= 0
+        test_list.merge!({id => t})
+      end
       if sub_app
         erb :results_list, :locals => {
           :application => app[:id],
           :sub_app_id => name.to_sym,
           :title => new_app.config['application']['name'],
-          :load_test_list => SnapshotComparer::Apps::Bootstrap.test_list
+          :load_test_list => test_list
         }
       else
         status 404
@@ -437,7 +454,7 @@ class PerfApp < Sinatra::Base
           :application => app[:id],
           :sub_app_id => name.to_sym,
           :title => new_app.config['application']['name'],
-          :result_set_list => results.past_summary_results.test_results(new_app.db, new_app.fs_ip, results.test_list).sort_by {|r| r.start.to_s},
+          :result_set_list => results.past_summary_results.test_results(new_app.db, new_app.fs_ip, results.test_list).sort_by {|r| r.start.to_s}.reverse,
           :plugin_list => plugins,
           :test_type => test
         }
@@ -1125,6 +1142,8 @@ class PerfApp < Sinatra::Base
 =begin
   POST /atom_hopper/applications/main/load/start -d '{"length":60, "description": "this is a description of the test", "flavor_type": "performance", "release": 1.6}'
 =end
+    logger.info "app: #{application}, name: #{name}, test: #{test}"
+    puts "app: #{application}, name: #{name}, test: #{test}"
     app = SnapshotComparer::Apps::Bootstrap.application_list.find {|a| a[:id] == application}
     if app and (SnapshotComparer::Apps::Bootstrap.test_list.keys.include?(test) or SnapshotComparer::Apps::Bootstrap.test_list.keys.include?("#{test}_test"))
       new_app = app[:klass].new(settings.deployment)
@@ -1134,6 +1153,7 @@ class PerfApp < Sinatra::Base
       if sub_app
         request.body.rewind
         json_data = JSON.parse(request.body.read)
+        logger.debug "jsondata: #{json_data}"
         content_type :json
         halt 400, { "fail" => "required keys are missing"}.to_json unless json_data.has_key?("name") and json_data.has_key?("length") and json_data.has_key?("runner")
         guid_response = new_app.start_test_recording(application, name, test.chomp('_test'), json_data)
@@ -1169,7 +1189,14 @@ class PerfApp < Sinatra::Base
       end
       if sub_app
         request.body.rewind
-        json_data = JSON.parse(request.body.read)
+        request_body = request.body.read
+        puts "json data: #{request_body}"
+        begin
+          json_data = JSON.parse(request_body)
+        rescue 
+          request_body.gsub!(/([a-z]+):/, '"\1":')
+          json_data = JSON.parse(request_body)
+        end
         content_type :json
         halt 400, { "fail" => "required keys are missing"}.to_json unless json_data.has_key?("guid") and json_data.has_key?("servers") and json_data["servers"].has_key?("results")
         stop_response = new_app.stop_test_recording(application, name, test.chomp('_test'), json_data)

@@ -27,3 +27,39 @@ application:
   - id: cloud_queues
     name: Cloud Queues
     description: Repose setup with Cloud Queues configurations
+  - id: connection_pool
+    name: Connection Pool
+    description: Tests for connection pooling
+  - id: aeauth
+    name: AE Auth Tokens
+    description: Repose test for large identity tokens
+  - id: rl_eventservice
+    name: Rate Limit - Event Service
+    description: Repose test for rate limiting with event service
+  - id: tracing
+    name: Tracing
+    description: Repose test for tracing
+  - id: apicoverage
+    name: Api Coverage
+    description: Repose test for api coverage
+  sla:
+  - average:
+      limit: upper
+      value: 5
+      value_type: ms
+      test_type:
+      - load
+  - throughput:
+      limit: lower
+      value: -100
+      test_type:
+      - load
+  - errors:
+      limit: upper
+      value: 10
+      test_type:
+      - load
+  notify: true
+  notification:
+    type: mail
+    recipient_list: reposecore@rackspace.com

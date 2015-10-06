@@ -1,4 +1,6 @@
 require 'sqlite3'
+require 'pg'
+require 'yaml'
 
 module SnapshotComparer
 module Models
@@ -7,6 +9,12 @@ module Models
     attr_accessor :apps
     attr_accessor :version
     attr_reader :db
+
+    def self.databases
+      {
+        :postgres => PostgresDatabase
+      }
+    end
 
     def initialize(name = nil)
       name = "performance" unless name
@@ -32,6 +40,38 @@ module Models
          applications.merge!({row['app_id'].to_sym => Models::Application.new(row['id'], row['name'], row['description'])})
       end
       applications
+    end
+  end
+
+  class PostgresDatabase
+    attr_reader :conn
+
+    def initialize(config_path = nil)
+      config_path ||= File.expand_path("config/config.yaml", Dir.pwd)
+      @config = YAML.load_file(config_path)
+puts @config.inspect
+      @conn = PGconn.connect(dbname: @config['datastore']['db'],user: @config['datastore']['user'], password: @config['datastore']['password'], host: @config['datastore']['host'])
+    end
+
+    def get_slas(app, sub_app, test_type)
+
+    end
+
+    def get_slas_by_id(guid)
+
+    end
+
+    def get_moving_average(app, sub_app, test_type)
+    end
+
+    def does_test_fail_sla(guid, sla, sla_type)
+=begin
+  get sla type (passed in as object)
+  get value from sla (sla_type.current_threshold)
+  based on sla threshold (from config) check if value is <> the sla
+  return true or false
+=end
+
     end
   end
 end

@@ -45,7 +45,11 @@ module PluginModule
         puts "get data from http://#{@remote_host}/render/?target=#{targets}&from=#{local_start}&until=#{local_stop}&format=json"
 
         File.open("#{tmp_dir}/graphitedata.out_#{@remote_host}", 'w') do |f|
-          f.write(RestClient.get "http://#{@remote_host}/render/?target=#{targets}&from=#{local_start}&until=#{local_stop}&format=json")
+          begin
+            f.write(RestClient.get "http://#{@remote_host}/render/?target=#{targets}&from=#{local_start}&until=#{local_stop}&format=json")
+          rescue Exception => e
+            puts "this needs to log an error but for now this is the error: #{e.message}"  
+          end
         end
        
 

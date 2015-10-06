@@ -70,7 +70,7 @@ def get_slave_test_ip(logger, env, test_id)
   while !run_succeeded && retry_counter < RETRY_COUNT
     begin
       
-      test_agent_list = env.service.servers.find_all {|server| logger.info server.name ;  server.name =~ /slave-test-agent-id-#{Regexp.escape(test_id.to_s)}/}.map {|server| server.ipv4_address}
+      test_agent_list = env.service.servers.find_all {|server| logger.info server.name ;  server.name =~ /test-slave-agent-id-#{Regexp.escape(test_id.to_s)}/}.map {|server| server.ipv4_address}
       logger.info "slave test agent list: #{test_agent_list}"
       run_succeeded = true
     rescue Exception => e
@@ -83,13 +83,14 @@ def get_slave_test_ip(logger, env, test_id)
 end
 
 environment_hash = {
- :atom_hopper => :iad,
- :translation => :iad,
- :identity => :iad,
- :dbaas => :iad,
+ :atom_hopper => :dfw,
+ :translation => :dfw,
+ :identity => :dfw,
+ :dbaas => :dfw,
  :auto_scale => :dfw,
  :psl => :dfw,
- :cloud_queues => :dfw
+ :cloud_queues => :dfw,
+ :connection_pool => :dfw
 }
 
 
@@ -328,6 +329,7 @@ if opts[:action] == 'stop'
       system "ssh root@#{server} 'rm -rf /home/repose/usr/share/repose/repose-valve.jar '" 
       system "ssh root@#{server} 'rm -rf /home/repose/usr/share/repose/filters/* '" 
       system "ssh root@#{server} 'rm -rf /home/repose/logs/* '" 
+      system "ssh root@#{server} 'rm -rf /home/repose/deployments/* '" 
     end
     system "ssh root@#{server} -f 'killall node '"
     system "ssh root@#{server} -f 'killall sar '"
@@ -420,7 +422,7 @@ elsif opts[:action] == 'start'
 
   if opts[:with_repose] and opts[:release] and opts[:release] == 'master'
     branch = opts[:branch] ? opts[:branch] : 'master'
-    system "rm -rf ~/repose_repo/repose ; mkdir ~/repose_repo/repose ; cd ~/repose_repo/repose ; git init ; git pull https://github.com/rackerlabs/repose #{opts[:branch]} ; mvn clean install -U -DskipTests; "
+    system "rm -rf ~/repose_repo/repose ; mkdir ~/repose_repo/repose ; cd ~/repose_repo/repose ; git init ; git pull https://github.com/rackerlabs/repose #{branch} ; mvn clean install -U -DskipTests; "
   end
 
   is_started_successfully = false
@@ -459,6 +461,22 @@ elsif opts[:action] == 'start'
               server,
               'root',
               "/tmp/#{guid}/dist-datastore.cfg.xml",
+              "/home/repose/configs/",
+              {:recursive => true, :verbose => true }
+            ) 
+
+            FileUtils.rm_rf("/tmp/#{guid}")
+          elsif JSON.parse(config_data)['name'] == 'ip-identity.cfg.xml'
+            system_model_contents = SnapshotComparer::SystemModelTemplate.new(server_ip_info[:nodes],File.read("#{config['storage_info']['path']}/#{JSON.parse(config_data)['location']}")).render
+
+            tmp_dir = "/tmp/#{guid}/"
+            FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
+            File.open("/tmp/#{guid}/ip-identity.cfg.xml", 'w') { |f| f.write(system_model_contents) }
+
+            Net::SCP.upload!(
+              server,
+              'root',
+              "/tmp/#{guid}/ip-identity.cfg.xml",
               "/home/repose/configs/",
               {:recursive => true, :verbose => true }
             ) 
@@ -511,6 +529,7 @@ elsif opts[:action] == 'start'
       plugin_list = redis.hget("#{opts[:app]}:#{opts[:sub_app]}:setup:meta:plugins", "ReposeJMXPlugin")
       plugin_list_json = JSON.parse(plugin_list) if plugin_list
      
+      logger.debug "plugin list: #{plugin_list_json.inspect}"
       plugin_list_json.each do |plugin|
         if config['storage_info']['destination'] == 'localhost'
           logger.info "moving over: #{plugin['name']}"
@@ -612,15 +631,18 @@ elsif opts[:action] == 'start'
     end
     
     logger.info "upload responders"
+    logger.info opts[:with_repose] || (!opts[:with_repose] && !secondary_responders) || (!opts[:with_repose] && secondary_responders && secondary_responders.length == 0)
     main_responders.each do |key, responder|
       responder_json = JSON.parse(responder)
       name = responder_json['name']
       location = responder_json['location']
       if config['storage_info']['destination'] == 'localhost'
+        logger.info "create directory in #{server} as root" 
         Net::SSH.start(server, 'root') do |ssh|
           ssh.exec!("mkdir -p /home/mocks")
         end
         logger.info "#{config['storage_info']['path']}/#{location}"
+        logger.info "upload mocks to #{server} as root" 
         Net::SCP.upload!(
           server, 
           'root', 
@@ -630,6 +652,7 @@ elsif opts[:action] == 'start'
         )
       else
         tmp_dir = "/tmp/#{guid}/"
+        logger.info "Download #{config['storage_info']['destination']} as #{config['storage_info']['user']} to #{location}"
         FileUtils.mkpath tmp_dir unless File.exists?(tmp_dir)
         Net::SCP.download!(
           config['storage_info']['destination'], 
@@ -641,6 +664,7 @@ elsif opts[:action] == 'start'
         ) 
     
         #second, upload to remote
+        logger.info "upload mocks to #{server} as root"
         Net::SCP.upload!(
           server, 
           'root', 
@@ -651,6 +675,7 @@ elsif opts[:action] == 'start'
       
         FileUtils.rm_rf("/tmp/#{guid}")
       end
+      logger.info "start: ssh root@#{server} -f 'nohup node /home/mocks/#{name} & '"
       system "ssh root@#{server} -f 'nohup node /home/mocks/#{name} & '"
     end if opts[:with_repose] || (!opts[:with_repose] && !secondary_responders) || (!opts[:with_repose] && secondary_responders && secondary_responders.length == 0)
     logger.info "secondary responders: #{secondary_responders}"
@@ -703,13 +728,14 @@ elsif opts[:action] == 'start'
 
     if opts[:with_repose]
       logger.info "start repose"
-      system "ssh root@#{server} -f 'nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Xms4G -Xmx4G -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ -s 6666 start & '" 
+      logger.info "ssh root@#{server} -f 'export SAXON_HOME=/etc/saxon && nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Xms4G -Xmx4G -XX:MaxPermSize=512m -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ & '"
+      system "ssh root@#{server} -f 'export SAXON_HOME=/etc/saxon && nohup java -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Xms4G -Xmx4G -XX:MaxPermSize=512m -jar /home/repose/usr/share/repose/repose-valve.jar -c /home/repose/configs/ & '" 
        
       
       is_valid = false
       execution_tries = 0
       response = nil
-      until is_valid || execution_tries > 100
+      until is_valid || execution_tries > 200
         begin
           logger.info "execute: http://#{server}:7070 for test"
           response = Net::HTTP.get_response(URI("http://#{server}:7070"))
@@ -727,7 +753,7 @@ elsif opts[:action] == 'start'
           end
           logger.info "connection exception: #{msg}"
         end
-        sleep 1
+        sleep 10
         execution_tries = execution_tries + 1
         response = nil
       end
@@ -745,11 +771,14 @@ elsif opts[:action] == 'start'
   
   logger.info "get jmeter stuff from redis"
   test_json = redis.hget("#{opts[:app]}:#{opts[:sub_app]}:setup:meta", "test_#{opts[:test_type]}_#{opts[:runner]}")
-  
+
+  sleep 60  
+  logger.info test_json
   raise ArgumentError, "invalid test" unless test_json
   test_data = JSON.parse(test_json)
   
   test_script_list = redis.lrange("#{opts[:app]}:#{opts[:sub_app]}:tests:setup:script", 0, -1)
+  logger.info test_script_list
   raise ArgumentError, "no tests found" unless test_script_list
   
   test_script = JSON.parse(test_script_list.find {|s| parsed_result = JSON.parse(s) ; parsed_result['type'] == opts[:runner] and parsed_result['test'] == opts[:test_type]})
@@ -902,11 +931,17 @@ elsif opts[:action] == 'start'
       slave_test_agent_list << test_agent
       logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -R #{slave_test_agent_list.join(',')} >> /home/apache/test/summary.log & '"
       system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -l /home/apache/test/response.jtl -R #{slave_test_agent_list.join(',')} >> /home/apache/test/summary.log & '"
+    when "adhoc"
+      rampdown = test_data["rampdown"] 
+      throughput = test_data["throughput"]
+      slave_test_agent_list << test_agent
+      logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -R #{slave_test_agent_list.join(',')} >> /home/apache/test/summary.log & '"
+      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampdown=#{rampdown} -Gthroughput=#{throughput} -Gport=80 -l /home/apache/test/response.jtl -R #{slave_test_agent_list.join(',')} >> /home/apache/test/summary.log & '"
     when "stress"  
       rampup_threads = test_data["rampup_threads"]  
       maxthreads = test_data["maxthreads"]
-      logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gmaxthreads=#{maxthreads} -Gport=80 -l /home/apache/test/response.jtl -R #{test_agent},166.78.152.90 >> /home/apache/test/summary.log & '"
-      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -R 162.209.124.170,162.209.124.104,162.209.99.151,162.209.97.222,162.209.103.84 -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gmaxthreads=#{maxthreads} -Gport=80 -R #{test_agent},166.78.152.90 >> /home/apache/test/summary.log & '"
+      logger.info "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gmaxthreads=#{maxthreads} -Gport=80 -l /home/apache/test/response.jtl -R #{slave_test_agent_list.join(',')} >> /home/apache/test/summary.log & '"
+      system "ssh root@#{test_agent} -f 'nohup /home/apache/apache-jmeter-2.10/bin/jmeter -n -t /home/apache/test/#{test_script['name']} -p /home/apache/apache-jmeter-2.10/bin/jmeter.properties -Ghost=#{host} -Gstartdelay=#{startdelay} -Grampup=#{rampup} -Gduration=#{test_duration} -Grampup_threads=#{rampup_threads} -Gmaxthreads=#{maxthreads} -Gport=80 -l /home/apache/test/response.jtl -R #{slave_test_agent_list.join(',')} >> /home/apache/test/summary.log & '"
 
       sleep(60)
       logger.info Net::SSH.start(test_agent,'root') {|ssh| ssh.exec!("lsof -i :4445")}

@@ -38,7 +38,7 @@ Required parameters:
   responders - responder location (default)
   compare_responders - responder location for comparison
 Usage:
-       set_up_app --app <app id> --plugins <plugin list> --name <app name> --type <singular|comparison> --description <app description> --configs <config location> --test <test location> --request <request location> --responders
+       add_sub_app --app <app id> --sub-app <sub app id> --name <app name> --description <app description> --configs <config location> --test <test location> --request <request location> --responders
 where [options] are:
 EOS
   opt :app, "App id", :type => :string

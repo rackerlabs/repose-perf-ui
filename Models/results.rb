@@ -2,6 +2,7 @@ require 'json'
 require 'yaml'
 require_relative 'result.rb'
 require_relative 'models.rb'
+require_relative 'application_test_type.rb'
 
 module SnapshotComparer
   module Models
@@ -21,7 +22,7 @@ module SnapshotComparer
             runner_class = Apps::Bootstrap.runner_list[test_json['runner'].to_sym] if test_json
             summary_data = JSON.parse(data_result)['location']
 
-            runner_class.compile_summary_results(test, test[:guid], "http://#{fs_ip}#{summary_data}")
+            runner_class.compile_summary_results(test, test[:guid], "http://#{fs_ip}#{summary_data}") if summary_data
 
             temp = Result.new(
                 test['start'],test[:length],test[:average],
@@ -41,7 +42,9 @@ module SnapshotComparer
                 result_to_compare.errors.to_i - temp.errors.to_i,
                 result_to_compare.name,
                 result_to_compare.description,
-                "#{result_to_compare.id}+#{temp.id}")
+                "#{result_to_compare.id}+#{temp.id}",
+                :completed,
+                ApplicationTestType.new(store,nil).get_status_for_guid(test[:application], test[:name], test[:test_type], "#{result_to_compare.id}+#{temp.id}")) if result_to_compare
               temp_list.delete(result_to_compare)
             else
               temp_list << temp
@@ -254,6 +257,30 @@ module SnapshotComparer
       @summary_results = @new_summary_results + @summary_results
       @new_summary_results
     end
+  end
+  
+  class Results
+      def get_running_test(db, app, sub_app, type)
+        store = Redis.new(db)
+        result = nil
+        begin
+          result = store.get("#{app}:test:#{sub_app}:#{type}:start")
+        ensure
+          store.quit
+        end
+        result
+      end
+
+      def get_state(db, app, sub_app, type)
+        store = Redis.new(db)
+        result = nil
+        begin
+          result = store.get("#{app}:test:#{sub_app}:#{type}:temp_start")
+        ensure
+          store.quit
+        end
+        result
+      end
   end
 end
 end

@@ -25,6 +25,10 @@ module Apps
       end
     end
 
+    def self.main_config_impl
+      YAML.load_file(File.expand_path(self.env, Dir.pwd))
+    end
+
     def self.logger
       Logging.color_scheme( 'bright',
         :levels => {
@@ -181,6 +185,7 @@ module Apps
     def stop_test_recording(application, sub_app = 'main', type = 'load', json_data = nil, timestamp = nil)
       @logger.debug "stopping test recording"
       id = "#{application}:test:#{sub_app}:#{type}:start"
+      @logger.debug "json data: #{json_data}"
       @logger.debug "id: #{id}"
       store = Redis.new(@db)
       plugin_result_list = []
@@ -188,6 +193,7 @@ module Apps
         raise ArgumentError, "start time for this test was not found.  Did you forget to start the test?" unless store.get(id)
         start_test = JSON.parse(store.get(id))
         @logger.debug "start test: #{start_test}"
+        @logger.debug "check to make sure that the guid passed in the request is the same as the guid stored in redis"
         raise ArgumentError, "invalid guid" unless json_data['guid'] == start_test['guid']
         end_time = timestamp ? timestamp : Time.now.to_i
         @logger.debug "end time: #{end_time}"
@@ -349,24 +355,30 @@ module Apps
  update the following data with the values coming from the start_test entry
  - application:sub_app:results:type:guid:meta test (NEED application, sub_app, type, json_data, start_test, end_time)
 =end
-      copy_meta_test(application, sub_app, type, json_data, start_test, end_time, start_test['runner'], store)
+      copy_meta_test(application, sub_app, type, json_data, start_test, end_time, start_test['runner'], store )
 
       @logger.debug "get runner and store results"
       source_result_info = json_data['servers']['results']
       runner = Apps::Bootstrap.runner_list[start_test['runner'].to_sym]
       @logger.debug "store results"
-      runner.store_results(application, sub_app, type, json_data['guid'], source_result_info, storage_info, store)
+      @logger.debug Apps::Bootstrap.main_config_impl
+      runner.store_results(application, sub_app, type, json_data['guid'], source_result_info, storage_info, store, Apps::Bootstrap.main_config_impl, start_test['comparison_guid'])
       @logger.debug "finish storing results"
       source_config_info = json_data['servers']['config'] if json_data['servers'].has_key?('config')
       @logger.debug "copy configs if required"
       copy_configs(application, sub_app, type, json_data['guid'], source_config_info, storage_info, store) if source_config_info
       @logger.debug "finish copy configs"
-
+      @logger.debug storage_info
       if storage_info['destination'] == 'localhost'
         @logger.debug "create directory in file store"
         FileUtils.mkdir_p "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}" unless File.exists?("#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}")
+        @logger.debug "copy everything from temp directory"
+        @logger.debug Dir["/tmp/#{json_data['guid']}/**/*"]
         @logger.debug "copy directory data to file store"
+        @logger.debug "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/"
         FileUtils.cp_r "/tmp/#{json_data['guid']}/", "#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/"
+        @logger.debug "did the directory copy?"
+        @logger.debug Dir["#{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}/**/*"]
       else
         Net::SSH.start(server, 'root') do |ssh|
           ssh.exec!("mkdir -p #{storage_info['path']}/#{storage_info['prefix']}/#{application}/#{sub_app}/results/#{type}")

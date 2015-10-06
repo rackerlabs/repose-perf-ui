@@ -5,6 +5,10 @@ require 'logging'
 module SnapshotComparer
   module Models
     class Servers
+      def self.RETRY_COUNT
+        3
+      end
+
       def create_servers(name, count, logger, environment, region_list)
         environment.spin_up_servers(
           count,
@@ -56,35 +60,71 @@ module SnapshotComparer
         logger.info "everything is killed."
       end
 
-      def get_server_ips(lb_name, logger, env)
-        retry_counter = 3
-        while retry_counter >= 0
+      def get_test_ip(logger, env, test_id)
+        run_succeeded = false
+        retry_counter = 0
+        while !run_succeeded && retry_counter < RETRY_COUNT
           begin
-            logger.debug "load balancer name: #{lb_name}"
-            lb_ip = env.lb_service.load_balancers.find do |lb|
-              lb.name =~ /#{Regexp.escape(lb_name)}/
-            end.virtual_ips.find do |ip|
-              ip.ip_version == 'IPV4' && ip.type == 'PUBLIC'
+            logger.info "get test agent #{test_id}"
+            test_agent = env.service.servers.find {|server| server.name =~ /test-agent-id-#{Regexp.escape(test_id.to_s)}/}.ipv4_address
+            logger.info "test agent: #{test_agent}"
+            run_succeeded = true
+          rescue Exception => e
+            logger.info e
+            logger.info e.backtrace
+            retry_counter = retry_counter + 1  
+          end
+        end
+        test_agent
+      end
+
+      def get_server_ips(lb_name, logger, env, test_id)
+        run_succeeded = false
+        retry_counter = 0
+        while !run_succeeded && retry_counter < RETRY_COUNT
+          begin
+            logger.debug "load balancer name: #{lb_name}_#{test_id} from #{env.lb_service.load_balancers}"
+            lb_ip = env.lb_service.load_balancers.find do |lb| 
+              lb.name =~ /#{Regexp.escape(lb_name)}_#{Regexp.escape(test_id.to_s)}/ 
+            end.virtual_ips.find do |ip| 
+              ip.ip_version == 'IPV4' && ip.type == 'PUBLIC' 
             end.address
-
+  
             logger.debug "load balancer ip: #{lb_ip}"
-
-            node_ips = env.lb_service.load_balancers.find do |lb|
-              lb.name =~ /#{Regexp.escape(lb_name)}/
-            end.nodes.map do |ip|
-              ip.address
+  
+            node_ips = env.lb_service.load_balancers.find do |lb| 
+              lb.name =~ /#{Regexp.escape(lb_name)}_#{Regexp.escape(test_id.to_s)}/ 
+            end.nodes.map do |ip| 
+              ip.address 
             end
             run_succeeded = true
           rescue Exception => e
             logger.info e
             logger.info e.backtrace
-            raise if retry_counter == 0
-            retry_counter = retry_counter - 1
+            retry_counter = retry_counter + 1  
           end
         end
         logger.debug "nodes: #{node_ips}"
-
+  
         {:lb => lb_ip, :nodes => node_ips}
+      end
+
+      def get_slave_test_ip(logger, env, test_id)
+        run_succeeded = false
+        retry_counter = 0
+        while !run_succeeded && retry_counter < RETRY_COUNT
+          begin      
+            logger.info "get test agent #{test_id}"
+            test_agent_list = env.service.servers.find_all {|server| logger.info server.name ;  server.name =~ /test-slave-agent-id-#{Regexp.escape(test_id.to_s)}/}.map {|server| server.ipv4_address}
+            logger.info "slave test agent list: #{test_agent_list}"
+            run_succeeded = true
+          rescue Exception => e
+            logger.info e
+            logger.info e.backtrace
+            retry_counter = retry_counter + 1  
+          end
+        end
+        test_agent_list
       end
     end
 
@@ -175,7 +215,7 @@ module SnapshotComparer
           :rackspace_api_key => @apikey,
           :rackspace_region => region
         })
-        @logger.info "connected to load balance service #{@lb_service.inspect}"
+        @logger.info "connected to load balance service in #{region} and retrieved #{@lb_service.inspect}"
         @lb_service
       end
 
